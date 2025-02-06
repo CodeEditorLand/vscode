@@ -4,10 +4,7 @@
 		"oneOf": [
 			{
 				"type": "object",
-				"required": [
-					"name",
-					"prependLicenseText"
-				],
+				"required": ["name", "prependLicenseText"],
 				"properties": {
 					"name": {
 						"type": "string",
@@ -31,10 +28,7 @@
 			},
 			{
 				"type": "object",
-				"required": [
-					"name",
-					"fullLicenseText"
-				],
+				"required": ["name", "fullLicenseText"],
 				"properties": {
 					"name": {
 						"type": "string",
@@ -58,10 +52,7 @@
 			},
 			{
 				"type": "object",
-				"required": [
-					"name",
-					"fullLicenseTextUri"
-				],
+				"required": ["name", "fullLicenseTextUri"],
 				"properties": {
 					"name": {
 						"type": "string",

@@ -3,17 +3,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Disposable } from './util/dispose';
+import * as vscode from "vscode";
+
+import { Disposable } from "./util/dispose";
 
 export abstract class PreviewStatusBarEntry extends Disposable {
 	private _showOwner: unknown | undefined;
 
 	protected readonly entry: vscode.StatusBarItem;
 
-	constructor(id: string, name: string, alignment: vscode.StatusBarAlignment, priority: number) {
+	constructor(
+		id: string,
+		name: string,
+		alignment: vscode.StatusBarAlignment,
+		priority: number,
+	) {
 		super();
-		this.entry = this._register(vscode.window.createStatusBarItem(id, alignment, priority));
+		this.entry = this._register(
+			vscode.window.createStatusBarItem(id, alignment, priority),
+		);
 		this.entry.name = name;
 	}
 

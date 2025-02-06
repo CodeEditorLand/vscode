@@ -3,17 +3,20 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const path = require('path');
-const fs = require('fs');
-const child_process = require('child_process');
+const path = require("path");
+const fs = require("fs");
+const child_process = require("child_process");
 
 const generatedNote = `//
 // **NOTE**: Do not edit directly! This file is generated using \`npm run import-typescript\`
 //
 `;
 
-const TYPESCRIPT_LIB_SOURCE = path.join(__dirname, '../../node_modules/typescript/lib');
-const TYPESCRIPT_LIB_DESTINATION = path.join(__dirname, '../server/build');
+const TYPESCRIPT_LIB_SOURCE = path.join(
+	__dirname,
+	"../../node_modules/typescript/lib",
+);
+const TYPESCRIPT_LIB_DESTINATION = path.join(__dirname, "../server/build");
 
 (function () {
 	try {
@@ -21,16 +24,15 @@ const TYPESCRIPT_LIB_DESTINATION = path.join(__dirname, '../server/build');
 	} catch (err) {
 		fs.mkdirSync(TYPESCRIPT_LIB_DESTINATION);
 	}
-	importLibs('es6');
+	importLibs("es6");
 })();
-
 
 function importLibs(startLib) {
 	function getFileName(name) {
-		return (name === '' ? 'lib.d.ts' : `lib.${name}.d.ts`);
+		return name === "" ? "lib.d.ts" : `lib.${name}.d.ts`;
 	}
 	function getVariableName(name) {
-		return (name === '' ? 'lib_dts' : `lib_${name.replace(/\./g, '_')}_dts`);
+		return name === "" ? "lib_dts" : `lib_${name.replace(/\./g, "_")}_dts`;
 	}
 	function readLibFile(name) {
 		var srcPath = path.join(TYPESCRIPT_LIB_SOURCE, getFileName(name));
@@ -56,7 +58,7 @@ function importLibs(startLib) {
 		var contents = readLibFile(name);
 		var lines = contents.split(/\r\n|\r|\n/);
 
-		var output = '';
+		var output = "";
 		var writeOutput = function (text) {
 			if (output.length === 0) {
 				output = text;
@@ -66,7 +68,7 @@ function importLibs(startLib) {
 		};
 		var outputLines = [];
 		var flushOutputLines = function () {
-			writeOutput(`"${escapeText(outputLines.join('\n'))}"`);
+			writeOutput(`"${escapeText(outputLines.join("\n"))}"`);
 			outputLines = [];
 		};
 		var deps = [];
@@ -86,7 +88,7 @@ function importLibs(startLib) {
 		result.push({
 			name: getVariableName(name),
 			deps: deps,
-			output: output
+			output: output,
 		});
 	}
 
@@ -119,7 +121,7 @@ ${generatedNote}`;
 		}
 	}
 
-	var dstPath = path.join(TYPESCRIPT_LIB_DESTINATION, 'lib.ts');
+	var dstPath = path.join(TYPESCRIPT_LIB_DESTINATION, "lib.ts");
 	fs.writeFileSync(dstPath, strResult);
 }
 
@@ -128,44 +130,47 @@ ${generatedNote}`;
  */
 function escapeText(text) {
 	// See http://www.javascriptkit.com/jsref/escapesequence.shtml
-	var _backspace = '\b'.charCodeAt(0);
-	var _formFeed = '\f'.charCodeAt(0);
-	var _newLine = '\n'.charCodeAt(0);
+	var _backspace = "\b".charCodeAt(0);
+	var _formFeed = "\f".charCodeAt(0);
+	var _newLine = "\n".charCodeAt(0);
 	var _nullChar = 0;
-	var _carriageReturn = '\r'.charCodeAt(0);
-	var _tab = '\t'.charCodeAt(0);
-	var _verticalTab = '\v'.charCodeAt(0);
-	var _backslash = '\\'.charCodeAt(0);
+	var _carriageReturn = "\r".charCodeAt(0);
+	var _tab = "\t".charCodeAt(0);
+	var _verticalTab = "\v".charCodeAt(0);
+	var _backslash = "\\".charCodeAt(0);
 	var _doubleQuote = '"'.charCodeAt(0);
 
-	var startPos = 0, chrCode, replaceWith = null, resultPieces = [];
+	var startPos = 0,
+		chrCode,
+		replaceWith = null,
+		resultPieces = [];
 
 	for (var i = 0, len = text.length; i < len; i++) {
 		chrCode = text.charCodeAt(i);
 		switch (chrCode) {
 			case _backspace:
-				replaceWith = '\\b';
+				replaceWith = "\\b";
 				break;
 			case _formFeed:
-				replaceWith = '\\f';
+				replaceWith = "\\f";
 				break;
 			case _newLine:
-				replaceWith = '\\n';
+				replaceWith = "\\n";
 				break;
 			case _nullChar:
-				replaceWith = '\\0';
+				replaceWith = "\\0";
 				break;
 			case _carriageReturn:
-				replaceWith = '\\r';
+				replaceWith = "\\r";
 				break;
 			case _tab:
-				replaceWith = '\\t';
+				replaceWith = "\\t";
 				break;
 			case _verticalTab:
-				replaceWith = '\\v';
+				replaceWith = "\\v";
 				break;
 			case _backslash:
-				replaceWith = '\\\\';
+				replaceWith = "\\\\";
 				break;
 			case _doubleQuote:
 				replaceWith = '\\"';
@@ -179,5 +184,5 @@ function escapeText(text) {
 		}
 	}
 	resultPieces.push(text.substring(startPos, len));
-	return resultPieces.join('');
+	return resultPieces.join("");
 }

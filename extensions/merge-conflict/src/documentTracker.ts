@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { MergeConflictParser } from './mergeConflictParser';
-import * as interfaces from './interfaces';
-import { Delayer } from './delayer';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import TelemetryReporter from "@vscode/extension-telemetry";
+import * as vscode from "vscode";
+
+import { Delayer } from "./delayer";
+import * as interfaces from "./interfaces";
+import { MergeConflictParser } from "./mergeConflictParser";
 
 class ScanTask {
 	public origins: Set<string> = new Set<string>();
@@ -15,7 +16,9 @@ class ScanTask {
 
 	constructor(delayTime: number, initialOrigin: string) {
 		this.origins.add(initialOrigin);
-		this.delayTask = new Delayer<interfaces.IDocumentMergeConflict[]>(delayTime);
+		this.delayTask = new Delayer<interfaces.IDocumentMergeConflict[]>(
+			delayTime,
+		);
 	}
 
 	public addOrigin(name: string): void {
@@ -27,11 +30,17 @@ class ScanTask {
 	}
 }
 
-class OriginDocumentMergeConflictTracker implements interfaces.IDocumentMergeConflictTracker {
-	constructor(private parent: DocumentMergeConflictTracker, private origin: string) {
-	}
+class OriginDocumentMergeConflictTracker
+	implements interfaces.IDocumentMergeConflictTracker
+{
+	constructor(
+		private parent: DocumentMergeConflictTracker,
+		private origin: string,
+	) {}
 
-	getConflicts(document: vscode.TextDocument): PromiseLike<interfaces.IDocumentMergeConflict[]> {
+	getConflicts(
+		document: vscode.TextDocument,
+	): PromiseLike<interfaces.IDocumentMergeConflict[]> {
 		return this.parent.getConflicts(document, this.origin);
 	}
 
@@ -44,33 +53,44 @@ class OriginDocumentMergeConflictTracker implements interfaces.IDocumentMergeCon
 	}
 }
 
-export default class DocumentMergeConflictTracker implements vscode.Disposable, interfaces.IDocumentMergeConflictTrackerService {
+export default class DocumentMergeConflictTracker
+	implements
+		vscode.Disposable,
+		interfaces.IDocumentMergeConflictTrackerService
+{
 	private cache: Map<string, ScanTask> = new Map();
 	private delayExpireTime: number = 0;
 
-	constructor(private readonly telemetryReporter: TelemetryReporter) { }
+	constructor(private readonly telemetryReporter: TelemetryReporter) {}
 
-	getConflicts(document: vscode.TextDocument, origin: string): PromiseLike<interfaces.IDocumentMergeConflict[]> {
+	getConflicts(
+		document: vscode.TextDocument,
+		origin: string,
+	): PromiseLike<interfaces.IDocumentMergeConflict[]> {
 		// Attempt from cache
 
 		const key = this.getCacheKey(document);
 
 		if (!key) {
 			// Document doesn't have a uri, can't cache it, so return
-			return Promise.resolve(this.getConflictsOrEmpty(document, [origin]));
+			return Promise.resolve(
+				this.getConflictsOrEmpty(document, [origin]),
+			);
 		}
 
 		let cacheItem = this.cache.get(key);
 		if (!cacheItem) {
 			cacheItem = new ScanTask(this.delayExpireTime, origin);
 			this.cache.set(key, cacheItem);
-		}
-		else {
+		} else {
 			cacheItem.addOrigin(origin);
 		}
 
 		return cacheItem.delayTask.trigger(() => {
-			const conflicts = this.getConflictsOrEmpty(document, Array.from(cacheItem!.origins));
+			const conflicts = this.getConflictsOrEmpty(
+				document,
+				Array.from(cacheItem!.origins),
+			);
 
 			this.cache?.delete(key!);
 
@@ -114,14 +134,20 @@ export default class DocumentMergeConflictTracker implements vscode.Disposable, 
 
 	private readonly seenDocumentsWithConflicts = new Set<string>();
 
-	private getConflictsOrEmpty(document: vscode.TextDocument, _origins: string[]): interfaces.IDocumentMergeConflict[] {
+	private getConflictsOrEmpty(
+		document: vscode.TextDocument,
+		_origins: string[],
+	): interfaces.IDocumentMergeConflict[] {
 		const containsConflict = MergeConflictParser.containsConflict(document);
 
 		if (!containsConflict) {
 			return [];
 		}
 
-		const conflicts = MergeConflictParser.scanDocument(document, this.telemetryReporter);
+		const conflicts = MergeConflictParser.scanDocument(
+			document,
+			this.telemetryReporter,
+		);
 
 		const key = document.uri.toString();
 		// Don't report telemetry for the same document twice. This is an approximation, but good enough.
@@ -136,9 +162,13 @@ export default class DocumentMergeConflictTracker implements vscode.Disposable, 
 					"conflictCount": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "isMeasurement": true, "comment": "Total number of conflict counts" }
 				}
 			*/
-			this.telemetryReporter.sendTelemetryEvent('mergeMarkers.documentWithConflictMarkersOpened', {}, {
-				conflictCount: conflicts.length,
-			});
+			this.telemetryReporter.sendTelemetryEvent(
+				"mergeMarkers.documentWithConflictMarkersOpened",
+				{},
+				{
+					conflictCount: conflicts.length,
+				},
+			);
 		}
 
 		return conflicts;
@@ -152,4 +182,3 @@ export default class DocumentMergeConflictTracker implements vscode.Disposable, 
 		return null;
 	}
 }
-

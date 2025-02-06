@@ -3,10 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs';
-import Tracer from '../logging/tracer';
-import { getTempFile } from '../utils/temp.electron';
-import { OngoingRequestCanceller, OngoingRequestCancellerFactory } from './cancellation';
+import * as fs from "fs";
+
+import Tracer from "../logging/tracer";
+import { getTempFile } from "../utils/temp.electron";
+import {
+	OngoingRequestCanceller,
+	OngoingRequestCancellerFactory,
+} from "./cancellation";
 
 export class NodeRequestCanceller implements OngoingRequestCanceller {
 	public readonly cancellationPipeName: string;
@@ -15,16 +19,19 @@ export class NodeRequestCanceller implements OngoingRequestCanceller {
 		private readonly _serverId: string,
 		private readonly _tracer: Tracer,
 	) {
-		this.cancellationPipeName = getTempFile('tscancellation');
+		this.cancellationPipeName = getTempFile("tscancellation");
 	}
 
 	public tryCancelOngoingRequest(seq: number): boolean {
 		if (!this.cancellationPipeName) {
 			return false;
 		}
-		this._tracer.trace(this._serverId, `TypeScript Server: trying to cancel ongoing request with sequence number ${seq}`);
+		this._tracer.trace(
+			this._serverId,
+			`TypeScript Server: trying to cancel ongoing request with sequence number ${seq}`,
+		);
 		try {
-			fs.writeFileSync(this.cancellationPipeName + seq, '');
+			fs.writeFileSync(this.cancellationPipeName + seq, "");
 		} catch {
 			// noop
 		}
@@ -32,9 +39,10 @@ export class NodeRequestCanceller implements OngoingRequestCanceller {
 	}
 }
 
-
-export const nodeRequestCancellerFactory = new class implements OngoingRequestCancellerFactory {
+export const nodeRequestCancellerFactory = new (class
+	implements OngoingRequestCancellerFactory
+{
 	create(serverId: string, tracer: Tracer): OngoingRequestCanceller {
 		return new NodeRequestCanceller(serverId, tracer);
 	}
-};
+})();

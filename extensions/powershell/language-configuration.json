@@ -1,7 +1,7 @@
 {
 	"comments": {
 		"lineComment": "#",
-		"blockComment": [ "<#", "#>" ]
+		"blockComment": ["<#", "#>"]
 	},
 	"brackets": [
 		["{", "}"],
@@ -12,10 +12,10 @@
 		["{", "}"],
 		["[", "]"],
 		["(", ")"],
-		{ "open": "@'", "close": "\n'@", "notIn": ["string", "comment"]},
-		{ "open": "@\"", "close": "\n\"@", "notIn": ["string", "comment"]},
-		{ "open": "\"", "close": "\"", "notIn": ["string"]},
-		{ "open": "'", "close": "'", "notIn": ["string", "comment"]},
+		{ "open": "@'", "close": "\n'@", "notIn": ["string", "comment"] },
+		{ "open": "@\"", "close": "\n\"@", "notIn": ["string", "comment"] },
+		{ "open": "\"", "close": "\"", "notIn": ["string"] },
+		{ "open": "'", "close": "'", "notIn": ["string", "comment"] },
 		["<#", "#>"]
 	],
 	"surroundingPairs": [

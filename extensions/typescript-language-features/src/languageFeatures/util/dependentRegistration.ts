@@ -3,10 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { API } from '../../tsServer/api';
-import { ClientCapability, ITypeScriptServiceClient } from '../../typescriptService';
-import { Disposable } from '../../utils/dispose';
+import * as vscode from "vscode";
+
+import { API } from "../../tsServer/api";
+import {
+	ClientCapability,
+	ITypeScriptServiceClient,
+} from "../../typescriptService";
+import { Disposable } from "../../utils/dispose";
 
 export class Condition extends Disposable {
 	private _value: boolean;
@@ -27,9 +31,13 @@ export class Condition extends Disposable {
 		});
 	}
 
-	public get value(): boolean { return this._value; }
+	public get value(): boolean {
+		return this._value;
+	}
 
-	private readonly _onDidChange = this._register(new vscode.EventEmitter<void>());
+	private readonly _onDidChange = this._register(
+		new vscode.EventEmitter<void>(),
+	);
 	public readonly onDidChange = this._onDidChange.event;
 }
 
@@ -38,7 +46,7 @@ class ConditionalRegistration {
 
 	public constructor(
 		private readonly conditions: readonly Condition[],
-		private readonly doRegister: () => vscode.Disposable
+		private readonly doRegister: () => vscode.Disposable,
 	) {
 		for (const condition of conditions) {
 			condition.onDidChange(() => this.update());
@@ -52,7 +60,7 @@ class ConditionalRegistration {
 	}
 
 	private update() {
-		const enabled = this.conditions.every(condition => condition.value);
+		const enabled = this.conditions.every((condition) => condition.value);
 		if (enabled) {
 			this.registration ??= this.doRegister();
 		} else {
@@ -75,7 +83,7 @@ export function requireMinVersion(
 ) {
 	return new Condition(
 		() => client.apiVersion.gte(minVersion),
-		client.onTsServerStarted
+		client.onTsServerStarted,
 	);
 }
 
@@ -83,13 +91,10 @@ export function requireGlobalConfiguration(
 	section: string,
 	configValue: string,
 ) {
-	return new Condition(
-		() => {
-			const config = vscode.workspace.getConfiguration(section, null);
-			return !!config.get<boolean>(configValue);
-		},
-		vscode.workspace.onDidChangeConfiguration
-	);
+	return new Condition(() => {
+		const config = vscode.workspace.getConfiguration(section, null);
+		return !!config.get<boolean>(configValue);
+	}, vscode.workspace.onDidChangeConfiguration);
 }
 
 export function requireSomeCapability(
@@ -97,7 +102,10 @@ export function requireSomeCapability(
 	...capabilities: readonly ClientCapability[]
 ) {
 	return new Condition(
-		() => capabilities.some(requiredCapability => client.capabilities.has(requiredCapability)),
-		client.onDidChangeCapabilities
+		() =>
+			capabilities.some((requiredCapability) =>
+				client.capabilities.has(requiredCapability),
+			),
+		client.onDidChangeCapabilities,
 	);
 }

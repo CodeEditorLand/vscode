@@ -3,29 +3,39 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import TelemetryReporter from '@vscode/extension-telemetry';
-import { getExperimentationService, IExperimentationService, IExperimentationTelemetry, TargetPopulation } from 'vscode-tas-client';
+import TelemetryReporter from "@vscode/extension-telemetry";
+import * as vscode from "vscode";
+import {
+	getExperimentationService,
+	IExperimentationService,
+	IExperimentationTelemetry,
+	TargetPopulation,
+} from "vscode-tas-client";
 
 export class ExperimentationTelemetry implements IExperimentationTelemetry {
 	private sharedProperties: Record<string, string> = {};
-	private experimentationServicePromise: Promise<IExperimentationService> | undefined;
+	private experimentationServicePromise:
+		| Promise<IExperimentationService>
+		| undefined;
 
-	constructor(private readonly context: vscode.ExtensionContext, private baseReporter: TelemetryReporter) { }
+	constructor(
+		private readonly context: vscode.ExtensionContext,
+		private baseReporter: TelemetryReporter,
+	) {}
 
 	private async createExperimentationService(): Promise<IExperimentationService> {
 		let targetPopulation: TargetPopulation;
 		switch (vscode.env.uriScheme) {
-			case 'vscode':
+			case "vscode":
 				targetPopulation = TargetPopulation.Public;
 				break;
-			case 'vscode-insiders':
+			case "vscode-insiders":
 				targetPopulation = TargetPopulation.Insiders;
 				break;
-			case 'vscode-exploration':
+			case "vscode-exploration":
 				targetPopulation = TargetPopulation.Internal;
 				break;
-			case 'code-oss':
+			case "code-oss":
 				targetPopulation = TargetPopulation.Team;
 				break;
 			default:
@@ -35,7 +45,13 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
 
 		const id = this.context.extension.id;
 		const version = this.context.extension.packageJSON.version;
-		const experimentationService = getExperimentationService(id, version, targetPopulation, this, this.context.globalState);
+		const experimentationService = getExperimentationService(
+			id,
+			version,
+			targetPopulation,
+			this,
+			this.context.globalState,
+		);
 		await experimentationService.initialFetch;
 		return experimentationService;
 	}
@@ -43,9 +59,14 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
 	/**
 	 * @returns A promise that you shouldn't need to await because this is just telemetry.
 	 */
-	async sendTelemetryEvent(eventName: string, properties?: Record<string, string>, measurements?: Record<string, number>) {
+	async sendTelemetryEvent(
+		eventName: string,
+		properties?: Record<string, string>,
+		measurements?: Record<string, number>,
+	) {
 		if (!this.experimentationServicePromise) {
-			this.experimentationServicePromise = this.createExperimentationService();
+			this.experimentationServicePromise =
+				this.createExperimentationService();
 		}
 		await this.experimentationServicePromise;
 
@@ -65,10 +86,11 @@ export class ExperimentationTelemetry implements IExperimentationTelemetry {
 	async sendTelemetryErrorEvent(
 		eventName: string,
 		properties?: Record<string, string>,
-		_measurements?: Record<string, number>
+		_measurements?: Record<string, number>,
 	) {
 		if (!this.experimentationServicePromise) {
-			this.experimentationServicePromise = this.createExperimentationService();
+			this.experimentationServicePromise =
+				this.createExperimentationService();
 		}
 		await this.experimentationServicePromise;
 

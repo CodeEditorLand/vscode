@@ -1,69 +1,71 @@
 {
-  "name": "php",
-  "displayName": "%displayName%",
-  "description": "%description%",
-  "version": "1.0.0",
-  "publisher": "vscode",
-  "license": "MIT",
-  "engines": {
-    "vscode": "0.10.x"
-  },
-  "categories": ["Programming Languages"],
-  "contributes": {
-    "languages": [
-      {
-        "id": "php",
-        "extensions": [
-          ".php",
-          ".php4",
-          ".php5",
-          ".phtml",
-          ".ctp"
-        ],
-        "aliases": [
-          "PHP",
-          "php"
-        ],
-        "firstLine": "^#!\\s*/.*\\bphp\\b",
-        "mimetypes": [
-          "application/x-php"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "php",
-        "scopeName": "source.php",
-        "path": "./syntaxes/php.tmLanguage.json"
-      },
-      {
-        "language": "php",
-        "scopeName": "text.html.php",
-        "path": "./syntaxes/html.tmLanguage.json",
-        "embeddedLanguages": {
-          "text.html": "html",
-          "source.php": "php",
-          "source.sql": "sql",
-          "text.xml": "xml",
-          "source.js": "javascript",
-          "source.json": "json",
-          "source.css": "css"
-        }
-      }
-    ],
-    "snippets": [
-      {
-        "language": "php",
-        "path": "./snippets/php.code-snippets"
-      }
-    ]
-  },
-  "scripts": {
-    "update-grammar": "node ./build/update-grammar.mjs"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/microsoft/vscode.git"
-  }
+	"name": "php",
+	"displayName": "%displayName%",
+	"version": "1.0.0",
+	"description": "%description%",
+	"categories": [
+		"Programming Languages"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/vscode.git"
+	},
+	"license": "MIT",
+	"publisher": "vscode",
+	"scripts": {
+		"update-grammar": "node ./build/update-grammar.mjs"
+	},
+	"contributes": {
+		"grammars": [
+			{
+				"language": "php",
+				"scopeName": "source.php",
+				"path": "./syntaxes/php.tmLanguage.json"
+			},
+			{
+				"language": "php",
+				"scopeName": "text.html.php",
+				"path": "./syntaxes/html.tmLanguage.json",
+				"embeddedLanguages": {
+					"text.html": "html",
+					"source.php": "php",
+					"source.sql": "sql",
+					"text.xml": "xml",
+					"source.js": "javascript",
+					"source.json": "json",
+					"source.css": "css"
+				}
+			}
+		],
+		"languages": [
+			{
+				"id": "php",
+				"extensions": [
+					".php",
+					".php4",
+					".php5",
+					".phtml",
+					".ctp"
+				],
+				"aliases": [
+					"PHP",
+					"php"
+				],
+				"firstLine": "^#!\\s*/.*\\bphp\\b",
+				"mimetypes": [
+					"application/x-php"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"snippets": [
+			{
+				"language": "php",
+				"path": "./snippets/php.code-snippets"
+			}
+		]
+	},
+	"engines": {
+		"vscode": "0.10.x"
+	}
 }

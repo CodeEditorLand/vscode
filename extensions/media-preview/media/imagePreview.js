@@ -17,9 +17,9 @@
 	}
 
 	function getSettings() {
-		const element = document.getElementById('image-preview-settings');
+		const element = document.getElementById("image-preview-settings");
 		if (element) {
-			const data = element.getAttribute('data-settings');
+			const data = element.getAttribute("data-settings");
 			if (data) {
 				return JSON.parse(data);
 			}
@@ -38,33 +38,21 @@
 	const MIN_SCALE = 0.1;
 
 	const zoomLevels = [
-		0.1,
-		0.2,
-		0.3,
-		0.4,
-		0.5,
-		0.6,
-		0.7,
-		0.8,
-		0.9,
-		1,
-		1.5,
-		2,
-		3,
-		5,
-		7,
-		10,
-		15,
-		20
+		0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.5, 2, 3, 5, 7, 10, 15,
+		20,
 	];
 
 	const settings = getSettings();
-	const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
 	// @ts-ignore
 	const vscode = acquireVsCodeApi();
 
-	const initialState = vscode.getState() || { scale: 'fit', offsetX: 0, offsetY: 0 };
+	const initialState = vscode.getState() || {
+		scale: "fit",
+		offsetX: 0,
+		offsetY: 0,
+	};
 
 	// State
 	let scale = initialState.scale;
@@ -76,46 +64,56 @@
 
 	// Elements
 	const container = document.body;
-	const image = document.createElement('img');
+	const image = document.createElement("img");
 
 	function updateScale(newScale) {
 		if (!image || !hasLoadedImage || !image.parentElement) {
 			return;
 		}
 
-		if (newScale === 'fit') {
-			scale = 'fit';
-			image.classList.add('scale-to-fit');
-			image.classList.remove('pixelated');
+		if (newScale === "fit") {
+			scale = "fit";
+			image.classList.add("scale-to-fit");
+			image.classList.remove("pixelated");
 			// @ts-ignore Non-standard CSS property
-			image.style.zoom = 'normal';
+			image.style.zoom = "normal";
 			vscode.setState(undefined);
 		} else {
 			scale = clamp(newScale, MIN_SCALE, MAX_SCALE);
 			if (scale >= PIXELATION_THRESHOLD) {
-				image.classList.add('pixelated');
+				image.classList.add("pixelated");
 			} else {
-				image.classList.remove('pixelated');
+				image.classList.remove("pixelated");
 			}
 
-			const dx = (window.scrollX + container.clientWidth / 2) / container.scrollWidth;
-			const dy = (window.scrollY + container.clientHeight / 2) / container.scrollHeight;
+			const dx =
+				(window.scrollX + container.clientWidth / 2) /
+				container.scrollWidth;
+			const dy =
+				(window.scrollY + container.clientHeight / 2) /
+				container.scrollHeight;
 
-			image.classList.remove('scale-to-fit');
+			image.classList.remove("scale-to-fit");
 			// @ts-ignore Non-standard CSS property
 			image.style.zoom = scale;
 
-			const newScrollX = container.scrollWidth * dx - container.clientWidth / 2;
-			const newScrollY = container.scrollHeight * dy - container.clientHeight / 2;
+			const newScrollX =
+				container.scrollWidth * dx - container.clientWidth / 2;
+			const newScrollY =
+				container.scrollHeight * dy - container.clientHeight / 2;
 
 			window.scrollTo(newScrollX, newScrollY);
 
-			vscode.setState({ scale: scale, offsetX: newScrollX, offsetY: newScrollY });
+			vscode.setState({
+				scale: scale,
+				offsetX: newScrollX,
+				offsetY: newScrollY,
+			});
 		}
 
 		vscode.postMessage({
-			type: 'zoom',
-			value: scale
+			type: "zoom",
+			value: scale,
 		});
 	}
 
@@ -123,17 +121,17 @@
 		isActive = value;
 		if (value) {
 			if (isMac ? altPressed : ctrlPressed) {
-				container.classList.remove('zoom-in');
-				container.classList.add('zoom-out');
+				container.classList.remove("zoom-in");
+				container.classList.add("zoom-out");
 			} else {
-				container.classList.remove('zoom-out');
-				container.classList.add('zoom-in');
+				container.classList.remove("zoom-out");
+				container.classList.add("zoom-in");
 			}
 		} else {
 			ctrlPressed = false;
 			altPressed = false;
-			container.classList.remove('zoom-out');
-			container.classList.remove('zoom-in');
+			container.classList.remove("zoom-out");
+			container.classList.remove("zoom-in");
 		}
 	}
 
@@ -147,7 +145,7 @@
 	}
 
 	function zoomIn() {
-		if (scale === 'fit') {
+		if (scale === "fit") {
 			firstZoom();
 		}
 
@@ -161,7 +159,7 @@
 	}
 
 	function zoomOut() {
-		if (scale === 'fit') {
+		if (scale === "fit") {
 			firstZoom();
 		}
 
@@ -174,7 +172,7 @@
 		updateScale(zoomLevels[i] || MIN_SCALE);
 	}
 
-	window.addEventListener('keydown', (/** @type {KeyboardEvent} */ e) => {
+	window.addEventListener("keydown", (/** @type {KeyboardEvent} */ e) => {
 		if (!image || !hasLoadedImage) {
 			return;
 		}
@@ -182,12 +180,12 @@
 		altPressed = e.altKey;
 
 		if (isMac ? altPressed : ctrlPressed) {
-			container.classList.remove('zoom-in');
-			container.classList.add('zoom-out');
+			container.classList.remove("zoom-in");
+			container.classList.add("zoom-out");
 		}
 	});
 
-	window.addEventListener('keyup', (/** @type {KeyboardEvent} */ e) => {
+	window.addEventListener("keyup", (/** @type {KeyboardEvent} */ e) => {
 		if (!image || !hasLoadedImage) {
 			return;
 		}
@@ -196,12 +194,12 @@
 		altPressed = e.altKey;
 
 		if (!(isMac ? altPressed : ctrlPressed)) {
-			container.classList.remove('zoom-out');
-			container.classList.add('zoom-in');
+			container.classList.remove("zoom-out");
+			container.classList.add("zoom-in");
 		}
 	});
 
-	container.addEventListener('mousedown', (/** @type {MouseEvent} */ e) => {
+	container.addEventListener("mousedown", (/** @type {MouseEvent} */ e) => {
 		if (!image || !hasLoadedImage) {
 			return;
 		}
@@ -216,7 +214,7 @@
 		consumeClick = !isActive;
 	});
 
-	container.addEventListener('click', (/** @type {MouseEvent} */ e) => {
+	container.addEventListener("click", (/** @type {MouseEvent} */ e) => {
 		if (!image || !hasLoadedImage) {
 			return;
 		}
@@ -230,127 +228,150 @@
 			return;
 		}
 		// left click
-		if (scale === 'fit') {
+		if (scale === "fit") {
 			firstZoom();
 		}
 
-		if (!(isMac ? altPressed : ctrlPressed)) { // zoom in
+		if (!(isMac ? altPressed : ctrlPressed)) {
+			// zoom in
 			zoomIn();
 		} else {
 			zoomOut();
 		}
 	});
 
-	container.addEventListener('wheel', (/** @type {WheelEvent} */ e) => {
-		// Prevent pinch to zoom
-		if (e.ctrlKey) {
-			e.preventDefault();
-		}
+	container.addEventListener(
+		"wheel",
+		(/** @type {WheelEvent} */ e) => {
+			// Prevent pinch to zoom
+			if (e.ctrlKey) {
+				e.preventDefault();
+			}
 
-		if (!image || !hasLoadedImage) {
-			return;
-		}
+			if (!image || !hasLoadedImage) {
+				return;
+			}
 
-		const isScrollWheelKeyPressed = isMac ? altPressed : ctrlPressed;
-		if (!isScrollWheelKeyPressed && !e.ctrlKey) { // pinching is reported as scroll wheel + ctrl
-			return;
-		}
+			const isScrollWheelKeyPressed = isMac ? altPressed : ctrlPressed;
+			if (!isScrollWheelKeyPressed && !e.ctrlKey) {
+				// pinching is reported as scroll wheel + ctrl
+				return;
+			}
 
-		if (scale === 'fit') {
-			firstZoom();
-		}
+			if (scale === "fit") {
+				firstZoom();
+			}
 
-		const delta = e.deltaY > 0 ? 1 : -1;
-		updateScale(scale * (1 - delta * SCALE_PINCH_FACTOR));
-	}, { passive: false });
+			const delta = e.deltaY > 0 ? 1 : -1;
+			updateScale(scale * (1 - delta * SCALE_PINCH_FACTOR));
+		},
+		{ passive: false },
+	);
 
-	window.addEventListener('scroll', e => {
-		if (!image || !hasLoadedImage || !image.parentElement || scale === 'fit') {
-			return;
-		}
+	window.addEventListener(
+		"scroll",
+		(e) => {
+			if (
+				!image ||
+				!hasLoadedImage ||
+				!image.parentElement ||
+				scale === "fit"
+			) {
+				return;
+			}
 
-		const entry = vscode.getState();
-		if (entry) {
-			vscode.setState({ scale: entry.scale, offsetX: window.scrollX, offsetY: window.scrollY });
-		}
-	}, { passive: true });
+			const entry = vscode.getState();
+			if (entry) {
+				vscode.setState({
+					scale: entry.scale,
+					offsetX: window.scrollX,
+					offsetY: window.scrollY,
+				});
+			}
+		},
+		{ passive: true },
+	);
 
-	container.classList.add('image');
+	container.classList.add("image");
 
-	image.classList.add('scale-to-fit');
+	image.classList.add("scale-to-fit");
 
-	image.addEventListener('load', () => {
+	image.addEventListener("load", () => {
 		if (hasLoadedImage) {
 			return;
 		}
 		hasLoadedImage = true;
 
 		vscode.postMessage({
-			type: 'size',
+			type: "size",
 			value: `${image.naturalWidth}x${image.naturalHeight}`,
 		});
 
-		document.body.classList.remove('loading');
-		document.body.classList.add('ready');
+		document.body.classList.remove("loading");
+		document.body.classList.add("ready");
 		document.body.append(image);
 
 		updateScale(scale);
 
-		if (initialState.scale !== 'fit') {
+		if (initialState.scale !== "fit") {
 			window.scrollTo(initialState.offsetX, initialState.offsetY);
 		}
 	});
 
-	image.addEventListener('error', e => {
+	image.addEventListener("error", (e) => {
 		if (hasLoadedImage) {
 			return;
 		}
 
 		hasLoadedImage = true;
-		document.body.classList.add('error');
-		document.body.classList.remove('loading');
+		document.body.classList.add("error");
+		document.body.classList.remove("loading");
 	});
 
 	image.src = settings.src;
 
-	document.querySelector('.open-file-link')?.addEventListener('click', (e) => {
-		e.preventDefault();
-		vscode.postMessage({
-			type: 'reopen-as-text',
+	document
+		.querySelector(".open-file-link")
+		?.addEventListener("click", (e) => {
+			e.preventDefault();
+			vscode.postMessage({
+				type: "reopen-as-text",
+			});
 		});
-	});
 
-	window.addEventListener('message', e => {
+	window.addEventListener("message", (e) => {
 		if (e.origin !== window.origin) {
-			console.error('Dropping message from unknown origin in image preview');
+			console.error(
+				"Dropping message from unknown origin in image preview",
+			);
 			return;
 		}
 
 		switch (e.data.type) {
-			case 'setScale': {
+			case "setScale": {
 				updateScale(e.data.scale);
 				break;
 			}
-			case 'setActive': {
+			case "setActive": {
 				setActive(e.data.value);
 				break;
 			}
-			case 'zoomIn': {
+			case "zoomIn": {
 				zoomIn();
 				break;
 			}
-			case 'zoomOut': {
+			case "zoomOut": {
 				zoomOut();
 				break;
 			}
-			case 'copyImage': {
+			case "copyImage": {
 				copyImage();
 				break;
 			}
 		}
 	});
 
-	document.addEventListener('copy', () => {
+	document.addEventListener("copy", () => {
 		copyImage();
 	});
 
@@ -359,25 +380,29 @@
 			// copyImage is called at the same time as webview.reveal, which means this function is running whilst the webview is gaining focus.
 			// Since navigator.clipboard.write requires the document to be focused, we need to wait for focus.
 			// We cannot use a listener, as there is a high chance the focus is gained during the setup of the listener resulting in us missing it.
-			setTimeout(() => { copyImage(retries - 1); }, 20);
+			setTimeout(() => {
+				copyImage(retries - 1);
+			}, 20);
 			return;
 		}
 
 		try {
-			await navigator.clipboard.write([new ClipboardItem({
-				'image/png': new Promise((resolve, reject) => {
-					const canvas = document.createElement('canvas');
-					canvas.width = image.naturalWidth;
-					canvas.height = image.naturalHeight;
-					canvas.getContext('2d').drawImage(image, 0, 0);
-					canvas.toBlob((blob) => {
-						resolve(blob);
-						canvas.remove();
-					}, 'image/png');
-				})
-			})]);
+			await navigator.clipboard.write([
+				new ClipboardItem({
+					"image/png": new Promise((resolve, reject) => {
+						const canvas = document.createElement("canvas");
+						canvas.width = image.naturalWidth;
+						canvas.height = image.naturalHeight;
+						canvas.getContext("2d").drawImage(image, 0, 0);
+						canvas.toBlob((blob) => {
+							resolve(blob);
+							canvas.remove();
+						}, "image/png");
+					}),
+				}),
+			]);
 		} catch (e) {
 			console.error(e);
 		}
 	}
-}());
+})();

@@ -8,8 +8,8 @@
  * @fileoverview Common build script for extension scripts used in in webviews.
  */
 
-const path = require('path');
-const esbuild = require('esbuild');
+const path = require("path");
+const esbuild = require("esbuild");
 
 /**
  * @typedef {Partial<import('esbuild').BuildOptions> & {
@@ -29,9 +29,9 @@ async function build(options, didBuild) {
 		bundle: true,
 		minify: true,
 		sourcemap: false,
-		format: 'esm',
-		platform: 'browser',
-		target: ['es2020'],
+		format: "esm",
+		platform: "browser",
+		target: ["es2020"],
 		...options,
 	});
 
@@ -64,7 +64,7 @@ async function tryBuild(options, didBuild) {
  */
 module.exports.run = async function (config, args, didBuild) {
 	let outdir = config.outdir;
-	const outputRootIndex = args.indexOf('--outputRoot');
+	const outputRootIndex = args.indexOf("--outputRoot");
 	if (outputRootIndex >= 0) {
 		const outputRoot = args[outputRootIndex + 1];
 		const outputDirName = path.basename(outdir);
@@ -78,12 +78,14 @@ module.exports.run = async function (config, args, didBuild) {
 		...(config.additionalOptions || {}),
 	};
 
-	const isWatch = args.indexOf('--watch') >= 0;
+	const isWatch = args.indexOf("--watch") >= 0;
 	if (isWatch) {
 		await tryBuild(resolvedOptions, didBuild);
 
-		const watcher = require('@parcel/watcher');
-		watcher.subscribe(config.srcDir, () => tryBuild(resolvedOptions, didBuild));
+		const watcher = require("@parcel/watcher");
+		watcher.subscribe(config.srcDir, () =>
+			tryBuild(resolvedOptions, didBuild),
+		);
 	} else {
 		return build(resolvedOptions, didBuild).catch(() => process.exit(1));
 	}

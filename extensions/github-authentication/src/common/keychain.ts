@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Log } from './logger';
+import * as vscode from "vscode";
+
+import { Log } from "./logger";
 
 export class Keychain {
 	constructor(
 		private readonly context: vscode.ExtensionContext,
 		private readonly serviceId: string,
-		private readonly Logger: Log
-	) { }
+		private readonly Logger: Log,
+	) {}
 
 	async setToken(token: string): Promise<void> {
 		try {
@@ -25,8 +26,8 @@ export class Keychain {
 	async getToken(): Promise<string | null | undefined> {
 		try {
 			const secret = await this.context.secrets.get(this.serviceId);
-			if (secret && secret !== '[]') {
-				this.Logger.trace('Token acquired from secret storage.');
+			if (secret && secret !== "[]") {
+				this.Logger.trace("Token acquired from secret storage.");
 			}
 			return secret;
 		} catch (e) {

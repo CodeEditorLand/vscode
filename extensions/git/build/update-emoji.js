@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 /* eslint-disable @typescript-eslint/no-var-requires */
-const fs = require('fs');
-const https = require('https');
-const path = require('path');
+const fs = require("fs");
+const https = require("https");
+const path = require("path");
 
 async function generate() {
 	/**
@@ -17,7 +17,7 @@ async function generate() {
 	// Get emoji data from https://github.com/milesj/emojibase
 	// https://github.com/milesj/emojibase/
 
-	const files = ['github.raw.json'] //, 'emojibase.raw.json']; //, 'iamcal.raw.json', 'joypixels.raw.json'];
+	const files = ["github.raw.json"]; //, 'emojibase.raw.json']; //, 'iamcal.raw.json', 'joypixels.raw.json'];
 
 	for (const file of files) {
 		await download(
@@ -32,9 +32,9 @@ async function generate() {
 		const data = require(path.join(process.cwd(), file));
 		for (const [emojis, codes] of Object.entries(data)) {
 			const emoji = emojis
-				.split('-')
-				.map(c => String.fromCodePoint(parseInt(c, 16)))
-				.join('');
+				.split("-")
+				.map((c) => String.fromCodePoint(parseInt(c, 16)))
+				.join("");
 			for (const code of Array.isArray(codes) ? codes : [codes]) {
 				if (shortcodeMap.has(code)) {
 					// console.warn(`${file}: ${code}`);
@@ -44,23 +44,25 @@ async function generate() {
 			}
 		}
 
-		fs.unlink(file, () => { });
+		fs.unlink(file, () => {});
 	}
 
 	// Get gitmoji data from https://github.com/carloscuesta/gitmoji
 	// https://github.com/carloscuesta/gitmoji/blob/master/src/data/gitmojis.json
 	await download(
-		'https://raw.githubusercontent.com/carloscuesta/gitmoji/master/src/data/gitmojis.json',
-		'gitmojis.json',
+		"https://raw.githubusercontent.com/carloscuesta/gitmoji/master/src/data/gitmojis.json",
+		"gitmojis.json",
 	);
 
 	/**
 	 * @type {({ code: string; emoji: string })[]}
 	 */
 	// eslint-disable-next-line import/no-dynamic-require
-	const gitmojis = require(path.join(process.cwd(), 'gitmojis.json')).gitmojis;
+	const gitmojis = require(
+		path.join(process.cwd(), "gitmojis.json"),
+	).gitmojis;
 	for (const emoji of gitmojis) {
-		if (emoji.code.startsWith(':') && emoji.code.endsWith(':')) {
+		if (emoji.code.startsWith(":") && emoji.code.endsWith(":")) {
 			emoji.code = emoji.code.substring(1, emoji.code.length - 2);
 		}
 
@@ -71,7 +73,7 @@ async function generate() {
 		shortcodeMap.set(emoji.code, emoji.emoji);
 	}
 
-	fs.unlink('gitmojis.json', () => { });
+	fs.unlink("gitmojis.json", () => {});
 
 	// Sort the emojis for easier diff checking
 	const list = [...shortcodeMap.entries()];
@@ -82,15 +84,19 @@ async function generate() {
 		return m;
 	}, Object.create(null));
 
-	fs.writeFileSync(path.join(process.cwd(), 'resources/emojis.json'), JSON.stringify(map), 'utf8');
+	fs.writeFileSync(
+		path.join(process.cwd(), "resources/emojis.json"),
+		JSON.stringify(map),
+		"utf8",
+	);
 }
 
 function download(url, destination) {
-	return new Promise(resolve => {
+	return new Promise((resolve) => {
 		const stream = fs.createWriteStream(destination);
-		https.get(url, rsp => {
+		https.get(url, (rsp) => {
 			rsp.pipe(stream);
-			stream.on('finish', () => {
+			stream.on("finish", () => {
 				stream.close();
 				resolve();
 			});

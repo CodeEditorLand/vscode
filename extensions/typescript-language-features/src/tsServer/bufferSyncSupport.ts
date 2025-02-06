@@ -3,42 +3,58 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import * as fileSchemes from '../configuration/fileSchemes';
-import * as languageModeIds from '../configuration/languageIds';
-import * as typeConverters from '../typeConverters';
-import { ClientCapability, ITypeScriptServiceClient } from '../typescriptService';
-import { inMemoryResourcePrefix } from '../typescriptServiceClient';
-import { coalesce } from '../utils/arrays';
-import { Delayer, setImmediate } from '../utils/async';
-import { nulToken } from '../utils/cancellation';
-import { Disposable } from '../utils/dispose';
-import { ResourceMap } from '../utils/resourceMap';
-import { API } from './api';
-import type * as Proto from './protocol/protocol';
+import * as vscode from "vscode";
 
-type ScriptKind = 'TS' | 'TSX' | 'JS' | 'JSX';
+import * as fileSchemes from "../configuration/fileSchemes";
+import * as languageModeIds from "../configuration/languageIds";
+import * as typeConverters from "../typeConverters";
+import {
+	ClientCapability,
+	ITypeScriptServiceClient,
+} from "../typescriptService";
+import { inMemoryResourcePrefix } from "../typescriptServiceClient";
+import { coalesce } from "../utils/arrays";
+import { Delayer, setImmediate } from "../utils/async";
+import { nulToken } from "../utils/cancellation";
+import { Disposable } from "../utils/dispose";
+import { ResourceMap } from "../utils/resourceMap";
+import { API } from "./api";
+import type * as Proto from "./protocol/protocol";
+
+type ScriptKind = "TS" | "TSX" | "JS" | "JSX";
 
 function mode2ScriptKind(mode: string): ScriptKind | undefined {
 	switch (mode) {
-		case languageModeIds.typescript: return 'TS';
-		case languageModeIds.typescriptreact: return 'TSX';
-		case languageModeIds.javascript: return 'JS';
-		case languageModeIds.javascriptreact: return 'JSX';
+		case languageModeIds.typescript:
+			return "TS";
+		case languageModeIds.typescriptreact:
+			return "TSX";
+		case languageModeIds.javascript:
+			return "JS";
+		case languageModeIds.javascriptreact:
+			return "JSX";
 	}
 	return undefined;
 }
 
-const enum BufferState { Initial, Open, Closed }
+const enum BufferState {
+	Initial,
+	Open,
+	Closed,
+}
 
-const enum BufferOperationType { Close, Open, Change }
+const enum BufferOperationType {
+	Close,
+	Open,
+	Change,
+}
 
 class CloseOperation {
 	readonly type = BufferOperationType.Close;
 	constructor(
 		public readonly args: string,
 		public readonly scriptKind: ScriptKind | undefined,
-	) { }
+	) {}
 }
 
 class OpenOperation {
@@ -46,14 +62,12 @@ class OpenOperation {
 	constructor(
 		public readonly args: Proto.OpenRequestArgs,
 		public readonly scriptKind: ScriptKind | undefined,
-	) { }
+	) {}
 }
 
 class ChangeOperation {
 	readonly type = BufferOperationType.Change;
-	constructor(
-		public readonly args: Proto.FileCodeEdits
-	) { }
+	constructor(public readonly args: Proto.FileCodeEdits) {}
 }
 
 type BufferOperation = CloseOperation | OpenOperation | ChangeOperation;
@@ -64,43 +78,67 @@ type BufferOperation = CloseOperation | OpenOperation | ChangeOperation;
  * If supported, batches together file changes. This allows the TS server to more efficiently process changes.
  */
 class BufferSynchronizer {
-
 	private readonly _pending: ResourceMap<BufferOperation>;
 
 	constructor(
 		private readonly client: ITypeScriptServiceClient,
 		pathNormalizer: (path: vscode.Uri) => string | undefined,
-		onCaseInsensitiveFileSystem: boolean
+		onCaseInsensitiveFileSystem: boolean,
 	) {
 		this._pending = new ResourceMap<BufferOperation>(pathNormalizer, {
-			onCaseInsensitiveFileSystem
+			onCaseInsensitiveFileSystem,
 		});
 	}
 
 	public open(resource: vscode.Uri, args: Proto.OpenRequestArgs) {
-		this.updatePending(resource, new OpenOperation(args, args.scriptKindName));
+		this.updatePending(
+			resource,
+			new OpenOperation(args, args.scriptKindName),
+		);
 	}
 
 	/**
 	 * @return Was the buffer open?
 	 */
-	public close(resource: vscode.Uri, filepath: string, scriptKind: ScriptKind | undefined): boolean {
-		return this.updatePending(resource, new CloseOperation(filepath, scriptKind));
+	public close(
+		resource: vscode.Uri,
+		filepath: string,
+		scriptKind: ScriptKind | undefined,
+	): boolean {
+		return this.updatePending(
+			resource,
+			new CloseOperation(filepath, scriptKind),
+		);
 	}
 
-	public change(resource: vscode.Uri, filepath: string, events: readonly vscode.TextDocumentContentChangeEvent[]) {
+	public change(
+		resource: vscode.Uri,
+		filepath: string,
+		events: readonly vscode.TextDocumentContentChangeEvent[],
+	) {
 		if (!events.length) {
 			return;
 		}
 
-		this.updatePending(resource, new ChangeOperation({
-			fileName: filepath,
-			textChanges: events.map((change): Proto.CodeEdit => ({
-				newText: change.text,
-				start: typeConverters.Position.toLocation(change.range.start),
-				end: typeConverters.Position.toLocation(change.range.end),
-			})).reverse(), // Send the edits end-of-document to start-of-document order
-		}));
+		this.updatePending(
+			resource,
+			new ChangeOperation({
+				fileName: filepath,
+				textChanges: events
+					.map(
+						(change): Proto.CodeEdit => ({
+							newText: change.text,
+							start: typeConverters.Position.toLocation(
+								change.range.start,
+							),
+							end: typeConverters.Position.toLocation(
+								change.range.end,
+							),
+						}),
+					)
+					.reverse(), // Send the edits end-of-document to start-of-document order
+			}),
+		);
 	}
 
 	public reset(): void {
@@ -108,7 +146,7 @@ class BufferSynchronizer {
 	}
 
 	public beforeCommand(command: string): void {
-		if (command === 'updateOpen') {
+		if (command === "updateOpen") {
 			return;
 		}
 
@@ -122,12 +160,23 @@ class BufferSynchronizer {
 			const changedFiles: Proto.FileCodeEdits[] = [];
 			for (const change of this._pending.values()) {
 				switch (change.type) {
-					case BufferOperationType.Change: changedFiles.push(change.args); break;
-					case BufferOperationType.Open: openFiles.push(change.args); break;
-					case BufferOperationType.Close: closedFiles.push(change.args); break;
+					case BufferOperationType.Change:
+						changedFiles.push(change.args);
+						break;
+					case BufferOperationType.Open:
+						openFiles.push(change.args);
+						break;
+					case BufferOperationType.Close:
+						closedFiles.push(change.args);
+						break;
 				}
 			}
-			this.client.execute('updateOpen', { changedFiles, closedFiles, openFiles }, nulToken, { nonRecoverable: true });
+			this.client.execute(
+				"updateOpen",
+				{ changedFiles, closedFiles, openFiles },
+				nulToken,
+				{ nonRecoverable: true },
+			);
 			this._pending.clear();
 		}
 	}
@@ -157,7 +206,6 @@ class BufferSynchronizer {
 }
 
 class SyncedBuffer {
-
 	private state = BufferState.Initial;
 
 	constructor(
@@ -165,7 +213,7 @@ class SyncedBuffer {
 		public readonly filepath: string,
 		private readonly client: ITypeScriptServiceClient,
 		private readonly synchronizer: BufferSynchronizer,
-	) { }
+	) {}
 
 	public open(): void {
 		const args: Proto.OpenRequestArgs = {
@@ -179,11 +227,14 @@ class SyncedBuffer {
 			args.scriptKindName = scriptKind;
 		}
 
-		const tsPluginsForDocument = this.client.pluginManager.plugins
-			.filter(x => x.languages.indexOf(this.document.languageId) >= 0);
+		const tsPluginsForDocument = this.client.pluginManager.plugins.filter(
+			(x) => x.languages.indexOf(this.document.languageId) >= 0,
+		);
 
 		if (tsPluginsForDocument.length) {
-			(args as any).plugins = tsPluginsForDocument.map(plugin => plugin.name);
+			(args as any).plugins = tsPluginsForDocument.map(
+				(plugin) => plugin.name,
+			);
 		}
 
 		this.synchronizer.open(this.resource, args);
@@ -194,10 +245,18 @@ class SyncedBuffer {
 		const workspaceRoot = this.client.getWorkspaceRootForResource(resource);
 		if (workspaceRoot) {
 			const tsRoot = this.client.toTsFilePath(workspaceRoot);
-			return tsRoot?.startsWith(inMemoryResourcePrefix) ? undefined : tsRoot;
+			return tsRoot?.startsWith(inMemoryResourcePrefix)
+				? undefined
+				: tsRoot;
 		}
 
-		return fileSchemes.isOfScheme(resource, fileSchemes.officeScript, fileSchemes.chatCodeBlock) ? '/' : undefined;
+		return fileSchemes.isOfScheme(
+			resource,
+			fileSchemes.officeScript,
+			fileSchemes.chatCodeBlock,
+		)
+			? "/"
+			: undefined;
 	}
 
 	public get resource(): vscode.Uri {
@@ -221,10 +280,16 @@ class SyncedBuffer {
 			return false;
 		}
 		this.state = BufferState.Closed;
-		return this.synchronizer.close(this.resource, this.filepath, mode2ScriptKind(this.document.languageId));
+		return this.synchronizer.close(
+			this.resource,
+			this.filepath,
+			mode2ScriptKind(this.document.languageId),
+		);
 	}
 
-	public onContentChanged(events: readonly vscode.TextDocumentContentChangeEvent[]): void {
+	public onContentChanged(
+		events: readonly vscode.TextDocumentContentChangeEvent[],
+	): void {
 		if (this.state !== BufferState.Open) {
 			console.error(`Unexpected buffer state: ${this.state}`);
 		}
@@ -234,7 +299,6 @@ class SyncedBuffer {
 }
 
 class SyncedBufferMap extends ResourceMap<SyncedBuffer> {
-
 	public getForPath(filePath: string): SyncedBuffer | undefined {
 		return this.get(vscode.Uri.file(filePath));
 	}
@@ -248,9 +312,12 @@ class PendingDiagnostics extends ResourceMap<number> {
 	public getOrderedFileSet(): ResourceMap<void | vscode.Range[]> {
 		const orderedResources = Array.from(this.entries())
 			.sort((a, b) => a.value - b.value)
-			.map(entry => entry.resource);
+			.map((entry) => entry.resource);
 
-		const map = new ResourceMap<void | vscode.Range[]>(this._normalizePath, this.config);
+		const map = new ResourceMap<void | vscode.Range[]>(
+			this._normalizePath,
+			this.config,
+		);
 		for (const resource of orderedResources) {
 			map.set(resource, undefined);
 		}
@@ -259,22 +326,22 @@ class PendingDiagnostics extends ResourceMap<number> {
 }
 
 class GetErrRequest {
-
 	public static executeGetErrRequest(
 		client: ITypeScriptServiceClient,
 		files: ResourceMap<void | vscode.Range[]>,
-		onDone: () => void
+		onDone: () => void,
 	) {
 		return new GetErrRequest(client, files, onDone);
 	}
 
 	private _done: boolean = false;
-	private readonly _token: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+	private readonly _token: vscode.CancellationTokenSource =
+		new vscode.CancellationTokenSource();
 
 	private constructor(
 		private readonly client: ITypeScriptServiceClient,
 		public readonly files: ResourceMap<void | vscode.Range[]>,
-		onDone: () => void
+		onDone: () => void,
 	) {
 		if (!this.isErrorReportingEnabled()) {
 			this._done = true;
@@ -283,9 +350,17 @@ class GetErrRequest {
 		}
 
 		const supportsSyntaxGetErr = this.client.apiVersion.gte(API.v440);
-		const fileEntries = Array.from(files.entries()).filter(entry => supportsSyntaxGetErr || client.hasCapabilityForResource(entry.resource, ClientCapability.Semantic));
-		const allFiles = coalesce(fileEntries
-			.map(entry => client.toTsFilePath(entry.resource)));
+		const fileEntries = Array.from(files.entries()).filter(
+			(entry) =>
+				supportsSyntaxGetErr ||
+				client.hasCapabilityForResource(
+					entry.resource,
+					ClientCapability.Semantic,
+				),
+		);
+		const allFiles = coalesce(
+			fileEntries.map((entry) => client.toTsFilePath(entry.resource)),
+		);
 
 		if (!allFiles.length) {
 			this._done = true;
@@ -295,26 +370,36 @@ class GetErrRequest {
 			if (this.areProjectDiagnosticsEnabled()) {
 				// Note that geterrForProject is almost certainly not the api we want here as it ends up computing far
 				// too many diagnostics
-				request = client.executeAsync('geterrForProject', { delay: 0, file: allFiles[0] }, this._token.token);
-			}
-			else {
+				request = client.executeAsync(
+					"geterrForProject",
+					{ delay: 0, file: allFiles[0] },
+					this._token.token,
+				);
+			} else {
 				let requestFiles;
 				if (this.areRegionDiagnosticsEnabled()) {
-					requestFiles = coalesce(fileEntries
-						.map(entry => {
+					requestFiles = coalesce(
+						fileEntries.map((entry) => {
 							const file = client.toTsFilePath(entry.resource);
 							const ranges = entry.value;
 							if (file && ranges) {
-								return typeConverters.Range.toFileRangesRequestArgs(file, ranges);
+								return typeConverters.Range.toFileRangesRequestArgs(
+									file,
+									ranges,
+								);
 							}
 
 							return file;
-						}));
-				}
-				else {
+						}),
+					);
+				} else {
 					requestFiles = allFiles;
 				}
-				request = client.executeAsync('geterr', { delay: 0, files: requestFiles }, this._token.token);
+				request = client.executeAsync(
+					"geterr",
+					{ delay: 0, files: requestFiles },
+					this._token.token,
+				);
 			}
 
 			request.finally(() => {
@@ -337,11 +422,17 @@ class GetErrRequest {
 	}
 
 	private areProjectDiagnosticsEnabled() {
-		return this.client.configuration.enableProjectDiagnostics && this.client.capabilities.has(ClientCapability.Semantic);
+		return (
+			this.client.configuration.enableProjectDiagnostics &&
+			this.client.capabilities.has(ClientCapability.Semantic)
+		);
 	}
 
 	private areRegionDiagnosticsEnabled() {
-		return this.client.configuration.enableRegionDiagnostics && this.client.apiVersion.gte(API.v560);
+		return (
+			this.client.configuration.enableRegionDiagnostics &&
+			this.client.apiVersion.gte(API.v560)
+		);
 	}
 
 	public cancel(): any {
@@ -354,14 +445,17 @@ class GetErrRequest {
 }
 
 class TabResourceTracker extends Disposable {
-
-	private readonly _onDidChange = this._register(new vscode.EventEmitter<{
-		readonly closed: Iterable<vscode.Uri>;
-		readonly opened: Iterable<vscode.Uri>;
-	}>());
+	private readonly _onDidChange = this._register(
+		new vscode.EventEmitter<{
+			readonly closed: Iterable<vscode.Uri>;
+			readonly opened: Iterable<vscode.Uri>;
+		}>(),
+	);
 	public readonly onDidChange = this._onDidChange.event;
 
-	private readonly _tabResources: ResourceMap<{ readonly tabs: Set<vscode.Tab> }>;
+	private readonly _tabResources: ResourceMap<{
+		readonly tabs: Set<vscode.Tab>;
+	}>;
 
 	constructor(
 		normalizePath: (resource: vscode.Uri) => string | undefined,
@@ -371,7 +465,9 @@ class TabResourceTracker extends Disposable {
 	) {
 		super();
 
-		this._tabResources = new ResourceMap<{ readonly tabs: Set<vscode.Tab> }>(normalizePath, config);
+		this._tabResources = new ResourceMap<{
+			readonly tabs: Set<vscode.Tab>;
+		}>(normalizePath, config);
 
 		for (const tabGroup of vscode.window.tabGroups.all) {
 			for (const tab of tabGroup.tabs) {
@@ -379,19 +475,28 @@ class TabResourceTracker extends Disposable {
 			}
 		}
 
-		this._register(vscode.window.tabGroups.onDidChangeTabs(e => {
-			const closed = e.closed.flatMap(tab => this.delete(tab));
-			const opened = e.opened.flatMap(tab => this.add(tab));
-			if (closed.length || opened.length) {
-				this._onDidChange.fire({ closed, opened });
-			}
-		}));
+		this._register(
+			vscode.window.tabGroups.onDidChangeTabs((e) => {
+				const closed = e.closed.flatMap((tab) => this.delete(tab));
+				const opened = e.opened.flatMap((tab) => this.add(tab));
+				if (closed.length || opened.length) {
+					this._onDidChange.fire({ closed, opened });
+				}
+			}),
+		);
 	}
 
 	public has(resource: vscode.Uri): boolean {
 		if (resource.scheme === fileSchemes.vscodeNotebookCell) {
-			const notebook = vscode.workspace.notebookDocuments.find(doc =>
-				doc.getCells().some(cell => cell.document.uri.toString() === resource.toString()));
+			const notebook = vscode.workspace.notebookDocuments.find((doc) =>
+				doc
+					.getCells()
+					.some(
+						(cell) =>
+							cell.document.uri.toString() ===
+							resource.toString(),
+					),
+			);
 
 			return !!notebook && this.has(notebook.uri);
 		}
@@ -444,9 +549,7 @@ class TabResourceTracker extends Disposable {
 	}
 }
 
-
 export default class BufferSyncSupport extends Disposable {
-
 	private readonly client: ITypeScriptServiceClient;
 
 	private _validateJavaScript = true;
@@ -465,7 +568,7 @@ export default class BufferSyncSupport extends Disposable {
 	constructor(
 		client: ITypeScriptServiceClient,
 		modeIds: readonly string[],
-		onCaseInsensitiveFileSystem: boolean
+		onCaseInsensitiveFileSystem: boolean,
 	) {
 		super();
 		this.client = client;
@@ -473,41 +576,64 @@ export default class BufferSyncSupport extends Disposable {
 
 		this.diagnosticDelayer = new Delayer<any>(300);
 
-		const pathNormalizer = (path: vscode.Uri) => this.client.toTsFilePath(path);
-		this.syncedBuffers = new SyncedBufferMap(pathNormalizer, { onCaseInsensitiveFileSystem });
-		this.pendingDiagnostics = new PendingDiagnostics(pathNormalizer, { onCaseInsensitiveFileSystem });
-		this.synchronizer = new BufferSynchronizer(client, pathNormalizer, onCaseInsensitiveFileSystem);
+		const pathNormalizer = (path: vscode.Uri) =>
+			this.client.toTsFilePath(path);
+		this.syncedBuffers = new SyncedBufferMap(pathNormalizer, {
+			onCaseInsensitiveFileSystem,
+		});
+		this.pendingDiagnostics = new PendingDiagnostics(pathNormalizer, {
+			onCaseInsensitiveFileSystem,
+		});
+		this.synchronizer = new BufferSynchronizer(
+			client,
+			pathNormalizer,
+			onCaseInsensitiveFileSystem,
+		);
 
-		this._tabResources = this._register(new TabResourceTracker(pathNormalizer, { onCaseInsensitiveFileSystem }));
-		this._register(this._tabResources.onDidChange(e => {
-			if (this.client.configuration.enableProjectDiagnostics) {
-				return;
-			}
-
-			for (const closed of e.closed) {
-				const syncedBuffer = this.syncedBuffers.get(closed);
-				if (syncedBuffer) {
-					this.pendingDiagnostics.delete(closed);
-					this.pendingGetErr?.files.delete(closed);
+		this._tabResources = this._register(
+			new TabResourceTracker(pathNormalizer, {
+				onCaseInsensitiveFileSystem,
+			}),
+		);
+		this._register(
+			this._tabResources.onDidChange((e) => {
+				if (this.client.configuration.enableProjectDiagnostics) {
+					return;
 				}
-			}
 
-			for (const opened of e.opened) {
-				const syncedBuffer = this.syncedBuffers.get(opened);
-				if (syncedBuffer) {
-					this.requestDiagnostic(syncedBuffer);
+				for (const closed of e.closed) {
+					const syncedBuffer = this.syncedBuffers.get(closed);
+					if (syncedBuffer) {
+						this.pendingDiagnostics.delete(closed);
+						this.pendingGetErr?.files.delete(closed);
+					}
 				}
-			}
-		}));
+
+				for (const opened of e.opened) {
+					const syncedBuffer = this.syncedBuffers.get(opened);
+					if (syncedBuffer) {
+						this.requestDiagnostic(syncedBuffer);
+					}
+				}
+			}),
+		);
 
 		this.updateConfiguration();
-		vscode.workspace.onDidChangeConfiguration(this.updateConfiguration, this, this._disposables);
+		vscode.workspace.onDidChangeConfiguration(
+			this.updateConfiguration,
+			this,
+			this._disposables,
+		);
 	}
 
-	private readonly _onDelete = this._register(new vscode.EventEmitter<vscode.Uri>());
+	private readonly _onDelete = this._register(
+		new vscode.EventEmitter<vscode.Uri>(),
+	);
 	public readonly onDelete = this._onDelete.event;
 
-	private readonly _onWillChange = this._register(new vscode.EventEmitter<vscode.Uri>());
+	private readonly _onWillChange = this._register(
+		new vscode.EventEmitter<vscode.Uri>(),
+	);
 	public readonly onWillChange = this._onWillChange.event;
 
 	public listen(): void {
@@ -515,17 +641,33 @@ export default class BufferSyncSupport extends Disposable {
 			return;
 		}
 		this.listening = true;
-		vscode.workspace.onDidOpenTextDocument(this.openTextDocument, this, this._disposables);
-		vscode.workspace.onDidCloseTextDocument(this.onDidCloseTextDocument, this, this._disposables);
-		vscode.workspace.onDidChangeTextDocument(this.onDidChangeTextDocument, this, this._disposables);
-		vscode.window.onDidChangeVisibleTextEditors(e => {
-			for (const { document } of e) {
-				const syncedBuffer = this.syncedBuffers.get(document.uri);
-				if (syncedBuffer) {
-					this.requestDiagnostic(syncedBuffer);
+		vscode.workspace.onDidOpenTextDocument(
+			this.openTextDocument,
+			this,
+			this._disposables,
+		);
+		vscode.workspace.onDidCloseTextDocument(
+			this.onDidCloseTextDocument,
+			this,
+			this._disposables,
+		);
+		vscode.workspace.onDidChangeTextDocument(
+			this.onDidChangeTextDocument,
+			this,
+			this._disposables,
+		);
+		vscode.window.onDidChangeVisibleTextEditors(
+			(e) => {
+				for (const { document } of e) {
+					const syncedBuffer = this.syncedBuffers.get(document.uri);
+					if (syncedBuffer) {
+						this.requestDiagnostic(syncedBuffer);
+					}
 				}
-			}
-		}, this, this._disposables);
+			},
+			this,
+			this._disposables,
+		);
 		vscode.workspace.textDocuments.forEach(this.openTextDocument, this);
 	}
 
@@ -538,7 +680,9 @@ export default class BufferSyncSupport extends Disposable {
 			return true;
 		}
 
-		const existingDocument = vscode.workspace.textDocuments.find(doc => doc.uri.toString() === resource.toString());
+		const existingDocument = vscode.workspace.textDocuments.find(
+			(doc) => doc.uri.toString() === resource.toString(),
+		);
 		if (existingDocument) {
 			return this.openTextDocument(existingDocument);
 		}
@@ -591,7 +735,12 @@ export default class BufferSyncSupport extends Disposable {
 			return true;
 		}
 
-		const syncedBuffer = new SyncedBuffer(document, filepath, this.client, this.synchronizer);
+		const syncedBuffer = new SyncedBuffer(
+			document,
+			filepath,
+			this.client,
+			this.synchronizer,
+		);
 		this.syncedBuffers.set(resource, syncedBuffer);
 		syncedBuffer.open();
 		this.requestDiagnostic(syncedBuffer);
@@ -615,8 +764,9 @@ export default class BufferSyncSupport extends Disposable {
 	}
 
 	public interruptGetErr<R>(f: () => R): R {
-		if (!this.pendingGetErr
-			|| this.client.configuration.enableProjectDiagnostics // `geterr` happens on separate server so no need to cancel it.
+		if (
+			!this.pendingGetErr ||
+			this.client.configuration.enableProjectDiagnostics // `geterr` happens on separate server so no need to cancel it.
 		) {
 			return f();
 		}
@@ -669,7 +819,9 @@ export default class BufferSyncSupport extends Disposable {
 	}
 
 	public getErr(resources: readonly vscode.Uri[]): any {
-		const handledResources = resources.filter(resource => this.handles(resource));
+		const handledResources = resources.filter((resource) =>
+			this.handles(resource),
+		);
 		if (!handledResources.length) {
 			return;
 		}
@@ -694,7 +846,10 @@ export default class BufferSyncSupport extends Disposable {
 
 		this.pendingDiagnostics.set(buffer.resource, Date.now());
 
-		const delay = Math.min(Math.max(Math.ceil(buffer.lineCount / 20), 300), 800);
+		const delay = Math.min(
+			Math.max(Math.ceil(buffer.lineCount / 20), 300),
+			800,
+		);
 		this.triggerDiagnostics(delay);
 		return true;
 	}
@@ -720,9 +875,18 @@ export default class BufferSyncSupport extends Disposable {
 
 		// Add all open TS buffers to the geterr request. They might be visible
 		for (const buffer of this.syncedBuffers.values()) {
-			const editors = vscode.window.visibleTextEditors.filter(editor => editor.document.uri.toString() === buffer.resource.toString());
-			const visibleRanges = editors.flatMap(editor => editor.visibleRanges);
-			orderedFileSet.set(buffer.resource, visibleRanges.length ? visibleRanges : undefined);
+			const editors = vscode.window.visibleTextEditors.filter(
+				(editor) =>
+					editor.document.uri.toString() ===
+					buffer.resource.toString(),
+			);
+			const visibleRanges = editors.flatMap(
+				(editor) => editor.visibleRanges,
+			);
+			orderedFileSet.set(
+				buffer.resource,
+				visibleRanges.length ? visibleRanges : undefined,
+			);
 		}
 
 		for (const { resource } of orderedFileSet.entries()) {
@@ -733,30 +897,47 @@ export default class BufferSyncSupport extends Disposable {
 		}
 
 		if (orderedFileSet.size) {
-			const getErr = this.pendingGetErr = GetErrRequest.executeGetErrRequest(this.client, orderedFileSet, () => {
-				if (this.pendingGetErr === getErr) {
-					this.pendingGetErr = undefined;
-				}
-			});
+			const getErr = (this.pendingGetErr =
+				GetErrRequest.executeGetErrRequest(
+					this.client,
+					orderedFileSet,
+					() => {
+						if (this.pendingGetErr === getErr) {
+							this.pendingGetErr = undefined;
+						}
+					},
+				));
 		}
 
 		this.pendingDiagnostics.clear();
 	}
 
 	private updateConfiguration() {
-		const jsConfig = vscode.workspace.getConfiguration('javascript', null);
-		const tsConfig = vscode.workspace.getConfiguration('typescript', null);
+		const jsConfig = vscode.workspace.getConfiguration("javascript", null);
+		const tsConfig = vscode.workspace.getConfiguration("typescript", null);
 
-		this._validateJavaScript = jsConfig.get<boolean>('validate.enable', true);
-		this._validateTypeScript = tsConfig.get<boolean>('validate.enable', true);
+		this._validateJavaScript = jsConfig.get<boolean>(
+			"validate.enable",
+			true,
+		);
+		this._validateTypeScript = tsConfig.get<boolean>(
+			"validate.enable",
+			true,
+		);
 	}
 
 	private shouldValidate(buffer: SyncedBuffer): boolean {
-		if (fileSchemes.isOfScheme(buffer.resource, fileSchemes.chatCodeBlock)) {
+		if (
+			fileSchemes.isOfScheme(buffer.resource, fileSchemes.chatCodeBlock)
+		) {
 			return false;
 		}
 
-		if (!this.client.configuration.enableProjectDiagnostics && !this._tabResources.has(buffer.resource)) { // Only validate resources that are showing to the user
+		if (
+			!this.client.configuration.enableProjectDiagnostics &&
+			!this._tabResources.has(buffer.resource)
+		) {
+			// Only validate resources that are showing to the user
 			return false;
 		}
 

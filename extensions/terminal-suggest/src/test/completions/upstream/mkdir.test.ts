@@ -3,41 +3,58 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'mocha';
-import { testPaths, type ISuiteSpec } from '../../helpers';
-import mkdirSpec from '../../../completions/upstream/mkdir';
+import "mocha";
+
+import mkdirSpec from "../../../completions/upstream/mkdir";
+import { testPaths, type ISuiteSpec } from "../../helpers";
 
 const allOptions = [
-	'--context',
-	'--help',
-	'--mode',
-	'--parents',
-	'--verbose',
-	'--version',
-	'-Z',
-	'-m',
-	'-p',
-	'-v',
+	"--context",
+	"--help",
+	"--mode",
+	"--parents",
+	"--verbose",
+	"--version",
+	"-Z",
+	"-m",
+	"-p",
+	"-v",
 ];
 
 export const mkdirTestSuiteSpec: ISuiteSpec = {
-	name: 'mkdir',
+	name: "mkdir",
 	completionSpecs: mkdirSpec,
-	availableCommands: 'mkdir',
+	availableCommands: "mkdir",
 	testSpecs: [
 		// Empty input
-		{ input: '|', expectedCompletions: ['mkdir'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{
+			input: "|",
+			expectedCompletions: ["mkdir"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
 
 		// Typing the command
-		{ input: 'm|', expectedCompletions: ['mkdir'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
-		{ input: 'mkdir|', expectedCompletions: ['mkdir'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{
+			input: "m|",
+			expectedCompletions: ["mkdir"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
+		{
+			input: "mkdir|",
+			expectedCompletions: ["mkdir"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
 
 		// Basic options
-		{ input: 'mkdir |', expectedCompletions: allOptions, expectedResourceRequests: { type: 'folders', cwd: testPaths.cwd } },
+		{
+			input: "mkdir |",
+			expectedCompletions: allOptions,
+			expectedResourceRequests: { type: "folders", cwd: testPaths.cwd },
+		},
 
 		// Duplicate option
 		// TODO: Duplicate options should not be presented https://github.com/microsoft/vscode/issues/239607
 		// { input: 'mkdir -Z -|', expectedCompletions: removeArrayEntries(allOptions, '-z') },
 		// { input: 'mkdir -Z -m -|', expectedCompletions: removeArrayEntries(allOptions, '-z', '-m') },
-	]
+	],
 };

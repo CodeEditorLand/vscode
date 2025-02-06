@@ -17,13 +17,15 @@ export class JsonStringScanner {
 	 * @param text the encoded JSON string
 	 * @param pos must not include ", ie must be `stringJSONNode.offset + 1`
 	 */
-	constructor(private readonly text: string, initialPos: number /* offset within `text` */) {
+	constructor(
+		private readonly text: string,
+		initialPos: number /* offset within `text` */,
+	) {
 		this.pos = initialPos;
 	}
 
 	// note that we don't do bound checks here, because we know that the offset is within the string
 	getOffsetInEncoded(offsetDecoded: number) {
-
 		let start = this.pos;
 
 		while (true) {
@@ -72,14 +74,11 @@ export class JsonStringScanner {
 			const ch = this.text.charCodeAt(this.pos);
 			if (ch >= CharacterCodes._0 && ch <= CharacterCodes._9) {
 				value = value * 16 + ch - CharacterCodes._0;
-			}
-			else if (ch >= CharacterCodes.A && ch <= CharacterCodes.F) {
+			} else if (ch >= CharacterCodes.A && ch <= CharacterCodes.F) {
 				value = value * 16 + ch - CharacterCodes.A + 10;
-			}
-			else if (ch >= CharacterCodes.a && ch <= CharacterCodes.f) {
+			} else if (ch >= CharacterCodes.a && ch <= CharacterCodes.f) {
 				value = value * 16 + ch - CharacterCodes.a + 10;
-			}
-			else {
+			} else {
 				break;
 			}
 			this.pos++;
@@ -92,12 +91,11 @@ export class JsonStringScanner {
 	}
 }
 
-
 const enum CharacterCodes {
-	lineFeed = 0x0A,              // \n
-	carriageReturn = 0x0D,        // \r
+	lineFeed = 0x0a, // \n
+	carriageReturn = 0x0d, // \r
 
-	space = 0x0020,   // " "
+	space = 0x0020, // " "
 
 	_0 = 0x30,
 	_1 = 0x31,
@@ -119,12 +117,12 @@ const enum CharacterCodes {
 	g = 0x67,
 	h = 0x68,
 	i = 0x69,
-	j = 0x6A,
-	k = 0x6B,
-	l = 0x6C,
-	m = 0x6D,
-	n = 0x6E,
-	o = 0x6F,
+	j = 0x6a,
+	k = 0x6b,
+	l = 0x6c,
+	m = 0x6d,
+	n = 0x6e,
+	o = 0x6f,
 	p = 0x70,
 	q = 0x71,
 	r = 0x72,
@@ -135,7 +133,7 @@ const enum CharacterCodes {
 	w = 0x77,
 	x = 0x78,
 	y = 0x79,
-	z = 0x7A,
+	z = 0x7a,
 
 	A = 0x41,
 	B = 0x42,
@@ -146,12 +144,12 @@ const enum CharacterCodes {
 	G = 0x47,
 	H = 0x48,
 	I = 0x49,
-	J = 0x4A,
-	K = 0x4B,
-	L = 0x4C,
-	M = 0x4D,
-	N = 0x4E,
-	O = 0x4F,
+	J = 0x4a,
+	K = 0x4b,
+	L = 0x4c,
+	M = 0x4d,
+	N = 0x4e,
+	O = 0x4f,
 	P = 0x50,
 	Q = 0x51,
 	R = 0x52,
@@ -164,20 +162,20 @@ const enum CharacterCodes {
 	Y = 0x59,
 	Z = 0x5a,
 
-	asterisk = 0x2A,              // *
-	backslash = 0x5C,             // \
-	closeBrace = 0x7D,            // }
-	closeBracket = 0x5D,          // ]
-	colon = 0x3A,                 // :
-	comma = 0x2C,                 // ,
-	dot = 0x2E,                   // .
-	doubleQuote = 0x22,           // "
-	minus = 0x2D,                 // -
-	openBrace = 0x7B,             // {
-	openBracket = 0x5B,           // [
-	plus = 0x2B,                  // +
-	slash = 0x2F,                 // /
+	asterisk = 0x2a, // *
+	backslash = 0x5c, // \
+	closeBrace = 0x7d, // }
+	closeBracket = 0x5d, // ]
+	colon = 0x3a, // :
+	comma = 0x2c, // ,
+	dot = 0x2e, // .
+	doubleQuote = 0x22, // "
+	minus = 0x2d, // -
+	openBrace = 0x7b, // {
+	openBracket = 0x5b, // [
+	plus = 0x2b, // +
+	slash = 0x2f, // /
 
-	formFeed = 0x0C,              // \f
-	tab = 0x09,                   // \t
+	formFeed = 0x0c, // \f
+	tab = 0x09, // \t
 }

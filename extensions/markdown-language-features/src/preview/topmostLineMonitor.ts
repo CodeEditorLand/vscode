@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Disposable } from '../util/dispose';
-import { isMarkdownFile } from '../util/file';
-import { ResourceMap } from '../util/resourceMap';
+import * as vscode from "vscode";
+
+import { Disposable } from "../util/dispose";
+import { isMarkdownFile } from "../util/file";
+import { ResourceMap } from "../util/resourceMap";
 
 export interface LastScrollLocation {
 	readonly line: number;
@@ -14,7 +15,6 @@ export interface LastScrollLocation {
 }
 
 export class TopmostLineMonitor extends Disposable {
-
 	private readonly _pendingUpdates = new ResourceMap<number>();
 	private readonly _throttle = 50;
 	private _previousTextEditorInfo = new ResourceMap<LastScrollLocation>();
@@ -25,60 +25,77 @@ export class TopmostLineMonitor extends Disposable {
 
 		if (vscode.window.activeTextEditor) {
 			const line = getVisibleLine(vscode.window.activeTextEditor);
-			this.setPreviousTextEditorLine({ uri: vscode.window.activeTextEditor.document.uri, line: line ?? 0 });
+			this.setPreviousTextEditorLine({
+				uri: vscode.window.activeTextEditor.document.uri,
+				line: line ?? 0,
+			});
 		}
 
-		this._register(vscode.window.onDidChangeTextEditorVisibleRanges(event => {
-			if (isMarkdownFile(event.textEditor.document)) {
-				const line = getVisibleLine(event.textEditor);
-				if (typeof line === 'number') {
-					this.updateLine(event.textEditor.document.uri, line);
-					this.setPreviousTextEditorLine({ uri: event.textEditor.document.uri, line: line });
+		this._register(
+			vscode.window.onDidChangeTextEditorVisibleRanges((event) => {
+				if (isMarkdownFile(event.textEditor.document)) {
+					const line = getVisibleLine(event.textEditor);
+					if (typeof line === "number") {
+						this.updateLine(event.textEditor.document.uri, line);
+						this.setPreviousTextEditorLine({
+							uri: event.textEditor.document.uri,
+							line: line,
+						});
+					}
 				}
-			}
-		}));
+			}),
+		);
 	}
 
-	private readonly _onChanged = this._register(new vscode.EventEmitter<{ readonly resource: vscode.Uri; readonly line: number }>());
+	private readonly _onChanged = this._register(
+		new vscode.EventEmitter<{
+			readonly resource: vscode.Uri;
+			readonly line: number;
+		}>(),
+	);
 	public readonly onDidChanged = this._onChanged.event;
 
-	public setPreviousStaticEditorLine(scrollLocation: LastScrollLocation): void {
+	public setPreviousStaticEditorLine(
+		scrollLocation: LastScrollLocation,
+	): void {
 		this._previousStaticEditorInfo.set(scrollLocation.uri, scrollLocation);
 	}
 
-	public getPreviousStaticEditorLineByUri(resource: vscode.Uri): number | undefined {
+	public getPreviousStaticEditorLineByUri(
+		resource: vscode.Uri,
+	): number | undefined {
 		const scrollLoc = this._previousStaticEditorInfo.get(resource);
 		this._previousStaticEditorInfo.delete(resource);
 		return scrollLoc?.line;
 	}
 
-
 	public setPreviousTextEditorLine(scrollLocation: LastScrollLocation): void {
 		this._previousTextEditorInfo.set(scrollLocation.uri, scrollLocation);
 	}
 
-	public getPreviousTextEditorLineByUri(resource: vscode.Uri): number | undefined {
+	public getPreviousTextEditorLineByUri(
+		resource: vscode.Uri,
+	): number | undefined {
 		const scrollLoc = this._previousTextEditorInfo.get(resource);
 		this._previousTextEditorInfo.delete(resource);
 		return scrollLoc?.line;
 	}
 
-	public getPreviousStaticTextEditorLineByUri(resource: vscode.Uri): number | undefined {
+	public getPreviousStaticTextEditorLineByUri(
+		resource: vscode.Uri,
+	): number | undefined {
 		const state = this._previousStaticEditorInfo.get(resource);
 		return state?.line;
 	}
 
-	public updateLine(
-		resource: vscode.Uri,
-		line: number
-	) {
+	public updateLine(resource: vscode.Uri, line: number) {
 		if (!this._pendingUpdates.has(resource)) {
 			// schedule update
 			setTimeout(() => {
 				if (this._pendingUpdates.has(resource)) {
 					this._onChanged.fire({
 						resource,
-						line: this._pendingUpdates.get(resource) as number
+						line: this._pendingUpdates.get(resource) as number,
 					});
 					this._pendingUpdates.delete(resource);
 				}
@@ -95,9 +112,7 @@ export class TopmostLineMonitor extends Disposable {
  * Returns a fractional line number based the visible character within the line.
  * Floor to get real line number
  */
-export function getVisibleLine(
-	editor: vscode.TextEditor
-): number | undefined {
+export function getVisibleLine(editor: vscode.TextEditor): number | undefined {
 	if (!editor.visibleRanges.length) {
 		return undefined;
 	}

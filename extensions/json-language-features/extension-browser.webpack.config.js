@@ -5,19 +5,19 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withBrowserDefaults = require('../shared.webpack.config').browser;
-const path = require('path');
+const withBrowserDefaults = require("../shared.webpack.config").browser;
+const path = require("path");
 
 module.exports = withBrowserDefaults({
-	target: 'webworker',
-	context: path.join(__dirname, 'client'),
+	target: "webworker",
+	context: path.join(__dirname, "client"),
 	entry: {
-		extension: './src/browser/jsonClientMain.ts'
+		extension: "./src/browser/jsonClientMain.ts",
 	},
 	output: {
-		filename: 'jsonClientMain.js',
-		path: path.join(__dirname, 'client', 'dist', 'browser')
-	}
+		filename: "jsonClientMain.js",
+		path: path.join(__dirname, "client", "dist", "browser"),
+	},
 });

@@ -2,12 +2,14 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as interfaces from './interfaces';
-import * as vscode from 'vscode';
-import type TelemetryReporter from '@vscode/extension-telemetry';
+import type TelemetryReporter from "@vscode/extension-telemetry";
+import * as vscode from "vscode";
 
-export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict {
+import * as interfaces from "./interfaces";
 
+export class DocumentMergeConflict
+	implements interfaces.IDocumentMergeConflict
+{
 	public range: vscode.Range;
 	public current: interfaces.IMergeRegion;
 	public incoming: interfaces.IMergeRegion;
@@ -15,7 +17,10 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 	public splitter: vscode.Range;
 	private applied = false;
 
-	constructor(descriptor: interfaces.IDocumentMergeConflictDescriptor, private readonly telemetryReporter: TelemetryReporter) {
+	constructor(
+		descriptor: interfaces.IDocumentMergeConflictDescriptor,
+		private readonly telemetryReporter: TelemetryReporter,
+	) {
 		this.range = descriptor.range;
 		this.current = descriptor.current;
 		this.incoming = descriptor.incoming;
@@ -23,15 +28,19 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 		this.splitter = descriptor.splitter;
 	}
 
-	public commitEdit(type: interfaces.CommitType, editor: vscode.TextEditor, edit?: vscode.TextEditorEdit): Thenable<boolean> {
+	public commitEdit(
+		type: interfaces.CommitType,
+		editor: vscode.TextEditor,
+		edit?: vscode.TextEditorEdit,
+	): Thenable<boolean> {
 		function commitTypeToString(type: interfaces.CommitType): string {
 			switch (type) {
 				case interfaces.CommitType.Current:
-					return 'current';
+					return "current";
 				case interfaces.CommitType.Incoming:
-					return 'incoming';
+					return "incoming";
 				case interfaces.CommitType.Both:
-					return 'both';
+					return "both";
 			}
 		}
 
@@ -42,18 +51,25 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 				"resolution": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "Indicates how the merge conflict was resolved by the user" }
 			}
 		*/
-		this.telemetryReporter.sendTelemetryEvent('mergeMarkers.accept', { resolution: commitTypeToString(type) });
+		this.telemetryReporter.sendTelemetryEvent("mergeMarkers.accept", {
+			resolution: commitTypeToString(type),
+		});
 
 		if (edit) {
-
 			this.applyEdit(type, editor.document, edit);
 			return Promise.resolve(true);
 		}
 
-		return editor.edit((edit) => this.applyEdit(type, editor.document, edit));
+		return editor.edit((edit) =>
+			this.applyEdit(type, editor.document, edit),
+		);
 	}
 
-	public applyEdit(type: interfaces.CommitType, document: vscode.TextDocument, edit: { replace(range: vscode.Range, newText: string): void }): void {
+	public applyEdit(
+		type: interfaces.CommitType,
+		document: vscode.TextDocument,
+		edit: { replace(range: vscode.Range, newText: string): void },
+	): void {
 		if (this.applied) {
 			return;
 		}
@@ -72,12 +88,10 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 			// Replace [ Conflict Range ] with [ Current Content ]
 			const content = document.getText(this.current.content);
 			this.replaceRangeWithContent(content, edit);
-		}
-		else if (type === interfaces.CommitType.Incoming) {
+		} else if (type === interfaces.CommitType.Incoming) {
 			const content = document.getText(this.incoming.content);
 			this.replaceRangeWithContent(content, edit);
-		}
-		else if (type === interfaces.CommitType.Both) {
+		} else if (type === interfaces.CommitType.Both) {
 			// Replace [ Conflict Range ] with [ Current Content ] + \n + [ Incoming Content ]
 
 			const currentContent = document.getText(this.current.content);
@@ -87,9 +101,12 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 		}
 	}
 
-	private replaceRangeWithContent(content: string, edit: { replace(range: vscode.Range, newText: string): void }) {
+	private replaceRangeWithContent(
+		content: string,
+		edit: { replace(range: vscode.Range, newText: string): void },
+	) {
 		if (this.isNewlineOnly(content)) {
-			edit.replace(this.range, '');
+			edit.replace(this.range, "");
 			return;
 		}
 
@@ -98,6 +115,6 @@ export class DocumentMergeConflict implements interfaces.IDocumentMergeConflict 
 	}
 
 	private isNewlineOnly(text: string) {
-		return text === '\n' || text === '\r\n';
+		return text === "\n" || text === "\r\n";
 	}
 }

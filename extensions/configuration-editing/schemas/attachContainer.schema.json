@@ -74,10 +74,7 @@
 								},
 								"protocol": {
 									"type": "string",
-									"enum": [
-										"http",
-										"https"
-									],
+									"enum": ["http", "https"],
 									"description": "The protocol to use when forwarding this port."
 								}
 							},
@@ -139,10 +136,7 @@
 						},
 						"protocol": {
 							"type": "string",
-							"enum": [
-								"http",
-								"https"
-							],
+							"enum": ["http", "https"],
 							"description": "The protocol to use when forwarding this port."
 						}
 					},
@@ -163,10 +157,7 @@
 				"remoteEnv": {
 					"type": "object",
 					"additionalProperties": {
-						"type": [
-							"string",
-							"null"
-						]
+						"type": ["string", "null"]
 					},
 					"description": "Remote environment variables. If these are used in the Integrated Terminal, make sure the 'Terminal > Integrated: Inherit Env' setting is enabled."
 				},
@@ -194,10 +185,7 @@
 					"description": "User environment probe to run. The default is none."
 				},
 				"postAttachCommand": {
-					"type": [
-						"string",
-						"array"
-					],
+					"type": ["string", "array"],
 					"description": "A command to run after attaching to the container. If this is a single string, it will be run in a shell. If this is an array of strings, it will be run as a single command without shell.",
 					"items": {
 						"type": "string"

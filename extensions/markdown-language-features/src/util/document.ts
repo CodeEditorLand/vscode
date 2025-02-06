@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Schemes } from './schemes';
-import { Utils } from 'vscode-uri';
+import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
+
+import { Schemes } from "./schemes";
 
 export function getDocumentDir(uri: vscode.Uri): vscode.Uri | undefined {
 	const docUri = getParentDocumentUri(uri);

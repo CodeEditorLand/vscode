@@ -5,22 +5,22 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withDefaults = require('../shared.webpack.config');
-const path = require('path');
+const withDefaults = require("../shared.webpack.config");
+const path = require("path");
 
 module.exports = withDefaults({
 	context: __dirname,
 	entry: {
-		['ipynbMain.node']: './src/ipynbMain.node.ts',
-		notebookSerializerWorker: './src/notebookSerializerWorker.ts',
+		["ipynbMain.node"]: "./src/ipynbMain.node.ts",
+		notebookSerializerWorker: "./src/notebookSerializerWorker.ts",
 	},
 	output: {
-		path: path.resolve(__dirname, 'dist'),
-		filename: '[name].js'
+		path: path.resolve(__dirname, "dist"),
+		filename: "[name].js",
 	},
 	plugins: [
 		...withDefaults.nodePlugins(__dirname), // add plugins, don't replace inherited
-	]
+	],
 });

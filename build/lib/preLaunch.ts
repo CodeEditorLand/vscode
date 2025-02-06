@@ -5,18 +5,23 @@
 
 // @ts-check
 
-import path from 'path';
-import { spawn } from 'child_process';
-import { promises as fs } from 'fs';
+import { spawn } from "child_process";
+import { promises as fs } from "fs";
+import path from "path";
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-const rootDir = path.resolve(__dirname, '..', '..');
+const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const rootDir = path.resolve(__dirname, "..", "..");
 
 function runProcess(command: string, args: ReadonlyArray<string> = []) {
 	return new Promise<void>((resolve, reject) => {
-		const child = spawn(command, args, { cwd: rootDir, stdio: 'inherit', env: process.env, shell: process.platform === 'win32' });
-		child.on('exit', err => !err ? resolve() : process.exit(err ?? 1));
-		child.on('error', reject);
+		const child = spawn(command, args, {
+			cwd: rootDir,
+			stdio: "inherit",
+			env: process.env,
+			shell: process.platform === "win32",
+		});
+		child.on("exit", (err) => (!err ? resolve() : process.exit(err ?? 1)));
+		child.on("error", reject);
 	});
 }
 
@@ -30,18 +35,18 @@ async function exists(subdir: string) {
 }
 
 async function ensureNodeModules() {
-	if (!(await exists('node_modules'))) {
-		await runProcess(npm, ['ci']);
+	if (!(await exists("node_modules"))) {
+		await runProcess(npm, ["ci"]);
 	}
 }
 
 async function getElectron() {
-	await runProcess(npm, ['run', 'electron']);
+	await runProcess(npm, ["run", "electron"]);
 }
 
 async function ensureCompiled() {
-	if (!(await exists('out'))) {
-		await runProcess(npm, ['run', 'compile']);
+	if (!(await exists("out"))) {
+		await runProcess(npm, ["run", "compile"]);
 	}
 }
 
@@ -51,12 +56,12 @@ async function main() {
 	await ensureCompiled();
 
 	// Can't require this until after dependencies are installed
-	const { getBuiltInExtensions } = require('./builtInExtensions');
+	const { getBuiltInExtensions } = require("./builtInExtensions");
 	await getBuiltInExtensions();
 }
 
 if (require.main === module) {
-	main().catch(err => {
+	main().catch((err) => {
 		console.error(err);
 		process.exit(1);
 	});

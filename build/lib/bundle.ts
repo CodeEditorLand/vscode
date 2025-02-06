@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import fs from 'fs';
-import path from 'path';
-import vm from 'vm';
+import fs from "fs";
+import path from "path";
+import vm from "vm";
 
 interface IPosition {
 	line: number;
@@ -26,8 +26,18 @@ interface IBuildModuleInfoMap {
 }
 
 interface ILoaderPlugin {
-	write(pluginName: string, moduleName: string, write: ILoaderPluginWriteFunc): void;
-	writeFile(pluginName: string, entryPoint: string, req: ILoaderPluginReqFunc, write: (filename: string, contents: string) => void, config: any): void;
+	write(
+		pluginName: string,
+		moduleName: string,
+		write: ILoaderPluginWriteFunc,
+	): void;
+	writeFile(
+		pluginName: string,
+		entryPoint: string,
+		req: ILoaderPluginReqFunc,
+		write: (filename: string, contents: string) => void,
+		config: any,
+	): void;
 	finishBuild(write: (filename: string, contents: string) => void): void;
 }
 
@@ -109,11 +119,17 @@ export interface ILoaderConfig {
 /**
  * Bundle `entryPoints` given config `config`.
  */
-export function bundle(entryPoints: IEntryPoint[], config: ILoaderConfig, callback: (err: any, result: IBundleResult | null) => void): void {
+export function bundle(
+	entryPoints: IEntryPoint[],
+	config: ILoaderConfig,
+	callback: (err: any, result: IBundleResult | null) => void,
+): void {
 	const entryPointsMap: IEntryPointMap = {};
 	entryPoints.forEach((module: IEntryPoint) => {
 		if (entryPointsMap[module.name]) {
-			throw new Error(`Cannot have two entry points with the same name '${module.name}'`);
+			throw new Error(
+				`Cannot have two entry points with the same name '${module.name}'`,
+			);
 		}
 		entryPointsMap[module.name] = module;
 	});
@@ -129,30 +145,35 @@ export function bundle(entryPoints: IEntryPoint[], config: ILoaderConfig, callba
 		});
 	});
 
-
-	const code = require('fs').readFileSync(path.join(__dirname, '../../src/vs/loader.js'));
-	const r: Function = <any>vm.runInThisContext('(function(require, module, exports) { ' + code + '\n});');
+	const code = require("fs").readFileSync(
+		path.join(__dirname, "../../src/vs/loader.js"),
+	);
+	const r: Function = <any>(
+		vm.runInThisContext(
+			"(function(require, module, exports) { " + code + "\n});",
+		)
+	);
 	const loaderModule = { exports: {} };
 	r.call({}, require, loaderModule, loaderModule.exports);
 
 	const loader: any = loaderModule.exports;
 	config.isBuild = true;
 	config.paths = config.paths || {};
-	if (!config.paths['vs/css']) {
-		config.paths['vs/css'] = 'out-build/vs/css.build';
+	if (!config.paths["vs/css"]) {
+		config.paths["vs/css"] = "out-build/vs/css.build";
 	}
 	config.buildForceInvokeFactory = config.buildForceInvokeFactory || {};
-	config.buildForceInvokeFactory['vs/css'] = true;
+	config.buildForceInvokeFactory["vs/css"] = true;
 	loader.config(config);
 
-	loader(['require'], (localRequire: any) => {
+	loader(["require"], (localRequire: any) => {
 		const resolvePath = (entry: IExtraFile) => {
 			let r = localRequire.toUrl(entry.path);
-			if (!r.endsWith('.js')) {
-				r += '.js';
+			if (!r.endsWith(".js")) {
+				r += ".js";
 			}
 			// avoid packaging the build version of plugins:
-			r = r.replace('vs/css.build.js', 'vs/css.js');
+			r = r.replace("vs/css.build.js", "vs/css.js");
 			return { path: r, amdModuleId: entry.amdModuleId };
 		};
 		for (const moduleId in entryPointsMap) {
@@ -163,19 +184,26 @@ export function bundle(entryPoints: IEntryPoint[], config: ILoaderConfig, callba
 		}
 	});
 
-	loader(Object.keys(allMentionedModulesMap), () => {
-		const modules = <IBuildModuleInfo[]>loader.getBuildInfo();
-		const partialResult = emitEntryPoints(modules, entryPointsMap);
-		const cssInlinedResources = loader('vs/css').getInlinedResources();
-		callback(null, {
-			files: partialResult.files,
-			cssInlinedResources: cssInlinedResources,
-			bundleData: partialResult.bundleData
-		});
-	}, (err: any) => callback(err, null));
+	loader(
+		Object.keys(allMentionedModulesMap),
+		() => {
+			const modules = <IBuildModuleInfo[]>loader.getBuildInfo();
+			const partialResult = emitEntryPoints(modules, entryPointsMap);
+			const cssInlinedResources = loader("vs/css").getInlinedResources();
+			callback(null, {
+				files: partialResult.files,
+				cssInlinedResources: cssInlinedResources,
+				bundleData: partialResult.bundleData,
+			});
+		},
+		(err: any) => callback(err, null),
+	);
 }
 
-function emitEntryPoints(modules: IBuildModuleInfo[], entryPoints: IEntryPointMap): IPartialBundleResult {
+function emitEntryPoints(
+	modules: IBuildModuleInfo[],
+	entryPoints: IEntryPointMap,
+): IPartialBundleResult {
 	const modulesMap: IBuildModuleInfoMap = {};
 	modules.forEach((m: IBuildModuleInfo) => {
 		modulesMap[m.id] = m;
@@ -192,14 +220,16 @@ function emitEntryPoints(modules: IBuildModuleInfo[], entryPoints: IEntryPointMa
 	const usedPlugins: IPluginMap = {};
 	const bundleData: IBundleData = {
 		graph: modulesGraph,
-		bundles: {}
+		bundles: {},
 	};
 
 	Object.keys(entryPoints).forEach((moduleToBundle: string) => {
 		const info = entryPoints[moduleToBundle];
 		const rootNodes = [moduleToBundle].concat(info.include || []);
 		const allDependencies = visit(rootNodes, modulesGraph);
-		const excludes: string[] = ['require', 'exports', 'module'].concat(info.exclude || []);
+		const excludes: string[] = ["require", "exports", "module"].concat(
+			info.exclude || [],
+		);
 
 		excludes.forEach((excludeRoot: string) => {
 			const allExcludes = visit([excludeRoot], modulesGraph);
@@ -220,25 +250,28 @@ function emitEntryPoints(modules: IBuildModuleInfo[], entryPoints: IEntryPointMa
 			moduleToBundle,
 			includedModules,
 			info.prepend || [],
-			info.dest
+			info.dest,
 		);
 
 		result = result.concat(res.files);
 		for (const pluginName in res.usedPlugins) {
-			usedPlugins[pluginName] = usedPlugins[pluginName] || res.usedPlugins[pluginName];
+			usedPlugins[pluginName] =
+				usedPlugins[pluginName] || res.usedPlugins[pluginName];
 		}
 	});
 
 	Object.keys(usedPlugins).forEach((pluginName: string) => {
 		const plugin = usedPlugins[pluginName];
-		if (typeof plugin.finishBuild === 'function') {
+		if (typeof plugin.finishBuild === "function") {
 			const write = (filename: string, contents: string) => {
 				result.push({
 					dest: filename,
-					sources: [{
-						path: null,
-						contents: contents
-					}]
+					sources: [
+						{
+							path: null,
+							contents: contents,
+						},
+					],
 				});
 			};
 			plugin.finishBuild(write);
@@ -248,38 +281,40 @@ function emitEntryPoints(modules: IBuildModuleInfo[], entryPoints: IEntryPointMa
 	return {
 		// TODO@TS 2.1.2
 		files: extractStrings(removeAllDuplicateTSBoilerplate(result)),
-		bundleData: bundleData
+		bundleData: bundleData,
 	};
 }
 
 function extractStrings(destFiles: IConcatFile[]): IConcatFile[] {
 	const parseDefineCall = (moduleMatch: string, depsMatch: string) => {
-		const module = moduleMatch.replace(/^"|"$/g, '');
-		let deps = depsMatch.split(',');
+		const module = moduleMatch.replace(/^"|"$/g, "");
+		let deps = depsMatch.split(",");
 		deps = deps.map((dep) => {
 			dep = dep.trim();
-			dep = dep.replace(/^"|"$/g, '');
-			dep = dep.replace(/^'|'$/g, '');
+			dep = dep.replace(/^"|"$/g, "");
+			dep = dep.replace(/^'|'$/g, "");
 			let prefix: string | null = null;
 			let _path: string | null = null;
-			const pieces = dep.split('!');
+			const pieces = dep.split("!");
 			if (pieces.length > 1) {
-				prefix = pieces[0] + '!';
+				prefix = pieces[0] + "!";
 				_path = pieces[1];
 			} else {
-				prefix = '';
+				prefix = "";
 				_path = pieces[0];
 			}
 
 			if (/^\.\//.test(_path) || /^\.\.\//.test(_path)) {
-				const res = path.join(path.dirname(module), _path).replace(/\\/g, '/');
+				const res = path
+					.join(path.dirname(module), _path)
+					.replace(/\\/g, "/");
 				return prefix + res;
 			}
 			return prefix + _path;
 		});
 		return {
 			module: module,
-			deps: deps
+			deps: deps,
 		};
 	};
 
@@ -294,13 +329,16 @@ function extractStrings(destFiles: IConcatFile[]): IConcatFile[] {
 		// Do one pass to record the usage counts for each module id
 		const useCounts: { [moduleId: string]: number } = {};
 		destFile.sources.forEach((source) => {
-			const matches = source.contents.match(/define\(("[^"]+"),\s*\[(((, )?("|')[^"']+("|'))+)\]/);
+			const matches = source.contents.match(
+				/define\(("[^"]+"),\s*\[(((, )?("|')[^"']+("|'))+)\]/,
+			);
 			if (!matches) {
 				return;
 			}
 
 			const defineCall = parseDefineCall(matches[1], matches[2]);
-			useCounts[defineCall.module] = (useCounts[defineCall.module] || 0) + 1;
+			useCounts[defineCall.module] =
+				(useCounts[defineCall.module] || 0) + 1;
 			defineCall.deps.forEach((dep) => {
 				useCounts[dep] = (useCounts[dep] || 0) + 1;
 			});
@@ -317,16 +355,19 @@ function extractStrings(destFiles: IConcatFile[]): IConcatFile[] {
 		});
 
 		destFile.sources.forEach((source) => {
-			source.contents = source.contents.replace(/define\(("[^"]+"),\s*\[(((, )?("|')[^"']+("|'))+)\]/, (_, moduleMatch, depsMatch) => {
-				const defineCall = parseDefineCall(moduleMatch, depsMatch);
-				return `define(__m[${replacementMap[defineCall.module]}/*${defineCall.module}*/], __M([${defineCall.deps.map(dep => replacementMap[dep] + '/*' + dep + '*/').join(',')}])`;
-			});
+			source.contents = source.contents.replace(
+				/define\(("[^"]+"),\s*\[(((, )?("|')[^"']+("|'))+)\]/,
+				(_, moduleMatch, depsMatch) => {
+					const defineCall = parseDefineCall(moduleMatch, depsMatch);
+					return `define(__m[${replacementMap[defineCall.module]}/*${defineCall.module}*/], __M([${defineCall.deps.map((dep) => replacementMap[dep] + "/*" + dep + "*/").join(",")}])`;
+				},
+			);
 		});
 
 		destFile.sources.unshift({
 			path: null,
 			contents: [
-				'(function() {',
+				"(function() {",
 				`var __m = ${JSON.stringify(sortedByUseModules)};`,
 				`var __M = function(deps) {`,
 				`  var result = [];`,
@@ -334,23 +375,28 @@ function extractStrings(destFiles: IConcatFile[]): IConcatFile[] {
 				`    result[i] = __m[deps[i]];`,
 				`  }`,
 				`  return result;`,
-				`};`
-			].join('\n')
+				`};`,
+			].join("\n"),
 		});
 
 		destFile.sources.push({
 			path: null,
-			contents: '}).call(this);'
+			contents: "}).call(this);",
 		});
 	});
 	return destFiles;
 }
 
-function removeAllDuplicateTSBoilerplate(destFiles: IConcatFile[]): IConcatFile[] {
+function removeAllDuplicateTSBoilerplate(
+	destFiles: IConcatFile[],
+): IConcatFile[] {
 	destFiles.forEach((destFile) => {
 		const SEEN_BOILERPLATE: boolean[] = [];
 		destFile.sources.forEach((source) => {
-			source.contents = removeDuplicateTSBoilerplate(source.contents, SEEN_BOILERPLATE);
+			source.contents = removeDuplicateTSBoilerplate(
+				source.contents,
+				SEEN_BOILERPLATE,
+			);
 		});
 	});
 
@@ -358,7 +404,11 @@ function removeAllDuplicateTSBoilerplate(destFiles: IConcatFile[]): IConcatFile[
 }
 
 export function removeAllTSBoilerplate(source: string) {
-	const seen = new Array<boolean>(BOILERPLATE.length).fill(true, 0, BOILERPLATE.length);
+	const seen = new Array<boolean>(BOILERPLATE.length).fill(
+		true,
+		0,
+		BOILERPLATE.length,
+	);
 	return removeDuplicateTSBoilerplate(source, seen);
 }
 
@@ -378,15 +428,19 @@ const BOILERPLATE = [
 	{ start: /^var __disposeResources/, end: /^}\);$/ },
 ];
 
-function removeDuplicateTSBoilerplate(source: string, SEEN_BOILERPLATE: boolean[] = []): string {
+function removeDuplicateTSBoilerplate(
+	source: string,
+	SEEN_BOILERPLATE: boolean[] = [],
+): string {
 	const lines = source.split(/\r\n|\n|\r/);
 	const newLines: string[] = [];
-	let IS_REMOVING_BOILERPLATE = false, END_BOILERPLATE: RegExp;
+	let IS_REMOVING_BOILERPLATE = false,
+		END_BOILERPLATE: RegExp;
 
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i];
 		if (IS_REMOVING_BOILERPLATE) {
-			newLines.push('');
+			newLines.push("");
 			if (END_BOILERPLATE!.test(line)) {
 				IS_REMOVING_BOILERPLATE = false;
 			}
@@ -403,13 +457,13 @@ function removeDuplicateTSBoilerplate(source: string, SEEN_BOILERPLATE: boolean[
 				}
 			}
 			if (IS_REMOVING_BOILERPLATE) {
-				newLines.push('');
+				newLines.push("");
 			} else {
 				newLines.push(line);
 			}
 		}
 	}
-	return newLines.join('\n');
+	return newLines.join("\n");
 }
 
 interface IPluginMap {
@@ -427,15 +481,15 @@ function emitEntryPoint(
 	entryPoint: string,
 	includedModules: string[],
 	prepend: IExtraFile[],
-	dest: string | undefined
+	dest: string | undefined,
 ): IEmitEntryPointResult {
 	if (!dest) {
-		dest = entryPoint + '.js';
+		dest = entryPoint + ".js";
 	}
 	const mainResult: IConcatFile = {
-		sources: [],
-		dest: dest
-	},
+			sources: [],
+			dest: dest,
+		},
 		results: IConcatFile[] = [mainResult];
 
 	const usedPlugins: IPluginMap = {};
@@ -447,53 +501,79 @@ function emitEntryPoint(
 	};
 
 	includedModules.forEach((c: string) => {
-		const bangIndex = c.indexOf('!');
+		const bangIndex = c.indexOf("!");
 
 		if (bangIndex >= 0) {
 			const pluginName = c.substr(0, bangIndex);
 			const plugin = getLoaderPlugin(pluginName);
-			mainResult.sources.push(emitPlugin(entryPoint, plugin, pluginName, c.substr(bangIndex + 1)));
+			mainResult.sources.push(
+				emitPlugin(
+					entryPoint,
+					plugin,
+					pluginName,
+					c.substr(bangIndex + 1),
+				),
+			);
 			return;
 		}
 
 		const module = modulesMap[c];
 
-		if (module.path === 'empty:') {
+		if (module.path === "empty:") {
 			return;
 		}
 
 		const contents = readFileAndRemoveBOM(module.path);
 
 		if (module.shim) {
-			mainResult.sources.push(emitShimmedModule(c, deps[c], module.shim, module.path, contents));
+			mainResult.sources.push(
+				emitShimmedModule(
+					c,
+					deps[c],
+					module.shim,
+					module.path,
+					contents,
+				),
+			);
 		} else if (module.defineLocation) {
-			mainResult.sources.push(emitNamedModule(c, module.defineLocation, module.path, contents));
+			mainResult.sources.push(
+				emitNamedModule(
+					c,
+					module.defineLocation,
+					module.path,
+					contents,
+				),
+			);
 		} else {
 			const moduleCopy = {
 				id: module.id,
 				path: module.path,
 				defineLocation: module.defineLocation,
-				dependencies: module.dependencies
+				dependencies: module.dependencies,
 			};
-			throw new Error(`Cannot bundle module '${module.id}' for entry point '${entryPoint}' because it has no shim and it lacks a defineLocation: ${JSON.stringify(moduleCopy)}`);
+			throw new Error(
+				`Cannot bundle module '${module.id}' for entry point '${entryPoint}' because it has no shim and it lacks a defineLocation: ${JSON.stringify(moduleCopy)}`,
+			);
 		}
 	});
 
 	Object.keys(usedPlugins).forEach((pluginName: string) => {
 		const plugin = usedPlugins[pluginName];
-		if (typeof plugin.writeFile === 'function') {
+		if (typeof plugin.writeFile === "function") {
 			const req: ILoaderPluginReqFunc = <any>(() => {
-				throw new Error('no-no!');
+				throw new Error("no-no!");
 			});
-			req.toUrl = something => something;
+			req.toUrl = (something) => something;
 
 			const write = (filename: string, contents: string) => {
 				results.push({
 					dest: filename,
-					sources: [{
-						path: null,
-						contents: contents
-					}]
+					sources: [
+						{
+							path: null,
+							contents: contents,
+						},
+					],
 				});
 			};
 			plugin.writeFile(pluginName, entryPoint, req, write, {});
@@ -503,11 +583,14 @@ function emitEntryPoint(
 	const toIFile = (entry: IExtraFile): IFile => {
 		let contents = readFileAndRemoveBOM(entry.path);
 		if (entry.amdModuleId) {
-			contents = contents.replace(/^define\(/m, `define("${entry.amdModuleId}",`);
+			contents = contents.replace(
+				/^define\(/m,
+				`define("${entry.amdModuleId}",`,
+			);
 		}
 		return {
 			path: entry.path,
-			contents: contents
+			contents: contents,
 		};
 	};
 
@@ -517,13 +600,13 @@ function emitEntryPoint(
 
 	return {
 		files: results,
-		usedPlugins: usedPlugins
+		usedPlugins: usedPlugins,
 	};
 }
 
 function readFileAndRemoveBOM(path: string): string {
 	const BOM_CHAR_CODE = 65279;
-	let contents = fs.readFileSync(path, 'utf8');
+	let contents = fs.readFileSync(path, "utf8");
 	// Remove BOM
 	if (contents.charCodeAt(0) === BOM_CHAR_CODE) {
 		contents = contents.substring(1);
@@ -531,9 +614,14 @@ function readFileAndRemoveBOM(path: string): string {
 	return contents;
 }
 
-function emitPlugin(entryPoint: string, plugin: ILoaderPlugin, pluginName: string, moduleName: string): IFile {
-	let result = '';
-	if (typeof plugin.write === 'function') {
+function emitPlugin(
+	entryPoint: string,
+	plugin: ILoaderPlugin,
+	pluginName: string,
+	moduleName: string,
+): IFile {
+	let result = "";
+	if (typeof plugin.write === "function") {
 		const write: ILoaderPluginWriteFunc = <any>((what: string) => {
 			result += what;
 		});
@@ -548,39 +636,61 @@ function emitPlugin(entryPoint: string, plugin: ILoaderPlugin, pluginName: strin
 	}
 	return {
 		path: null,
-		contents: result
+		contents: result,
 	};
 }
 
-function emitNamedModule(moduleId: string, defineCallPosition: IPosition, path: string, contents: string): IFile {
-
+function emitNamedModule(
+	moduleId: string,
+	defineCallPosition: IPosition,
+	path: string,
+	contents: string,
+): IFile {
 	// `defineCallPosition` is the position in code: |define()
-	const defineCallOffset = positionToOffset(contents, defineCallPosition.line, defineCallPosition.col);
+	const defineCallOffset = positionToOffset(
+		contents,
+		defineCallPosition.line,
+		defineCallPosition.col,
+	);
 
 	// `parensOffset` is the position in code: define|()
-	const parensOffset = contents.indexOf('(', defineCallOffset);
+	const parensOffset = contents.indexOf("(", defineCallOffset);
 
 	const insertStr = '"' + moduleId + '", ';
 
 	return {
 		path: path,
-		contents: contents.substr(0, parensOffset + 1) + insertStr + contents.substr(parensOffset + 1)
+		contents:
+			contents.substr(0, parensOffset + 1) +
+			insertStr +
+			contents.substr(parensOffset + 1),
 	};
 }
 
-function emitShimmedModule(moduleId: string, myDeps: string[], factory: string, path: string, contents: string): IFile {
-	const strDeps = (myDeps.length > 0 ? '"' + myDeps.join('", "') + '"' : '');
-	const strDefine = 'define("' + moduleId + '", [' + strDeps + '], ' + factory + ');';
+function emitShimmedModule(
+	moduleId: string,
+	myDeps: string[],
+	factory: string,
+	path: string,
+	contents: string,
+): IFile {
+	const strDeps = myDeps.length > 0 ? '"' + myDeps.join('", "') + '"' : "";
+	const strDefine =
+		'define("' + moduleId + '", [' + strDeps + "], " + factory + ");";
 	return {
 		path: path,
-		contents: contents + '\n;\n' + strDefine
+		contents: contents + "\n;\n" + strDefine,
 	};
 }
 
 /**
  * Convert a position (line:col) to (offset) in string `str`
  */
-function positionToOffset(str: string, desiredLine: number, desiredCol: number): number {
+function positionToOffset(
+	str: string,
+	desiredLine: number,
+	desiredCol: number,
+): number {
 	if (desiredLine === 1) {
 		return desiredCol - 1;
 	}
@@ -592,13 +702,12 @@ function positionToOffset(str: string, desiredLine: number, desiredCol: number):
 		if (desiredLine === line) {
 			return lastNewLineOffset + 1 + desiredCol - 1;
 		}
-		lastNewLineOffset = str.indexOf('\n', lastNewLineOffset + 1);
+		lastNewLineOffset = str.indexOf("\n", lastNewLineOffset + 1);
 		line++;
 	} while (lastNewLineOffset >= 0);
 
 	return -1;
 }
-
 
 /**
  * Return a set of reachable nodes in `graph` starting from `rootNodes`
@@ -629,7 +738,6 @@ function visit(rootNodes: string[], graph: IGraph): INodeSet {
  * Perform a topological sort on `graph`
  */
 function topologicalSort(graph: IGraph): string[] {
-
 	const allNodes: INodeSet = {},
 		outgoingEdgeCount: { [node: string]: number } = {},
 		inverseEdges: IGraph = {};
@@ -676,7 +784,10 @@ function topologicalSort(graph: IGraph): string[] {
 	}
 
 	if (Object.keys(outgoingEdgeCount).length > 0) {
-		throw new Error('Cannot do topological sort on cyclic graph, remaining nodes: ' + Object.keys(outgoingEdgeCount));
+		throw new Error(
+			"Cannot do topological sort on cyclic graph, remaining nodes: " +
+				Object.keys(outgoingEdgeCount),
+		);
 	}
 
 	return L;

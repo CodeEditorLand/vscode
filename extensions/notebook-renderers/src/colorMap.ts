@@ -3,60 +3,64 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export const ansiColorIdentifiers: { colorName: string; colorValue: string }[] = [];
+export const ansiColorIdentifiers: { colorName: string; colorValue: string }[] =
+	[];
 export const ansiColorMap: { [key: string]: { index: number } } = {
-	'terminal.ansiBlack': {
+	"terminal.ansiBlack": {
 		index: 0,
 	},
-	'terminal.ansiRed': {
+	"terminal.ansiRed": {
 		index: 1,
 	},
-	'terminal.ansiGreen': {
+	"terminal.ansiGreen": {
 		index: 2,
 	},
-	'terminal.ansiYellow': {
+	"terminal.ansiYellow": {
 		index: 3,
 	},
-	'terminal.ansiBlue': {
+	"terminal.ansiBlue": {
 		index: 4,
 	},
-	'terminal.ansiMagenta': {
+	"terminal.ansiMagenta": {
 		index: 5,
 	},
-	'terminal.ansiCyan': {
+	"terminal.ansiCyan": {
 		index: 6,
 	},
-	'terminal.ansiWhite': {
+	"terminal.ansiWhite": {
 		index: 7,
 	},
-	'terminal.ansiBrightBlack': {
+	"terminal.ansiBrightBlack": {
 		index: 8,
 	},
-	'terminal.ansiBrightRed': {
+	"terminal.ansiBrightRed": {
 		index: 9,
 	},
-	'terminal.ansiBrightGreen': {
+	"terminal.ansiBrightGreen": {
 		index: 10,
 	},
-	'terminal.ansiBrightYellow': {
+	"terminal.ansiBrightYellow": {
 		index: 11,
 	},
-	'terminal.ansiBrightBlue': {
+	"terminal.ansiBrightBlue": {
 		index: 12,
 	},
-	'terminal.ansiBrightMagenta': {
+	"terminal.ansiBrightMagenta": {
 		index: 13,
 	},
-	'terminal.ansiBrightCyan': {
+	"terminal.ansiBrightCyan": {
 		index: 14,
 	},
-	'terminal.ansiBrightWhite': {
+	"terminal.ansiBrightWhite": {
 		index: 15,
-	}
+	},
 };
 
 for (const id in ansiColorMap) {
 	const entry = ansiColorMap[id];
 	const colorName = id.substring(13);
-	ansiColorIdentifiers[entry.index] = { colorName, colorValue: 'var(--vscode-' + id.replace('.', '-') + ')' };
+	ansiColorIdentifiers[entry.index] = {
+		colorName,
+		colorValue: "var(--vscode-" + id.replace(".", "-") + ")",
+	};
 }

@@ -3,11 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import VsCodeTelemetryReporter from '@vscode/extension-telemetry';
-import * as vscode from 'vscode';
-import * as tas from 'vscode-tas-client';
+import VsCodeTelemetryReporter from "@vscode/extension-telemetry";
+import * as vscode from "vscode";
+import * as tas from "vscode-tas-client";
 
-export interface IExperimentationTelemetryReporter extends tas.IExperimentationTelemetry, vscode.Disposable {
+export interface IExperimentationTelemetryReporter
+	extends tas.IExperimentationTelemetry,
+		vscode.Disposable {
 	postEventObj(eventName: string, props: { [prop: string]: string }): void;
 }
 
@@ -16,8 +18,9 @@ export interface IExperimentationTelemetryReporter extends tas.IExperimentationT
  * but will only do so when passed to an {@link ExperimentationService}.
  */
 
-export class ExperimentationTelemetryReporter implements IExperimentationTelemetryReporter {
-
+export class ExperimentationTelemetryReporter
+	implements IExperimentationTelemetryReporter
+{
 	private _sharedProperties: Record<string, string> = {};
 	private readonly _reporter: VsCodeTelemetryReporter;
 
@@ -48,4 +51,3 @@ export class ExperimentationTelemetryReporter implements IExperimentationTelemet
 		this._reporter.dispose();
 	}
 }
-

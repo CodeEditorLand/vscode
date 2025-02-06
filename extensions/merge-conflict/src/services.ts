@@ -2,19 +2,19 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
-import DocumentTracker from './documentTracker';
-import CodeLensProvider from './codelensProvider';
-import CommandHandler from './commandHandler';
-import ContentProvider from './contentProvider';
-import Decorator from './mergeDecorator';
-import * as interfaces from './interfaces';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import TelemetryReporter from "@vscode/extension-telemetry";
+import * as vscode from "vscode";
 
-const ConfigurationSectionName = 'merge-conflict';
+import CodeLensProvider from "./codelensProvider";
+import CommandHandler from "./commandHandler";
+import ContentProvider from "./contentProvider";
+import DocumentTracker from "./documentTracker";
+import * as interfaces from "./interfaces";
+import Decorator from "./mergeDecorator";
+
+const ConfigurationSectionName = "merge-conflict";
 
 export default class ServiceWrapper implements vscode.Disposable {
-
 	private services: vscode.Disposable[] = [];
 	private telemetryReporter: TelemetryReporter;
 
@@ -25,7 +25,6 @@ export default class ServiceWrapper implements vscode.Disposable {
 	}
 
 	begin() {
-
 		const configuration = this.createExtensionConfiguration();
 		const documentTracker = new DocumentTracker(this.telemetryReporter);
 
@@ -45,27 +44,40 @@ export default class ServiceWrapper implements vscode.Disposable {
 
 		vscode.workspace.onDidChangeConfiguration(() => {
 			this.services.forEach((service: any) => {
-				if (service.configurationUpdated && service.configurationUpdated instanceof Function) {
-					service.configurationUpdated(this.createExtensionConfiguration());
+				if (
+					service.configurationUpdated &&
+					service.configurationUpdated instanceof Function
+				) {
+					service.configurationUpdated(
+						this.createExtensionConfiguration(),
+					);
 				}
 			});
 		});
 	}
 
 	createExtensionConfiguration(): interfaces.IExtensionConfiguration {
-		const workspaceConfiguration = vscode.workspace.getConfiguration(ConfigurationSectionName);
-		const codeLensEnabled: boolean = workspaceConfiguration.get('codeLens.enabled', true);
-		const decoratorsEnabled: boolean = workspaceConfiguration.get('decorators.enabled', true);
+		const workspaceConfiguration = vscode.workspace.getConfiguration(
+			ConfigurationSectionName,
+		);
+		const codeLensEnabled: boolean = workspaceConfiguration.get(
+			"codeLens.enabled",
+			true,
+		);
+		const decoratorsEnabled: boolean = workspaceConfiguration.get(
+			"decorators.enabled",
+			true,
+		);
 
 		return {
 			enableCodeLens: codeLensEnabled,
 			enableDecorations: decoratorsEnabled,
-			enableEditorOverview: decoratorsEnabled
+			enableEditorOverview: decoratorsEnabled,
 		};
 	}
 
 	dispose() {
-		this.services.forEach(disposable => disposable.dispose());
+		this.services.forEach((disposable) => disposable.dispose());
 		this.services = [];
 	}
 }

@@ -3,20 +3,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import parse from '@emmetio/html-matcher';
-import parseStylesheet from '@emmetio/css-parser';
-import { Node as FlatNode, HtmlNode as HtmlFlatNode, Property as FlatProperty, Rule as FlatRule, CssToken as FlatCssToken, Stylesheet as FlatStylesheet } from 'EmmetFlatNode';
-import { DocumentStreamReader } from './bufferStream';
-import * as EmmetHelper from '@vscode/emmet-helper';
-import { TextDocument as LSTextDocument } from 'vscode-languageserver-textdocument';
-import { getRootNode } from './parseDocument';
+import parseStylesheet from "@emmetio/css-parser";
+import parse from "@emmetio/html-matcher";
+import * as EmmetHelper from "@vscode/emmet-helper";
+import {
+	CssToken as FlatCssToken,
+	Node as FlatNode,
+	Property as FlatProperty,
+	Rule as FlatRule,
+	Stylesheet as FlatStylesheet,
+	HtmlNode as HtmlFlatNode,
+} from "EmmetFlatNode";
+import * as vscode from "vscode";
+import { TextDocument as LSTextDocument } from "vscode-languageserver-textdocument";
+
+import { DocumentStreamReader } from "./bufferStream";
+import { getRootNode } from "./parseDocument";
 
 let _emmetHelper: typeof EmmetHelper;
 let _currentExtensionsPath: string[] | undefined;
 
 let _homeDir: vscode.Uri | undefined;
-
 
 export function setHomeDir(homeDir: vscode.Uri) {
 	_homeDir = homeDir;
@@ -26,7 +33,7 @@ export function getEmmetHelper() {
 	// Lazy load vscode-emmet-helper instead of importing it
 	// directly to reduce the start-up time of the extension
 	if (!_emmetHelper) {
-		_emmetHelper = require('@vscode/emmet-helper');
+		_emmetHelper = require("@vscode/emmet-helper");
 	}
 	return _emmetHelper;
 }
@@ -36,19 +43,30 @@ export function getEmmetHelper() {
  */
 export function updateEmmetExtensionsPath(forceRefresh: boolean = false) {
 	const helper = getEmmetHelper();
-	let extensionsPath = vscode.workspace.getConfiguration('emmet').get<string[]>('extensionsPath');
+	let extensionsPath = vscode.workspace
+		.getConfiguration("emmet")
+		.get<string[]>("extensionsPath");
 	if (!extensionsPath) {
 		extensionsPath = [];
 	}
 	if (forceRefresh || _currentExtensionsPath !== extensionsPath) {
 		_currentExtensionsPath = extensionsPath;
-		const rootPaths = vscode.workspace.workspaceFolders?.length ? vscode.workspace.workspaceFolders.map(f => f.uri) : undefined;
+		const rootPaths = vscode.workspace.workspaceFolders?.length
+			? vscode.workspace.workspaceFolders.map((f) => f.uri)
+			: undefined;
 		const fileSystem = vscode.workspace.fs;
-		helper.updateExtensionsPath(extensionsPath, fileSystem, rootPaths, _homeDir).catch(err => {
-			if (Array.isArray(extensionsPath) && extensionsPath.length) {
-				vscode.window.showErrorMessage(err.message);
-			}
-		});
+		helper
+			.updateExtensionsPath(
+				extensionsPath,
+				fileSystem,
+				rootPaths,
+				_homeDir,
+			)
+			.catch((err) => {
+				if (Array.isArray(extensionsPath) && extensionsPath.length) {
+					vscode.window.showErrorMessage(err.message);
+				}
+			});
 	}
 }
 
@@ -58,25 +76,37 @@ export function updateEmmetExtensionsPath(forceRefresh: boolean = false) {
  */
 export function migrateEmmetExtensionsPath() {
 	// Get the detail info of emmet.extensionsPath setting
-	const config = vscode.workspace.getConfiguration().inspect('emmet.extensionsPath');
+	const config = vscode.workspace
+		.getConfiguration()
+		.inspect("emmet.extensionsPath");
 
 	// Update Global setting if the value type is string or the value is null
-	if (typeof config?.globalValue === 'string') {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', [config.globalValue], true);
+	if (typeof config?.globalValue === "string") {
+		vscode.workspace
+			.getConfiguration()
+			.update("emmet.extensionsPath", [config.globalValue], true);
 	} else if (config?.globalValue === null) {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', [], true);
+		vscode.workspace
+			.getConfiguration()
+			.update("emmet.extensionsPath", [], true);
 	}
 	// Update Workspace setting if the value type is string or the value is null
-	if (typeof config?.workspaceValue === 'string') {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', [config.workspaceValue], false);
+	if (typeof config?.workspaceValue === "string") {
+		vscode.workspace
+			.getConfiguration()
+			.update("emmet.extensionsPath", [config.workspaceValue], false);
 	} else if (config?.workspaceValue === null) {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', [], false);
+		vscode.workspace
+			.getConfiguration()
+			.update("emmet.extensionsPath", [], false);
 	}
 	// Update WorkspaceFolder setting if the value type is string or the value is null
-	if (typeof config?.workspaceFolderValue === 'string') {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', [config.workspaceFolderValue]);
+	if (typeof config?.workspaceFolderValue === "string") {
+		vscode.workspace
+			.getConfiguration()
+			.update("emmet.extensionsPath", [config.workspaceFolderValue]);
 	} else if (config?.workspaceFolderValue === null) {
-		vscode.workspace.getConfiguration().update('emmet.extensionsPath', []);
+		vscode.workspace.getConfiguration().update("emmet.extensionsPath", []);
 	}
 }
 
@@ -84,30 +114,185 @@ export function migrateEmmetExtensionsPath() {
  * Mapping between languages that support Emmet and completion trigger characters
  */
 export const LANGUAGE_MODES: { [id: string]: string[] } = {
-	'html': ['!', '.', '}', ':', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'jade': ['!', '.', '}', ':', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'slim': ['!', '.', '}', ':', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'haml': ['!', '.', '}', ':', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'xml': ['.', '}', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'xsl': ['!', '.', '}', '*', '$', '/', ']', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'css': [':', '!', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'scss': [':', '!', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'sass': [':', '!', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'less': [':', '!', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'stylus': [':', '!', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'javascriptreact': ['!', '.', '}', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-	'typescriptreact': ['!', '.', '}', '*', '$', ']', '/', '>', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+	"html": [
+		"!",
+		".",
+		"}",
+		":",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"jade": [
+		"!",
+		".",
+		"}",
+		":",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"slim": [
+		"!",
+		".",
+		"}",
+		":",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"haml": [
+		"!",
+		".",
+		"}",
+		":",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"xml": [
+		".",
+		"}",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"xsl": [
+		"!",
+		".",
+		"}",
+		"*",
+		"$",
+		"/",
+		"]",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"css": [":", "!", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+	"scss": [":", "!", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+	"sass": [":", "!", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+	"less": [":", "!", "-", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+	"stylus": [":", "!", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+	"javascriptreact": [
+		"!",
+		".",
+		"}",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
+	"typescriptreact": [
+		"!",
+		".",
+		"}",
+		"*",
+		"$",
+		"]",
+		"/",
+		">",
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9",
+	],
 };
 
 export function isStyleSheet(syntax: string): boolean {
-	const stylesheetSyntaxes = ['css', 'scss', 'sass', 'less', 'stylus'];
+	const stylesheetSyntaxes = ["css", "scss", "sass", "less", "stylus"];
 	return stylesheetSyntaxes.includes(syntax);
 }
 
 export function validate(allowStylesheet: boolean = true): boolean {
 	const editor = vscode.window.activeTextEditor;
 	if (!editor) {
-		vscode.window.showInformationMessage('No editor is active');
+		vscode.window.showInformationMessage("No editor is active");
 		return false;
 	}
 	if (!allowStylesheet && isStyleSheet(editor.document.languageId)) {
@@ -122,15 +307,24 @@ export function getMappingForIncludedLanguages(): Record<string, string> {
 	// For other languages, users will have to use `emmet.includeLanguages` or
 	// language specific extensions can provide emmet completion support
 	const MAPPED_MODES: Record<string, string> = {
-		'handlebars': 'html',
-		'php': 'html'
+		"handlebars": "html",
+		"php": "html",
 	};
 
 	const finalMappedModes: Record<string, string> = {};
-	const includeLanguagesConfig = vscode.workspace.getConfiguration('emmet').get<Record<string, string>>('includeLanguages');
-	const includeLanguages = Object.assign({}, MAPPED_MODES, includeLanguagesConfig ?? {});
-	Object.keys(includeLanguages).forEach(syntax => {
-		if (typeof includeLanguages[syntax] === 'string' && LANGUAGE_MODES[includeLanguages[syntax]]) {
+	const includeLanguagesConfig = vscode.workspace
+		.getConfiguration("emmet")
+		.get<Record<string, string>>("includeLanguages");
+	const includeLanguages = Object.assign(
+		{},
+		MAPPED_MODES,
+		includeLanguagesConfig ?? {},
+	);
+	Object.keys(includeLanguages).forEach((syntax) => {
+		if (
+			typeof includeLanguages[syntax] === "string" &&
+			LANGUAGE_MODES[includeLanguages[syntax]]
+		) {
 			finalMappedModes[syntax] = includeLanguages[syntax];
 		}
 	});
@@ -138,38 +332,45 @@ export function getMappingForIncludedLanguages(): Record<string, string> {
 }
 
 /**
-* Get the corresponding emmet mode for given vscode language mode
-* E.g.: jsx for typescriptreact/javascriptreact or pug for jade
-* If the language is not supported by emmet or has been excluded via `excludeLanguages` setting,
-* then nothing is returned
-*
-* @param excludedLanguages Array of language ids that user has chosen to exclude for emmet
-*/
-export function getEmmetMode(language: string, mappedModes: Record<string, string>, excludedLanguages: string[]): string | undefined {
+ * Get the corresponding emmet mode for given vscode language mode
+ * E.g.: jsx for typescriptreact/javascriptreact or pug for jade
+ * If the language is not supported by emmet or has been excluded via `excludeLanguages` setting,
+ * then nothing is returned
+ *
+ * @param excludedLanguages Array of language ids that user has chosen to exclude for emmet
+ */
+export function getEmmetMode(
+	language: string,
+	mappedModes: Record<string, string>,
+	excludedLanguages: string[],
+): string | undefined {
 	if (!language || excludedLanguages.includes(language)) {
 		return;
 	}
 
-	if (language === 'jsx-tags') {
-		language = 'javascriptreact';
+	if (language === "jsx-tags") {
+		language = "javascriptreact";
 	}
 
 	if (mappedModes[language]) {
 		language = mappedModes[language];
 	}
 
-	if (/\b(typescriptreact|javascriptreact|jsx-tags)\b/.test(language)) { // treat tsx like jsx
-		language = 'jsx';
-	}
-	else if (language === 'sass-indented') { // map sass-indented to sass
-		language = 'sass';
-	}
-	else if (language === 'jade' || language === 'pug') {
-		language = 'pug';
+	if (/\b(typescriptreact|javascriptreact|jsx-tags)\b/.test(language)) {
+		// treat tsx like jsx
+		language = "jsx";
+	} else if (language === "sass-indented") {
+		// map sass-indented to sass
+		language = "sass";
+	} else if (language === "jade" || language === "pug") {
+		language = "pug";
 	}
 
 	const syntaxes = getSyntaxes();
-	if (syntaxes.markup.includes(language) || syntaxes.stylesheet.includes(language)) {
+	if (
+		syntaxes.markup.includes(language) ||
+		syntaxes.stylesheet.includes(language)
+	) {
 		return language;
 	}
 	return;
@@ -186,8 +387,11 @@ const star = 42;
  * @param document vscode.TextDocument
  * @param position vscode.Position
  */
-export function parsePartialStylesheet(document: vscode.TextDocument, position: vscode.Position): FlatStylesheet | undefined {
-	const isCSS = document.languageId === 'css';
+export function parsePartialStylesheet(
+	document: vscode.TextDocument,
+	position: vscode.Position,
+): FlatStylesheet | undefined {
+	const isCSS = document.languageId === "css";
 	const positionOffset = document.offsetAt(position);
 	let startOffset = 0;
 	let endOffset = document.getText().length;
@@ -197,7 +401,7 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 
 	function findOpeningCommentBeforePosition(pos: number): number | undefined {
 		const text = document.getText().substring(0, pos);
-		const offset = text.lastIndexOf('/*');
+		const offset = text.lastIndexOf("/*");
 		if (offset === -1) {
 			return;
 		}
@@ -206,7 +410,7 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 
 	function findClosingCommentAfterPosition(pos: number): number | undefined {
 		const text = document.getText().substring(pos);
-		let offset = text.indexOf('*/');
+		let offset = text.indexOf("*/");
 		if (offset === -1) {
 			return;
 		}
@@ -218,9 +422,13 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 		const posLineNumber = document.positionAt(stream.pos).line;
 		if (!isCSS && currentLine !== posLineNumber) {
 			currentLine = posLineNumber;
-			const startLineComment = document.lineAt(currentLine).text.indexOf('//');
+			const startLineComment = document
+				.lineAt(currentLine)
+				.text.indexOf("//");
 			if (startLineComment > -1) {
-				stream.pos = document.offsetAt(new vscode.Position(currentLine, startLineComment));
+				stream.pos = document.offsetAt(
+					new vscode.Position(currentLine, startLineComment),
+				);
 			}
 		}
 	}
@@ -228,7 +436,8 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 	function consumeBlockCommentBackwards() {
 		if (!stream.sof() && stream.peek() === slash) {
 			if (stream.backUp(1) === star) {
-				stream.pos = findOpeningCommentBeforePosition(stream.pos) ?? startOffset;
+				stream.pos =
+					findOpeningCommentBeforePosition(stream.pos) ?? startOffset;
 			} else {
 				stream.next();
 			}
@@ -239,9 +448,12 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 		if (stream.eat(slash)) {
 			if (stream.eat(slash) && !isCSS) {
 				const posLineNumber = document.positionAt(stream.pos).line;
-				stream.pos = document.offsetAt(new vscode.Position(posLineNumber + 1, 0));
+				stream.pos = document.offsetAt(
+					new vscode.Position(posLineNumber + 1, 0),
+				);
 			} else if (stream.eat(star)) {
-				stream.pos = findClosingCommentAfterPosition(stream.pos) ?? endOffset;
+				stream.pos =
+					findClosingCommentAfterPosition(stream.pos) ?? endOffset;
 			}
 		}
 	}
@@ -288,8 +500,10 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 				break;
 		}
 
-		if (position.line - document.positionAt(stream.pos).line > 100
-			|| stream.pos <= limitOffset) {
+		if (
+			position.line - document.positionAt(stream.pos).line > 100 ||
+			stream.pos <= limitOffset
+		) {
 			exit = true;
 		}
 	}
@@ -329,7 +543,9 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 	}
 
 	try {
-		const buffer = ' '.repeat(startOffset) + document.getText().substring(startOffset, endOffset);
+		const buffer =
+			" ".repeat(startOffset) +
+			document.getText().substring(startOffset, endOffset);
 		return parseStylesheet(buffer);
 	} catch (e) {
 		return;
@@ -339,22 +555,29 @@ export function parsePartialStylesheet(document: vscode.TextDocument, position: 
 /**
  * Returns node corresponding to given position in the given root node
  */
-export function getFlatNode(root: FlatNode | undefined, offset: number, includeNodeBoundary: boolean): FlatNode | undefined {
+export function getFlatNode(
+	root: FlatNode | undefined,
+	offset: number,
+	includeNodeBoundary: boolean,
+): FlatNode | undefined {
 	if (!root) {
 		return;
 	}
 
-	function getFlatNodeChild(child: FlatNode | undefined): FlatNode | undefined {
+	function getFlatNodeChild(
+		child: FlatNode | undefined,
+	): FlatNode | undefined {
 		if (!child) {
 			return;
 		}
 		const nodeStart = child.start;
 		const nodeEnd = child.end;
-		if ((nodeStart < offset && nodeEnd > offset)
-			|| (includeNodeBoundary && nodeStart <= offset && nodeEnd >= offset)) {
+		if (
+			(nodeStart < offset && nodeEnd > offset) ||
+			(includeNodeBoundary && nodeStart <= offset && nodeEnd >= offset)
+		) {
 			return getFlatNodeChildren(child.children) ?? child;
-		}
-		else if ('close' in <any>child) {
+		} else if ("close" in <any>child) {
 			// We have an HTML node in this case.
 			// In case this node is an invalid unpaired HTML node,
 			// we still want to search its children
@@ -379,84 +602,144 @@ export function getFlatNode(root: FlatNode | undefined, offset: number, includeN
 	return getFlatNodeChildren(root.children);
 }
 
-export const allowedMimeTypesInScriptTag = ['text/html', 'text/plain', 'text/x-template', 'text/template', 'text/ng-template'];
+export const allowedMimeTypesInScriptTag = [
+	"text/html",
+	"text/plain",
+	"text/x-template",
+	"text/template",
+	"text/ng-template",
+];
 
 /**
  * Finds the HTML node within an HTML document at a given position
  * If position is inside a script tag of type template, then it will be parsed to find the inner HTML node as well
  */
-export function getHtmlFlatNode(documentText: string, root: FlatNode | undefined, offset: number, includeNodeBoundary: boolean): HtmlFlatNode | undefined {
-	let currentNode: HtmlFlatNode | undefined = <HtmlFlatNode | undefined>getFlatNode(root, offset, includeNodeBoundary);
-	if (!currentNode) { return; }
+export function getHtmlFlatNode(
+	documentText: string,
+	root: FlatNode | undefined,
+	offset: number,
+	includeNodeBoundary: boolean,
+): HtmlFlatNode | undefined {
+	let currentNode: HtmlFlatNode | undefined = <HtmlFlatNode | undefined>(
+		getFlatNode(root, offset, includeNodeBoundary)
+	);
+	if (!currentNode) {
+		return;
+	}
 
 	// If the currentNode is a script one, first set up its subtree and then find HTML node.
-	if (currentNode.name === 'script' && currentNode.children.length === 0) {
-		const scriptNodeBody = setupScriptNodeSubtree(documentText, currentNode);
+	if (currentNode.name === "script" && currentNode.children.length === 0) {
+		const scriptNodeBody = setupScriptNodeSubtree(
+			documentText,
+			currentNode,
+		);
 		if (scriptNodeBody) {
-			currentNode = getHtmlFlatNode(scriptNodeBody, currentNode, offset, includeNodeBoundary) ?? currentNode;
+			currentNode =
+				getHtmlFlatNode(
+					scriptNodeBody,
+					currentNode,
+					offset,
+					includeNodeBoundary,
+				) ?? currentNode;
 		}
-	}
-	else if (currentNode.type === 'cdata') {
+	} else if (currentNode.type === "cdata") {
 		const cdataBody = setupCdataNodeSubtree(documentText, currentNode);
-		currentNode = getHtmlFlatNode(cdataBody, currentNode, offset, includeNodeBoundary) ?? currentNode;
+		currentNode =
+			getHtmlFlatNode(
+				cdataBody,
+				currentNode,
+				offset,
+				includeNodeBoundary,
+			) ?? currentNode;
 	}
 	return currentNode;
 }
 
-export function setupScriptNodeSubtree(documentText: string, scriptNode: HtmlFlatNode): string {
-	const isTemplateScript = scriptNode.name === 'script' &&
-		(scriptNode.attributes &&
-			scriptNode.attributes.some(x => x.name.toString() === 'type'
-				&& allowedMimeTypesInScriptTag.includes(x.value.toString())));
-	if (isTemplateScript
-		&& scriptNode.open) {
+export function setupScriptNodeSubtree(
+	documentText: string,
+	scriptNode: HtmlFlatNode,
+): string {
+	const isTemplateScript =
+		scriptNode.name === "script" &&
+		scriptNode.attributes &&
+		scriptNode.attributes.some(
+			(x) =>
+				x.name.toString() === "type" &&
+				allowedMimeTypesInScriptTag.includes(x.value.toString()),
+		);
+	if (isTemplateScript && scriptNode.open) {
 		// blank out the rest of the document and generate the subtree.
-		const beforePadding = ' '.repeat(scriptNode.open.end);
-		const endToUse = scriptNode.close ? scriptNode.close.start : scriptNode.end;
-		const scriptBodyText = beforePadding + documentText.substring(scriptNode.open.end, endToUse);
+		const beforePadding = " ".repeat(scriptNode.open.end);
+		const endToUse = scriptNode.close
+			? scriptNode.close.start
+			: scriptNode.end;
+		const scriptBodyText =
+			beforePadding +
+			documentText.substring(scriptNode.open.end, endToUse);
 		const innerRoot: HtmlFlatNode = parse(scriptBodyText);
-		innerRoot.children.forEach(child => {
+		innerRoot.children.forEach((child) => {
 			scriptNode.children.push(child);
 			child.parent = scriptNode;
 		});
 		return scriptBodyText;
 	}
-	return '';
+	return "";
 }
 
-export function setupCdataNodeSubtree(documentText: string, cdataNode: HtmlFlatNode): string {
+export function setupCdataNodeSubtree(
+	documentText: string,
+	cdataNode: HtmlFlatNode,
+): string {
 	// blank out the rest of the document and generate the subtree.
-	const cdataStart = '<![CDATA[';
-	const cdataEnd = ']]>';
+	const cdataStart = "<![CDATA[";
+	const cdataEnd = "]]>";
 	const startToUse = cdataNode.start + cdataStart.length;
 	const endToUse = cdataNode.end - cdataEnd.length;
-	const beforePadding = ' '.repeat(startToUse);
-	const cdataBody = beforePadding + documentText.substring(startToUse, endToUse);
+	const beforePadding = " ".repeat(startToUse);
+	const cdataBody =
+		beforePadding + documentText.substring(startToUse, endToUse);
 	const innerRoot: HtmlFlatNode = parse(cdataBody);
-	innerRoot.children.forEach(child => {
+	innerRoot.children.forEach((child) => {
 		cdataNode.children.push(child);
 		child.parent = cdataNode;
 	});
 	return cdataBody;
 }
 
-export function isOffsetInsideOpenOrCloseTag(node: FlatNode, offset: number): boolean {
+export function isOffsetInsideOpenOrCloseTag(
+	node: FlatNode,
+	offset: number,
+): boolean {
 	const htmlNode = node as HtmlFlatNode;
-	if ((htmlNode.open && offset > htmlNode.open.start && offset < htmlNode.open.end)
-		|| (htmlNode.close && offset > htmlNode.close.start && offset < htmlNode.close.end)) {
+	if (
+		(htmlNode.open &&
+			offset > htmlNode.open.start &&
+			offset < htmlNode.open.end) ||
+		(htmlNode.close &&
+			offset > htmlNode.close.start &&
+			offset < htmlNode.close.end)
+	) {
 		return true;
 	}
 
 	return false;
 }
 
-export function offsetRangeToSelection(document: vscode.TextDocument, start: number, end: number): vscode.Selection {
+export function offsetRangeToSelection(
+	document: vscode.TextDocument,
+	start: number,
+	end: number,
+): vscode.Selection {
 	const startPos = document.positionAt(start);
 	const endPos = document.positionAt(end);
 	return new vscode.Selection(startPos, endPos);
 }
 
-export function offsetRangeToVsRange(document: vscode.TextDocument, start: number, end: number): vscode.Range {
+export function offsetRangeToVsRange(
+	document: vscode.TextDocument,
+	start: number,
+	end: number,
+): vscode.Range {
 	const startPos = document.positionAt(start);
 	const endPos = document.positionAt(end);
 	return new vscode.Range(startPos, endPos);
@@ -465,20 +748,29 @@ export function offsetRangeToVsRange(document: vscode.TextDocument, start: numbe
 /**
  * Returns the deepest non comment node under given node
  */
-export function getDeepestFlatNode(node: FlatNode | undefined): FlatNode | undefined {
-	if (!node || !node.children || node.children.length === 0 || !node.children.find(x => x.type !== 'comment')) {
+export function getDeepestFlatNode(
+	node: FlatNode | undefined,
+): FlatNode | undefined {
+	if (
+		!node ||
+		!node.children ||
+		node.children.length === 0 ||
+		!node.children.find((x) => x.type !== "comment")
+	) {
 		return node;
 	}
 	for (let i = node.children.length - 1; i >= 0; i--) {
-		if (node.children[i].type !== 'comment') {
+		if (node.children[i].type !== "comment") {
 			return getDeepestFlatNode(node.children[i]);
 		}
 	}
 	return undefined;
 }
 
-export function findNextWord(propertyValue: string, pos: number): [number | undefined, number | undefined] {
-
+export function findNextWord(
+	propertyValue: string,
+	pos: number,
+): [number | undefined, number | undefined] {
 	let foundSpace = pos === -1;
 	let foundStart = false;
 	let foundEnd = false;
@@ -488,12 +780,12 @@ export function findNextWord(propertyValue: string, pos: number): [number | unde
 	while (pos < propertyValue.length - 1) {
 		pos++;
 		if (!foundSpace) {
-			if (propertyValue[pos] === ' ') {
+			if (propertyValue[pos] === " ") {
 				foundSpace = true;
 			}
 			continue;
 		}
-		if (foundSpace && !foundStart && propertyValue[pos] === ' ') {
+		if (foundSpace && !foundStart && propertyValue[pos] === " ") {
 			continue;
 		}
 		if (!foundStart) {
@@ -501,7 +793,7 @@ export function findNextWord(propertyValue: string, pos: number): [number | unde
 			foundStart = true;
 			continue;
 		}
-		if (propertyValue[pos] === ' ') {
+		if (propertyValue[pos] === " ") {
 			newSelectionEnd = pos;
 			foundEnd = true;
 			break;
@@ -515,8 +807,10 @@ export function findNextWord(propertyValue: string, pos: number): [number | unde
 	return [newSelectionStart, newSelectionEnd];
 }
 
-export function findPrevWord(propertyValue: string, pos: number): [number | undefined, number | undefined] {
-
+export function findPrevWord(
+	propertyValue: string,
+	pos: number,
+): [number | undefined, number | undefined] {
 	let foundSpace = pos === propertyValue.length;
 	let foundStart = false;
 	let foundEnd = false;
@@ -526,12 +820,12 @@ export function findPrevWord(propertyValue: string, pos: number): [number | unde
 	while (pos > -1) {
 		pos--;
 		if (!foundSpace) {
-			if (propertyValue[pos] === ' ') {
+			if (propertyValue[pos] === " ") {
 				foundSpace = true;
 			}
 			continue;
 		}
-		if (foundSpace && !foundEnd && propertyValue[pos] === ' ') {
+		if (foundSpace && !foundEnd && propertyValue[pos] === " ") {
 			continue;
 		}
 		if (!foundEnd) {
@@ -539,7 +833,7 @@ export function findPrevWord(propertyValue: string, pos: number): [number | unde
 			foundEnd = true;
 			continue;
 		}
-		if (propertyValue[pos] === ' ') {
+		if (propertyValue[pos] === " ") {
 			newSelectionStart = pos + 1;
 			foundStart = true;
 			break;
@@ -553,7 +847,10 @@ export function findPrevWord(propertyValue: string, pos: number): [number | unde
 	return [newSelectionStart, newSelectionEnd];
 }
 
-export function getNodesInBetween(node1: FlatNode, node2: FlatNode): FlatNode[] {
+export function getNodesInBetween(
+	node1: FlatNode,
+	node2: FlatNode,
+): FlatNode[] {
 	// Same node
 	if (sameNodes(node1, node2)) {
 		return [node1];
@@ -592,7 +889,10 @@ export function getNodesInBetween(node1: FlatNode, node2: FlatNode): FlatNode[] 
 	return siblings;
 }
 
-export function sameNodes(node1: FlatNode | undefined, node2: FlatNode | undefined): boolean {
+export function sameNodes(
+	node1: FlatNode | undefined,
+	node2: FlatNode | undefined,
+): boolean {
 	// return true if they're both undefined
 	if (!node1 && !node2) {
 		return true;
@@ -605,31 +905,35 @@ export function sameNodes(node1: FlatNode | undefined, node2: FlatNode | undefin
 }
 
 export function getEmmetConfiguration(syntax: string) {
-	const emmetConfig = vscode.workspace.getConfiguration('emmet');
-	const syntaxProfiles = Object.assign({}, emmetConfig['syntaxProfiles'] || {});
-	const preferences = Object.assign({}, emmetConfig['preferences'] || {});
+	const emmetConfig = vscode.workspace.getConfiguration("emmet");
+	const syntaxProfiles = Object.assign(
+		{},
+		emmetConfig["syntaxProfiles"] || {},
+	);
+	const preferences = Object.assign({}, emmetConfig["preferences"] || {});
 	// jsx, xml and xsl syntaxes need to have self closing tags unless otherwise configured by user
-	if (syntax === 'jsx' || syntax === 'xml' || syntax === 'xsl') {
+	if (syntax === "jsx" || syntax === "xml" || syntax === "xsl") {
 		syntaxProfiles[syntax] = syntaxProfiles[syntax] || {};
-		if (typeof syntaxProfiles[syntax] === 'object'
-			&& !syntaxProfiles[syntax].hasOwnProperty('self_closing_tag') // Old Emmet format
-			&& !syntaxProfiles[syntax].hasOwnProperty('selfClosingStyle') // Emmet 2.0 format
+		if (
+			typeof syntaxProfiles[syntax] === "object" &&
+			!syntaxProfiles[syntax].hasOwnProperty("self_closing_tag") && // Old Emmet format
+			!syntaxProfiles[syntax].hasOwnProperty("selfClosingStyle") // Emmet 2.0 format
 		) {
 			syntaxProfiles[syntax] = {
 				...syntaxProfiles[syntax],
-				selfClosingStyle: syntax === 'jsx' ? 'xhtml' : 'xml'
+				selfClosingStyle: syntax === "jsx" ? "xhtml" : "xml",
 			};
 		}
 	}
 
 	return {
 		preferences,
-		showExpandedAbbreviation: emmetConfig['showExpandedAbbreviation'],
-		showAbbreviationSuggestions: emmetConfig['showAbbreviationSuggestions'],
+		showExpandedAbbreviation: emmetConfig["showExpandedAbbreviation"],
+		showAbbreviationSuggestions: emmetConfig["showAbbreviationSuggestions"],
 		syntaxProfiles,
-		variables: emmetConfig['variables'],
-		excludeLanguages: emmetConfig['excludeLanguages'],
-		showSuggestionsAsSnippets: emmetConfig['showSuggestionsAsSnippets']
+		variables: emmetConfig["variables"],
+		excludeLanguages: emmetConfig["excludeLanguages"],
+		showSuggestionsAsSnippets: emmetConfig["showSuggestionsAsSnippets"],
 	};
 }
 
@@ -637,9 +941,15 @@ export function getEmmetConfiguration(syntax: string) {
  * Itereates by each child, as well as nested child's children, in their order
  * and invokes `fn` for each. If `fn` function returns `false`, iteration stops
  */
-export function iterateCSSToken(token: FlatCssToken, fn: (x: any) => any): boolean {
+export function iterateCSSToken(
+	token: FlatCssToken,
+	fn: (x: any) => any,
+): boolean {
 	for (let i = 0, il = token.size; i < il; i++) {
-		if (fn(token.item(i)) === false || iterateCSSToken(token.item(i), fn) === false) {
+		if (
+			fn(token.item(i)) === false ||
+			iterateCSSToken(token.item(i), fn) === false
+		) {
 			return false;
 		}
 	}
@@ -649,51 +959,78 @@ export function iterateCSSToken(token: FlatCssToken, fn: (x: any) => any): boole
 /**
  * Returns `name` CSS property from given `rule`
  */
-export function getCssPropertyFromRule(rule: FlatRule, name: string): FlatProperty | undefined {
-	return rule.children.find(node => node.type === 'property' && node.name === name) as FlatProperty;
+export function getCssPropertyFromRule(
+	rule: FlatRule,
+	name: string,
+): FlatProperty | undefined {
+	return rule.children.find(
+		(node) => node.type === "property" && node.name === name,
+	) as FlatProperty;
 }
 
 /**
  * Returns css property under caret in given editor or `null` if such node cannot
  * be found
  */
-export function getCssPropertyFromDocument(editor: vscode.TextEditor, position: vscode.Position): FlatProperty | null {
+export function getCssPropertyFromDocument(
+	editor: vscode.TextEditor,
+	position: vscode.Position,
+): FlatProperty | null {
 	const document = editor.document;
 	const rootNode = getRootNode(document, true);
 	const offset = document.offsetAt(position);
 	const node = getFlatNode(rootNode, offset, true);
 
 	if (isStyleSheet(editor.document.languageId)) {
-		return node && node.type === 'property' ? <FlatProperty>node : null;
+		return node && node.type === "property" ? <FlatProperty>node : null;
 	}
 
 	const htmlNode = <HtmlFlatNode>node;
-	if (htmlNode
-		&& htmlNode.name === 'style'
-		&& htmlNode.open && htmlNode.close
-		&& htmlNode.open.end < offset
-		&& htmlNode.close.start > offset) {
-		const buffer = ' '.repeat(htmlNode.start) +
+	if (
+		htmlNode &&
+		htmlNode.name === "style" &&
+		htmlNode.open &&
+		htmlNode.close &&
+		htmlNode.open.end < offset &&
+		htmlNode.close.start > offset
+	) {
+		const buffer =
+			" ".repeat(htmlNode.start) +
 			document.getText().substring(htmlNode.start, htmlNode.end);
 		const innerRootNode = parseStylesheet(buffer);
 		const innerNode = getFlatNode(innerRootNode, offset, true);
-		return (innerNode && innerNode.type === 'property') ? <FlatProperty>innerNode : null;
+		return innerNode && innerNode.type === "property"
+			? <FlatProperty>innerNode
+			: null;
 	}
 
 	return null;
 }
 
-
-export function getEmbeddedCssNodeIfAny(document: vscode.TextDocument, currentNode: FlatNode | undefined, position: vscode.Position): FlatNode | undefined {
+export function getEmbeddedCssNodeIfAny(
+	document: vscode.TextDocument,
+	currentNode: FlatNode | undefined,
+	position: vscode.Position,
+): FlatNode | undefined {
 	if (!currentNode) {
 		return;
 	}
 	const currentHtmlNode = <HtmlFlatNode>currentNode;
 	if (currentHtmlNode && currentHtmlNode.open && currentHtmlNode.close) {
 		const offset = document.offsetAt(position);
-		if (currentHtmlNode.open.end < offset && offset <= currentHtmlNode.close.start) {
-			if (currentHtmlNode.name === 'style') {
-				const buffer = ' '.repeat(currentHtmlNode.open.end) + document.getText().substring(currentHtmlNode.open.end, currentHtmlNode.close.start);
+		if (
+			currentHtmlNode.open.end < offset &&
+			offset <= currentHtmlNode.close.start
+		) {
+			if (currentHtmlNode.name === "style") {
+				const buffer =
+					" ".repeat(currentHtmlNode.open.end) +
+					document
+						.getText()
+						.substring(
+							currentHtmlNode.open.end,
+							currentHtmlNode.close.start,
+						);
 				return parseStylesheet(buffer);
 			}
 		}
@@ -701,31 +1038,46 @@ export function getEmbeddedCssNodeIfAny(document: vscode.TextDocument, currentNo
 	return;
 }
 
-export function isStyleAttribute(currentNode: FlatNode | undefined, offset: number): boolean {
+export function isStyleAttribute(
+	currentNode: FlatNode | undefined,
+	offset: number,
+): boolean {
 	if (!currentNode) {
 		return false;
 	}
 	const currentHtmlNode = <HtmlFlatNode>currentNode;
-	const index = (currentHtmlNode.attributes || []).findIndex(x => x.name.toString() === 'style');
+	const index = (currentHtmlNode.attributes || []).findIndex(
+		(x) => x.name.toString() === "style",
+	);
 	if (index === -1) {
 		return false;
 	}
 	const styleAttribute = currentHtmlNode.attributes[index];
-	return offset >= styleAttribute.value.start && offset <= styleAttribute.value.end;
+	return (
+		offset >= styleAttribute.value.start &&
+		offset <= styleAttribute.value.end
+	);
 }
 
 export function isNumber(obj: any): obj is number {
-	return typeof obj === 'number';
+	return typeof obj === "number";
 }
 
 export function toLSTextDocument(doc: vscode.TextDocument): LSTextDocument {
-	return LSTextDocument.create(doc.uri.toString(), doc.languageId, doc.version, doc.getText());
+	return LSTextDocument.create(
+		doc.uri.toString(),
+		doc.languageId,
+		doc.version,
+		doc.getText(),
+	);
 }
 
 export function getPathBaseName(path: string): string {
-	const pathAfterSlashSplit = path.split('/').pop();
-	const pathAfterBackslashSplit = pathAfterSlashSplit ? pathAfterSlashSplit.split('\\').pop() : '';
-	return pathAfterBackslashSplit ?? '';
+	const pathAfterSlashSplit = path.split("/").pop();
+	const pathAfterBackslashSplit = pathAfterSlashSplit
+		? pathAfterSlashSplit.split("\\").pop()
+		: "";
+	return pathAfterBackslashSplit ?? "";
 }
 
 export function getSyntaxes() {
@@ -733,7 +1085,7 @@ export function getSyntaxes() {
 	 * List of all known syntaxes, from emmetio/emmet
 	 */
 	return {
-		markup: ['html', 'xml', 'xsl', 'jsx', 'js', 'pug', 'slim', 'haml'],
-		stylesheet: ['css', 'sass', 'scss', 'less', 'sss', 'stylus']
+		markup: ["html", "xml", "xsl", "jsx", "js", "pug", "slim", "haml"],
+		stylesheet: ["css", "sass", "scss", "less", "sss", "stylus"],
 	};
 }

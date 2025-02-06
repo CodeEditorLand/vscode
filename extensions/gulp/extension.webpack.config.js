@@ -5,16 +5,16 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withDefaults = require('../shared.webpack.config');
+const withDefaults = require("../shared.webpack.config");
 
 module.exports = withDefaults({
 	context: __dirname,
 	entry: {
-		main: './src/main.ts',
+		main: "./src/main.ts",
 	},
 	resolve: {
-		mainFields: ['module', 'main']
-	}
+		mainFields: ["module", "main"],
+	},
 });

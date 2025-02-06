@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { PreviewStatusBarEntry } from './ownedStatusBarEntry';
+import * as vscode from "vscode";
 
+import { PreviewStatusBarEntry } from "./ownedStatusBarEntry";
 
 class BinarySize {
 	static readonly KB = 1024;
@@ -35,13 +35,17 @@ class BinarySize {
 }
 
 export class BinarySizeStatusBarEntry extends PreviewStatusBarEntry {
-
 	constructor() {
-		super('status.imagePreview.binarySize', vscode.l10n.t("Image Binary Size"), vscode.StatusBarAlignment.Right, 100);
+		super(
+			"status.imagePreview.binarySize",
+			vscode.l10n.t("Image Binary Size"),
+			vscode.StatusBarAlignment.Right,
+			100,
+		);
 	}
 
 	public show(owner: unknown, size: number | undefined) {
-		if (typeof size === 'number') {
+		if (typeof size === "number") {
 			super.showItem(owner, BinarySize.formatSize(size));
 		} else {
 			this.hide(owner);

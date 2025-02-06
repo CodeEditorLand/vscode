@@ -5,16 +5,16 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withDefaults = require('../shared.webpack.config');
+const withDefaults = require("../shared.webpack.config");
 
 module.exports = withDefaults({
 	context: __dirname,
 	entry: {
-		extension: './src/phpMain.ts',
+		extension: "./src/phpMain.ts",
 	},
 	output: {
-		filename: 'phpMain.js'
-	}
+		filename: "phpMain.js",
+	},
 });

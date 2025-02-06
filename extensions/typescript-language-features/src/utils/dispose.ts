@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-
+import * as vscode from "vscode";
 
 export function disposeAll(disposables: Iterable<vscode.Disposable>) {
 	const errors: any[] = [];
@@ -20,7 +19,10 @@ export function disposeAll(disposables: Iterable<vscode.Disposable>) {
 	if (errors.length === 1) {
 		throw errors[0];
 	} else if (errors.length > 1) {
-		throw new AggregateError(errors, 'Encountered errors while disposing of store');
+		throw new AggregateError(
+			errors,
+			"Encountered errors while disposing of store",
+		);
 	}
 }
 
@@ -56,7 +58,6 @@ export abstract class Disposable {
 }
 
 export class DisposableStore extends Disposable {
-
 	public add<T extends IDisposable>(disposable: T): T {
 		this._register(disposable);
 

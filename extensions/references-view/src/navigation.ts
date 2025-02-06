@@ -3,21 +3,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { SymbolItemNavigation } from './references-view';
-import { ContextKey } from './utils';
+import * as vscode from "vscode";
+
+import { SymbolItemNavigation } from "./references-view";
+import { ContextKey } from "./utils";
 
 export class Navigation {
-
 	private readonly _disposables: vscode.Disposable[] = [];
-	private readonly _ctxCanNavigate = new ContextKey<boolean>('references-view.canNavigate');
+	private readonly _ctxCanNavigate = new ContextKey<boolean>(
+		"references-view.canNavigate",
+	);
 
 	private _delegate?: SymbolItemNavigation<unknown>;
 
 	constructor(private readonly _view: vscode.TreeView<unknown>) {
 		this._disposables.push(
-			vscode.commands.registerCommand('references-view.next', () => this.next(false)),
-			vscode.commands.registerCommand('references-view.prev', () => this.previous(false)),
+			vscode.commands.registerCommand("references-view.next", () =>
+				this.next(false),
+			),
+			vscode.commands.registerCommand("references-view.prev", () =>
+				this.previous(false),
+			),
 		);
 	}
 
@@ -41,13 +47,16 @@ export class Navigation {
 		if (!vscode.window.activeTextEditor) {
 			return undefined;
 		}
-		return this._delegate.nearest(vscode.window.activeTextEditor.document.uri, vscode.window.activeTextEditor.selection.active);
+		return this._delegate.nearest(
+			vscode.window.activeTextEditor.document.uri,
+			vscode.window.activeTextEditor.selection.active,
+		);
 	}
 
 	private _open(loc: vscode.Location, preserveFocus: boolean) {
-		vscode.commands.executeCommand('vscode.open', loc.uri, {
+		vscode.commands.executeCommand("vscode.open", loc.uri, {
 			selection: new vscode.Selection(loc.range.start, loc.range.start),
-			preserveFocus
+			preserveFocus,
 		});
 	}
 

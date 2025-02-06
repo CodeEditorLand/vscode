@@ -8,7 +8,7 @@ export const empty = Object.freeze([]);
 export function equals<T>(
 	a: ReadonlyArray<T>,
 	b: ReadonlyArray<T>,
-	itemEquals: (a: T, b: T) => boolean = (a, b) => a === b
+	itemEquals: (a: T, b: T) => boolean = (a, b) => a === b,
 ): boolean {
 	if (a === b) {
 		return true;

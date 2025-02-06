@@ -5,17 +5,16 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withBrowserDefaults = require('../shared.webpack.config').browser;
+const withBrowserDefaults = require("../shared.webpack.config").browser;
 
 module.exports = withBrowserDefaults({
 	context: __dirname,
 	entry: {
-		extension: './src/extensionEditingBrowserMain.ts'
+		extension: "./src/extensionEditingBrowserMain.ts",
 	},
 	output: {
-		filename: 'extensionEditingBrowserMain.js'
-	}
+		filename: "extensionEditingBrowserMain.js",
+	},
 });
-

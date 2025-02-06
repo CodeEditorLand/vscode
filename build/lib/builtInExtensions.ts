@@ -3,17 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
-import rimraf from 'rimraf';
-import es from 'event-stream';
-import rename from 'gulp-rename';
-import vfs from 'vinyl-fs';
-import * as ext from './extensions';
-import fancyLog from 'fancy-log';
-import ansiColors from 'ansi-colors';
-import { Stream } from 'stream';
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { Stream } from "stream";
+import ansiColors from "ansi-colors";
+import es from "event-stream";
+import fancyLog from "fancy-log";
+import rename from "gulp-rename";
+import rimraf from "rimraf";
+import vfs from "vinyl-fs";
+
+import * as ext from "./extensions";
 
 export interface IExtensionDefinition {
 	name: string;
@@ -34,11 +35,21 @@ export interface IExtensionDefinition {
 }
 
 const root = path.dirname(path.dirname(__dirname));
-const productjson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../product.json'), 'utf8'));
-const builtInExtensions = <IExtensionDefinition[]>productjson.builtInExtensions || [];
-const webBuiltInExtensions = <IExtensionDefinition[]>productjson.webBuiltInExtensions || [];
-const controlFilePath = path.join(os.homedir(), '.vscode-oss-dev', 'extensions', 'control.json');
-const ENABLE_LOGGING = !process.env['VSCODE_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE'];
+const productjson = JSON.parse(
+	fs.readFileSync(path.join(__dirname, "../../product.json"), "utf8"),
+);
+const builtInExtensions =
+	<IExtensionDefinition[]>productjson.builtInExtensions || [];
+const webBuiltInExtensions =
+	<IExtensionDefinition[]>productjson.webBuiltInExtensions || [];
+const controlFilePath = path.join(
+	os.homedir(),
+	".vscode-oss-dev",
+	"extensions",
+	"control.json",
+);
+const ENABLE_LOGGING =
+	!process.env["VSCODE_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE"];
 
 function log(...messages: string[]): void {
 	if (ENABLE_LOGGING) {
@@ -47,21 +58,21 @@ function log(...messages: string[]): void {
 }
 
 function getExtensionPath(extension: IExtensionDefinition): string {
-	return path.join(root, '.build', 'builtInExtensions', extension.name);
+	return path.join(root, ".build", "builtInExtensions", extension.name);
 }
 
 function isUpToDate(extension: IExtensionDefinition): boolean {
-	const packagePath = path.join(getExtensionPath(extension), 'package.json');
+	const packagePath = path.join(getExtensionPath(extension), "package.json");
 
 	if (!fs.existsSync(packagePath)) {
 		return false;
 	}
 
-	const packageContents = fs.readFileSync(packagePath, { encoding: 'utf8' });
+	const packageContents = fs.readFileSync(packagePath, { encoding: "utf8" });
 
 	try {
 		const diskVersion = JSON.parse(packageContents).version;
-		return (diskVersion === extension.version);
+		return diskVersion === extension.version;
 	} catch (err) {
 		return false;
 	}
@@ -69,16 +80,26 @@ function isUpToDate(extension: IExtensionDefinition): boolean {
 
 function getExtensionDownloadStream(extension: IExtensionDefinition) {
 	const galleryServiceUrl = productjson.extensionsGallery?.serviceUrl;
-	return (galleryServiceUrl ? ext.fromMarketplace(galleryServiceUrl, extension) : ext.fromGithub(extension))
-		.pipe(rename(p => p.dirname = `${extension.name}/${p.dirname}`));
+	return (
+		galleryServiceUrl
+			? ext.fromMarketplace(galleryServiceUrl, extension)
+			: ext.fromGithub(extension)
+	).pipe(rename((p) => (p.dirname = `${extension.name}/${p.dirname}`)));
 }
 
 export function getExtensionStream(extension: IExtensionDefinition) {
 	// if the extension exists on disk, use those files instead of downloading anew
 	if (isUpToDate(extension)) {
-		log('[extensions]', `${extension.name}@${extension.version} up to date`, ansiColors.green('✔︎'));
-		return vfs.src(['**'], { cwd: getExtensionPath(extension), dot: true })
-			.pipe(rename(p => p.dirname = `${extension.name}/${p.dirname}`));
+		log(
+			"[extensions]",
+			`${extension.name}@${extension.version} up to date`,
+			ansiColors.green("✔︎"),
+		);
+		return vfs
+			.src(["**"], { cwd: getExtensionPath(extension), dot: true })
+			.pipe(
+				rename((p) => (p.dirname = `${extension.name}/${p.dirname}`)),
+			);
 	}
 
 	return getExtensionDownloadStream(extension);
@@ -86,59 +107,85 @@ export function getExtensionStream(extension: IExtensionDefinition) {
 
 function syncMarketplaceExtension(extension: IExtensionDefinition): Stream {
 	const galleryServiceUrl = productjson.extensionsGallery?.serviceUrl;
-	const source = ansiColors.blue(galleryServiceUrl ? '[marketplace]' : '[github]');
+	const source = ansiColors.blue(
+		galleryServiceUrl ? "[marketplace]" : "[github]",
+	);
 	if (isUpToDate(extension)) {
-		log(source, `${extension.name}@${extension.version}`, ansiColors.green('✔︎'));
+		log(
+			source,
+			`${extension.name}@${extension.version}`,
+			ansiColors.green("✔︎"),
+		);
 		return es.readArray([]);
 	}
 
 	rimraf.sync(getExtensionPath(extension));
 
 	return getExtensionDownloadStream(extension)
-		.pipe(vfs.dest('.build/builtInExtensions'))
-		.on('end', () => log(source, extension.name, ansiColors.green('✔︎')));
+		.pipe(vfs.dest(".build/builtInExtensions"))
+		.on("end", () => log(source, extension.name, ansiColors.green("✔︎")));
 }
 
-function syncExtension(extension: IExtensionDefinition, controlState: 'disabled' | 'marketplace'): Stream {
+function syncExtension(
+	extension: IExtensionDefinition,
+	controlState: "disabled" | "marketplace",
+): Stream {
 	if (extension.platforms) {
 		const platforms = new Set(extension.platforms);
 
 		if (!platforms.has(process.platform)) {
-			log(ansiColors.gray('[skip]'), `${extension.name}@${extension.version}: Platform '${process.platform}' not supported: [${extension.platforms}]`, ansiColors.green('✔︎'));
+			log(
+				ansiColors.gray("[skip]"),
+				`${extension.name}@${extension.version}: Platform '${process.platform}' not supported: [${extension.platforms}]`,
+				ansiColors.green("✔︎"),
+			);
 			return es.readArray([]);
 		}
 	}
 
 	switch (controlState) {
-		case 'disabled':
-			log(ansiColors.blue('[disabled]'), ansiColors.gray(extension.name));
+		case "disabled":
+			log(ansiColors.blue("[disabled]"), ansiColors.gray(extension.name));
 			return es.readArray([]);
 
-		case 'marketplace':
+		case "marketplace":
 			return syncMarketplaceExtension(extension);
 
 		default:
 			if (!fs.existsSync(controlState)) {
-				log(ansiColors.red(`Error: Built-in extension '${extension.name}' is configured to run from '${controlState}' but that path does not exist.`));
+				log(
+					ansiColors.red(
+						`Error: Built-in extension '${extension.name}' is configured to run from '${controlState}' but that path does not exist.`,
+					),
+				);
 				return es.readArray([]);
-
-			} else if (!fs.existsSync(path.join(controlState, 'package.json'))) {
-				log(ansiColors.red(`Error: Built-in extension '${extension.name}' is configured to run from '${controlState}' but there is no 'package.json' file in that directory.`));
+			} else if (
+				!fs.existsSync(path.join(controlState, "package.json"))
+			) {
+				log(
+					ansiColors.red(
+						`Error: Built-in extension '${extension.name}' is configured to run from '${controlState}' but there is no 'package.json' file in that directory.`,
+					),
+				);
 				return es.readArray([]);
 			}
 
-			log(ansiColors.blue('[local]'), `${extension.name}: ${ansiColors.cyan(controlState)}`, ansiColors.green('✔︎'));
+			log(
+				ansiColors.blue("[local]"),
+				`${extension.name}: ${ansiColors.cyan(controlState)}`,
+				ansiColors.green("✔︎"),
+			);
 			return es.readArray([]);
 	}
 }
 
 interface IControlFile {
-	[name: string]: 'disabled' | 'marketplace';
+	[name: string]: "disabled" | "marketplace";
 }
 
 function readControlFile(): IControlFile {
 	try {
-		return JSON.parse(fs.readFileSync(controlFilePath, 'utf8'));
+		return JSON.parse(fs.readFileSync(controlFilePath, "utf8"));
 	} catch (err) {
 		return {};
 	}
@@ -150,14 +197,16 @@ function writeControlFile(control: IControlFile): void {
 }
 
 export function getBuiltInExtensions(): Promise<void> {
-	log('Synchronizing built-in extensions...');
-	log(`You can manage built-in extensions with the ${ansiColors.cyan('--builtin')} flag`);
+	log("Synchronizing built-in extensions...");
+	log(
+		`You can manage built-in extensions with the ${ansiColors.cyan("--builtin")} flag`,
+	);
 
 	const control = readControlFile();
 	const streams: Stream[] = [];
 
 	for (const extension of [...builtInExtensions, ...webBuiltInExtensions]) {
-		const controlState = control[extension.name] || 'marketplace';
+		const controlState = control[extension.name] || "marketplace";
 		control[extension.name] = controlState;
 
 		streams.push(syncExtension(extension, controlState));
@@ -166,15 +215,15 @@ export function getBuiltInExtensions(): Promise<void> {
 	writeControlFile(control);
 
 	return new Promise((resolve, reject) => {
-		es.merge(streams)
-			.on('error', reject)
-			.on('end', resolve);
+		es.merge(streams).on("error", reject).on("end", resolve);
 	});
 }
 
 if (require.main === module) {
-	getBuiltInExtensions().then(() => process.exit(0)).catch(err => {
-		console.error(err);
-		process.exit(1);
-	});
+	getBuiltInExtensions()
+		.then(() => process.exit(0))
+		.catch((err) => {
+			console.error(err);
+			process.exit(1);
+		});
 }

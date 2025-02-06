@@ -3,130 +3,128 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as DOMPurify from 'dompurify';
-import MarkdownIt from 'markdown-it';
-import type * as MarkdownItToken from 'markdown-it/lib/token';
-import type { ActivationFunction } from 'vscode-notebook-renderer';
+import * as DOMPurify from "dompurify";
+import MarkdownIt from "markdown-it";
+import type * as MarkdownItToken from "markdown-it/lib/token";
+import type { ActivationFunction } from "vscode-notebook-renderer";
 
-const allowedHtmlTags = Object.freeze(['a',
-	'abbr',
-	'b',
-	'bdo',
-	'blockquote',
-	'br',
-	'caption',
-	'cite',
-	'code',
-	'col',
-	'colgroup',
-	'dd',
-	'del',
-	'details',
-	'dfn',
-	'div',
-	'dl',
-	'dt',
-	'em',
-	'figcaption',
-	'figure',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-	'hr',
-	'i',
-	'img',
-	'ins',
-	'kbd',
-	'label',
-	'li',
-	'mark',
-	'ol',
-	'p',
-	'pre',
-	'q',
-	'rp',
-	'rt',
-	'ruby',
-	'samp',
-	'small',
-	'small',
-	'source',
-	'span',
-	'strike',
-	'strong',
-	'sub',
-	'summary',
-	'sup',
-	'table',
-	'tbody',
-	'td',
-	'tfoot',
-	'th',
-	'thead',
-	'time',
-	'tr',
-	'tt',
-	'u',
-	'ul',
-	'var',
-	'video',
-	'wbr',
+const allowedHtmlTags = Object.freeze([
+	"a",
+	"abbr",
+	"b",
+	"bdo",
+	"blockquote",
+	"br",
+	"caption",
+	"cite",
+	"code",
+	"col",
+	"colgroup",
+	"dd",
+	"del",
+	"details",
+	"dfn",
+	"div",
+	"dl",
+	"dt",
+	"em",
+	"figcaption",
+	"figure",
+	"h1",
+	"h2",
+	"h3",
+	"h4",
+	"h5",
+	"h6",
+	"hr",
+	"i",
+	"img",
+	"ins",
+	"kbd",
+	"label",
+	"li",
+	"mark",
+	"ol",
+	"p",
+	"pre",
+	"q",
+	"rp",
+	"rt",
+	"ruby",
+	"samp",
+	"small",
+	"small",
+	"source",
+	"span",
+	"strike",
+	"strong",
+	"sub",
+	"summary",
+	"sup",
+	"table",
+	"tbody",
+	"td",
+	"tfoot",
+	"th",
+	"thead",
+	"time",
+	"tr",
+	"tt",
+	"u",
+	"ul",
+	"var",
+	"video",
+	"wbr",
 ]);
 
 const allowedSvgTags = Object.freeze([
-	'svg',
-	'a',
-	'altglyph',
-	'altglyphdef',
-	'altglyphitem',
-	'animatecolor',
-	'animatemotion',
-	'animatetransform',
-	'circle',
-	'clippath',
-	'defs',
-	'desc',
-	'ellipse',
-	'filter',
-	'font',
-	'g',
-	'glyph',
-	'glyphref',
-	'hkern',
-	'image',
-	'line',
-	'lineargradient',
-	'marker',
-	'mask',
-	'metadata',
-	'mpath',
-	'path',
-	'pattern',
-	'polygon',
-	'polyline',
-	'radialgradient',
-	'rect',
-	'stop',
-	'style',
-	'switch',
-	'symbol',
-	'text',
-	'textpath',
-	'title',
-	'tref',
-	'tspan',
-	'view',
-	'vkern',
+	"svg",
+	"a",
+	"altglyph",
+	"altglyphdef",
+	"altglyphitem",
+	"animatecolor",
+	"animatemotion",
+	"animatetransform",
+	"circle",
+	"clippath",
+	"defs",
+	"desc",
+	"ellipse",
+	"filter",
+	"font",
+	"g",
+	"glyph",
+	"glyphref",
+	"hkern",
+	"image",
+	"line",
+	"lineargradient",
+	"marker",
+	"mask",
+	"metadata",
+	"mpath",
+	"path",
+	"pattern",
+	"polygon",
+	"polyline",
+	"radialgradient",
+	"rect",
+	"stop",
+	"style",
+	"switch",
+	"symbol",
+	"text",
+	"textpath",
+	"title",
+	"tref",
+	"tspan",
+	"view",
+	"vkern",
 ]);
 
 const sanitizerOptions: DOMPurify.Config = {
-	ALLOWED_TAGS: [
-		...allowedHtmlTags,
-		...allowedSvgTags,
-	],
+	ALLOWED_TAGS: [...allowedHtmlTags, ...allowedSvgTags],
 };
 
 export const activate: ActivationFunction<void> = (ctx) => {
@@ -138,17 +136,17 @@ export const activate: ActivationFunction<void> = (ctx) => {
 				return `<div class="vscode-code-block" data-vscode-code-block-lang="${markdownIt.utils.escapeHtml(lang)}">${markdownIt.utils.escapeHtml(str)}</div>`;
 			}
 			return markdownIt.utils.escapeHtml(str);
-		}
+		},
 	});
 	markdownIt.linkify.set({ fuzzyLink: false });
 
 	addNamedHeaderRendering(markdownIt);
 	addLinkRenderer(markdownIt);
 
-	const style = document.createElement('style');
+	const style = document.createElement("style");
 	style.textContent = `
 		.emptyMarkdownCell::before {
-			content: "${document.documentElement.style.getPropertyValue('--notebook-cell-markup-empty-content')}";
+			content: "${document.documentElement.style.getPropertyValue("--notebook-cell-markup-empty-content")}";
 			font-style: italic;
 			opacity: 0.6;
 		}
@@ -293,8 +291,8 @@ export const activate: ActivationFunction<void> = (ctx) => {
 			margin-bottom: 0.7em;
 		}
 	`;
-	const template = document.createElement('template');
-	template.classList.add('markdown-style');
+	const template = document.createElement("template");
+	template.classList.add("markdown-style");
 	template.content.appendChild(style);
 	document.head.appendChild(template);
 
@@ -302,73 +300,98 @@ export const activate: ActivationFunction<void> = (ctx) => {
 		renderOutputItem: (outputInfo, element) => {
 			let previewNode: HTMLElement;
 			if (!element.shadowRoot) {
-				const previewRoot = element.attachShadow({ mode: 'open' });
+				const previewRoot = element.attachShadow({ mode: "open" });
 
 				// Insert styles into markdown preview shadow dom so that they are applied.
 				// First add default webview style
-				const defaultStyles = document.getElementById('_defaultStyles') as HTMLStyleElement;
+				const defaultStyles = document.getElementById(
+					"_defaultStyles",
+				) as HTMLStyleElement;
 				previewRoot.appendChild(defaultStyles.cloneNode(true));
 
 				// And then contributed styles
-				for (const element of document.getElementsByClassName('markdown-style')) {
+				for (const element of document.getElementsByClassName(
+					"markdown-style",
+				)) {
 					if (element instanceof HTMLTemplateElement) {
-						previewRoot.appendChild(element.content.cloneNode(true));
+						previewRoot.appendChild(
+							element.content.cloneNode(true),
+						);
 					} else {
 						previewRoot.appendChild(element.cloneNode(true));
 					}
 				}
 
-				previewNode = document.createElement('div');
-				previewNode.id = 'preview';
+				previewNode = document.createElement("div");
+				previewNode.id = "preview";
 				previewRoot.appendChild(previewNode);
 			} else {
-				previewNode = element.shadowRoot.getElementById('preview')!;
+				previewNode = element.shadowRoot.getElementById("preview")!;
 			}
 
 			const text = outputInfo.text();
 			if (text.trim().length === 0) {
-				previewNode.innerText = '';
-				previewNode.classList.add('emptyMarkdownCell');
+				previewNode.innerText = "";
+				previewNode.classList.add("emptyMarkdownCell");
 			} else {
-				previewNode.classList.remove('emptyMarkdownCell');
-				const markdownText = outputInfo.mime.startsWith('text/x-') ? `\`\`\`${outputInfo.mime.substr(7)}\n${text}\n\`\`\``
-					: (outputInfo.mime.startsWith('application/') ? `\`\`\`${outputInfo.mime.substr(12)}\n${text}\n\`\`\`` : text);
-				const unsanitizedRenderedMarkdown = markdownIt.render(markdownText, {
-					outputItem: outputInfo,
-				});
-				previewNode.innerHTML = (ctx.workspace.isTrusted
-					? unsanitizedRenderedMarkdown
-					: DOMPurify.sanitize(unsanitizedRenderedMarkdown, sanitizerOptions)) as string;
+				previewNode.classList.remove("emptyMarkdownCell");
+				const markdownText = outputInfo.mime.startsWith("text/x-")
+					? `\`\`\`${outputInfo.mime.substr(7)}\n${text}\n\`\`\``
+					: outputInfo.mime.startsWith("application/")
+						? `\`\`\`${outputInfo.mime.substr(12)}\n${text}\n\`\`\``
+						: text;
+				const unsanitizedRenderedMarkdown = markdownIt.render(
+					markdownText,
+					{
+						outputItem: outputInfo,
+					},
+				);
+				previewNode.innerHTML = (
+					ctx.workspace.isTrusted
+						? unsanitizedRenderedMarkdown
+						: DOMPurify.sanitize(
+								unsanitizedRenderedMarkdown,
+								sanitizerOptions,
+							)
+				) as string;
 			}
 		},
 		extendMarkdownIt: (f: (md: typeof markdownIt) => void) => {
 			try {
 				f(markdownIt);
 			} catch (err) {
-				console.error('Error extending markdown-it', err);
+				console.error("Error extending markdown-it", err);
 			}
-		}
+		},
 	};
 };
-
 
 function addNamedHeaderRendering(md: InstanceType<typeof MarkdownIt>): void {
 	const slugCounter = new Map<string, number>();
 
 	const originalHeaderOpen = md.renderer.rules.heading_open;
-	md.renderer.rules.heading_open = (tokens: MarkdownItToken[], idx: number, options, env, self) => {
-		const title = tokens[idx + 1].children!.reduce<string>((acc, t) => acc + t.content, '');
+	md.renderer.rules.heading_open = (
+		tokens: MarkdownItToken[],
+		idx: number,
+		options,
+		env,
+		self,
+	) => {
+		const title = tokens[idx + 1].children!.reduce<string>(
+			(acc, t) => acc + t.content,
+			"",
+		);
 		let slug = slugify(title);
 
 		if (slugCounter.has(slug)) {
 			const count = slugCounter.get(slug)!;
 			slugCounter.set(slug, count + 1);
-			slug = slugify(slug + '-' + (count + 1));
+			slug = slugify(slug + "-" + (count + 1));
 		} else {
 			slugCounter.set(slug, 0);
 		}
 
-		tokens[idx].attrSet('id', slug);
+		tokens[idx].attrSet("id", slug);
 
 		if (originalHeaderOpen) {
 			return originalHeaderOpen(tokens, idx, options, env, self);
@@ -387,11 +410,17 @@ function addNamedHeaderRendering(md: InstanceType<typeof MarkdownIt>): void {
 function addLinkRenderer(md: MarkdownIt): void {
 	const original = md.renderer.rules.link_open;
 
-	md.renderer.rules.link_open = (tokens: MarkdownItToken[], idx: number, options, env, self) => {
+	md.renderer.rules.link_open = (
+		tokens: MarkdownItToken[],
+		idx: number,
+		options,
+		env,
+		self,
+	) => {
 		const token = tokens[idx];
-		const href = token.attrGet('href');
-		if (typeof href === 'string' && href.startsWith('#')) {
-			token.attrSet('href', '#' + slugify(href.slice(1)));
+		const href = token.attrGet("href");
+		if (typeof href === "string" && href.startsWith("#")) {
+			token.attrSet("href", "#" + slugify(href.slice(1)));
 		}
 		if (original) {
 			return original(tokens, idx, options, env, self);
@@ -403,13 +432,17 @@ function addLinkRenderer(md: MarkdownIt): void {
 
 function slugify(text: string): string {
 	const slugifiedHeading = encodeURI(
-		text.trim()
+		text
+			.trim()
 			.toLowerCase()
-			.replace(/\s+/g, '-') // Replace whitespace with -
+			.replace(/\s+/g, "-") // Replace whitespace with -
 			// allow-any-unicode-next-line
-			.replace(/[\]\[\!\/\'\"\#\$\%\&\(\)\*\+\,\.\/\:\;\<\=\>\?\@\\\^\{\|\}\~\`。，、；：？！…—·ˉ¨‘’“”々～‖∶＂＇｀｜〃〔〕〈〉《》「」『』．〖〗【】（）［］｛｝]/g, '') // Remove known punctuators
-			.replace(/^\-+/, '') // Remove leading -
-			.replace(/\-+$/, '') // Remove trailing -
+			.replace(
+				/[\]\[\!\/\'\"\#\$\%\&\(\)\*\+\,\.\/\:\;\<\=\>\?\@\\\^\{\|\}\~\`。，、；：？！…—·ˉ¨‘’“”々～‖∶＂＇｀｜〃〔〕〈〉《》「」『』．〖〗【】（）［］｛｝]/g,
+				"",
+			) // Remove known punctuators
+			.replace(/^\-+/, "") // Remove leading -
+			.replace(/\-+$/, ""), // Remove trailing -
 	);
 	return slugifiedHeading;
 }

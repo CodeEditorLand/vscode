@@ -3,8 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-html, body {
-	font-family: var(--markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, "Ubuntu", "Droid Sans", sans-serif);
+html,
+body {
+	font-family: var(
+		--markdown-font-family,
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe WPC",
+		"Segoe UI",
+		system-ui,
+		"Ubuntu",
+		"Droid Sans",
+		sans-serif
+	);
 	font-size: var(--markdown-font-size, 14px);
 	padding: 0 26px;
 	line-height: var(--markdown-line-height, 22px);
@@ -16,12 +27,25 @@ body {
 }
 
 /* Reset margin top for elements */
-h1, h2, h3, h4, h5, h6,
-p, ol, ul, pre {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ol,
+ul,
+pre {
 	margin-top: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
 	font-weight: 600;
 	margin-top: 24px;
 	margin-bottom: 16px;
@@ -37,16 +61,16 @@ h1, h2, h3, h4, h5, h6 {
 	text-align: center;
 	font-size: 12px;
 	font-family: sans-serif;
-	background-color:#444444;
+	background-color: #444444;
 	cursor: pointer;
 	padding: 6px;
-	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+	box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 #code-csp-warning:hover {
 	text-decoration: none;
-	background-color:#007acc;
-	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+	background-color: #007acc;
+	box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
 }
 
 body.scrollBeyondLastLine {
@@ -57,8 +81,8 @@ body.showEditorSelection .code-line {
 	position: relative;
 }
 
-body.showEditorSelection :not(tr,ul,ol).code-active-line:before,
-body.showEditorSelection :not(tr,ul,ol).code-line:hover:before {
+body.showEditorSelection :not(tr, ul, ol).code-active-line:before,
+body.showEditorSelection :not(tr, ul, ol).code-line:hover:before {
 	content: "";
 	display: block;
 	position: absolute;
@@ -67,7 +91,9 @@ body.showEditorSelection :not(tr,ul,ol).code-line:hover:before {
 	height: 100%;
 }
 
-.vscode-high-contrast.showEditorSelection  :not(tr,ul,ol).code-line .code-line:hover:before {
+.vscode-high-contrast.showEditorSelection
+	:not(tr, ul, ol).code-line
+	.code-line:hover:before {
 	border-left: none;
 }
 
@@ -81,7 +107,7 @@ body.showEditorSelection li.code-line:hover:before {
 }
 
 .vscode-light.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(0, 0, 0, 0.40);
+	border-left: 3px solid rgba(0, 0, 0, 0.4);
 }
 
 .vscode-dark.showEditorSelection .code-active-line:before {
@@ -89,7 +115,7 @@ body.showEditorSelection li.code-line:hover:before {
 }
 
 .vscode-dark.showEditorSelection .code-line:hover:before {
-	border-left: 3px solid rgba(255, 255, 255, 0.60);
+	border-left: 3px solid rgba(255, 255, 255, 0.6);
 }
 
 .vscode-high-contrast.showEditorSelection .code-active-line:before {
@@ -113,7 +139,8 @@ ol ol:first-child {
 	margin-bottom: 0;
 }
 
-img, video {
+img,
+video {
 	max-width: 100%;
 	max-height: 100%;
 }
@@ -212,7 +239,18 @@ blockquote {
 }
 
 code {
-	font-family: var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);
+	font-family: var(
+		--vscode-editor-font-family,
+		"SF Mono",
+		Monaco,
+		Menlo,
+		Consolas,
+		"Ubuntu Mono",
+		"Liberation Mono",
+		"DejaVu Sans Mono",
+		"Courier New",
+		monospace
+	);
 	font-size: 1em;
 	line-height: 1.357em;
 }

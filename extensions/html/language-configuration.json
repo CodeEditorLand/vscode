@@ -1,6 +1,6 @@
 {
 	"comments": {
-		"blockComment": [ "<!--", "-->" ]
+		"blockComment": ["<!--", "-->"]
 	},
 	"brackets": [
 		["<!--", "-->"],
@@ -8,23 +8,22 @@
 		["(", ")"]
 	],
 	"autoClosingPairs": [
-		{ "open": "{", "close": "}"},
-		{ "open": "[", "close": "]"},
+		{ "open": "{", "close": "}" },
+		{ "open": "[", "close": "]" },
 		{ "open": "(", "close": ")" },
 		{ "open": "'", "close": "'" },
 		{ "open": "\"", "close": "\"" },
-		{ "open": "<!--", "close": "-->", "notIn": [ "comment", "string" ]}
+		{ "open": "<!--", "close": "-->", "notIn": ["comment", "string"] }
 	],
 	"surroundingPairs": [
 		{ "open": "'", "close": "'" },
 		{ "open": "\"", "close": "\"" },
-		{ "open": "{", "close": "}"},
-		{ "open": "[", "close": "]"},
+		{ "open": "{", "close": "}" },
+		{ "open": "[", "close": "]" },
 		{ "open": "(", "close": ")" },
 		{ "open": "<", "close": ">" }
 	],
-	"colorizedBracketPairs": [
-	],
+	"colorizedBracketPairs": [],
 	"folding": {
 		"markers": {
 			"start": "^\\s*<!--\\s*#region\\b.*-->",
@@ -34,14 +33,23 @@
 	"wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\$\\^\\&\\*\\(\\)\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\s]+)",
 	"onEnterRules": [
 		{
-			"beforeText": { "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$", "flags": "i" },
-			"afterText": { "pattern": "^<\\/([_:\\w][_:\\w-.\\d]*)\\s*>", "flags": "i" },
+			"beforeText": {
+				"pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$",
+				"flags": "i"
+			},
+			"afterText": {
+				"pattern": "^<\\/([_:\\w][_:\\w-.\\d]*)\\s*>",
+				"flags": "i"
+			},
 			"action": {
 				"indent": "indentOutdent"
 			}
 		},
 		{
-			"beforeText": { "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$", "flags": "i" },
+			"beforeText": {
+				"pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$",
+				"flags": "i"
+			},
 			"action": {
 				"indent": "indent"
 			}

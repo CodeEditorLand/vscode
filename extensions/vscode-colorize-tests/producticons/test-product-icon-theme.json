@@ -10,12 +10,12 @@
 				}
 			],
 			"weight": "normal",
-			"style": "normal",
+			"style": "normal"
 		}
 	],
 	"iconDefinitions": {
 		"chevron-down": {
-			"fontCharacter": "\\43",
+			"fontCharacter": "\\43"
 		},
 		"chevron-right": {
 			"fontCharacter": "\\45"
@@ -38,6 +38,5 @@
 		"run-view-icon": {
 			"fontCharacter": "\\e072"
 		}
-
 	}
 }

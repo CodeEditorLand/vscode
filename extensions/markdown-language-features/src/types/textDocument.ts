@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * Minimal version of {@link vscode.TextDocument}.
@@ -16,4 +16,3 @@ export interface ITextDocument {
 
 	positionAt(offset: number): vscode.Position;
 }
-

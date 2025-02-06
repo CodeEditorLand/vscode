@@ -219,118 +219,118 @@ export const enum CharCode {
 	 */
 	Tilde = 126,
 
-	U_Combining_Grave_Accent = 0x0300,								//	U+0300	Combining Grave Accent
-	U_Combining_Acute_Accent = 0x0301,								//	U+0301	Combining Acute Accent
-	U_Combining_Circumflex_Accent = 0x0302,							//	U+0302	Combining Circumflex Accent
-	U_Combining_Tilde = 0x0303,										//	U+0303	Combining Tilde
-	U_Combining_Macron = 0x0304,									//	U+0304	Combining Macron
-	U_Combining_Overline = 0x0305,									//	U+0305	Combining Overline
-	U_Combining_Breve = 0x0306,										//	U+0306	Combining Breve
-	U_Combining_Dot_Above = 0x0307,									//	U+0307	Combining Dot Above
-	U_Combining_Diaeresis = 0x0308,									//	U+0308	Combining Diaeresis
-	U_Combining_Hook_Above = 0x0309,								//	U+0309	Combining Hook Above
-	U_Combining_Ring_Above = 0x030A,								//	U+030A	Combining Ring Above
-	U_Combining_Double_Acute_Accent = 0x030B,						//	U+030B	Combining Double Acute Accent
-	U_Combining_Caron = 0x030C,										//	U+030C	Combining Caron
-	U_Combining_Vertical_Line_Above = 0x030D,						//	U+030D	Combining Vertical Line Above
-	U_Combining_Double_Vertical_Line_Above = 0x030E,				//	U+030E	Combining Double Vertical Line Above
-	U_Combining_Double_Grave_Accent = 0x030F,						//	U+030F	Combining Double Grave Accent
-	U_Combining_Candrabindu = 0x0310,								//	U+0310	Combining Candrabindu
-	U_Combining_Inverted_Breve = 0x0311,							//	U+0311	Combining Inverted Breve
-	U_Combining_Turned_Comma_Above = 0x0312,						//	U+0312	Combining Turned Comma Above
-	U_Combining_Comma_Above = 0x0313,								//	U+0313	Combining Comma Above
-	U_Combining_Reversed_Comma_Above = 0x0314,						//	U+0314	Combining Reversed Comma Above
-	U_Combining_Comma_Above_Right = 0x0315,							//	U+0315	Combining Comma Above Right
-	U_Combining_Grave_Accent_Below = 0x0316,						//	U+0316	Combining Grave Accent Below
-	U_Combining_Acute_Accent_Below = 0x0317,						//	U+0317	Combining Acute Accent Below
-	U_Combining_Left_Tack_Below = 0x0318,							//	U+0318	Combining Left Tack Below
-	U_Combining_Right_Tack_Below = 0x0319,							//	U+0319	Combining Right Tack Below
-	U_Combining_Left_Angle_Above = 0x031A,							//	U+031A	Combining Left Angle Above
-	U_Combining_Horn = 0x031B,										//	U+031B	Combining Horn
-	U_Combining_Left_Half_Ring_Below = 0x031C,						//	U+031C	Combining Left Half Ring Below
-	U_Combining_Up_Tack_Below = 0x031D,								//	U+031D	Combining Up Tack Below
-	U_Combining_Down_Tack_Below = 0x031E,							//	U+031E	Combining Down Tack Below
-	U_Combining_Plus_Sign_Below = 0x031F,							//	U+031F	Combining Plus Sign Below
-	U_Combining_Minus_Sign_Below = 0x0320,							//	U+0320	Combining Minus Sign Below
-	U_Combining_Palatalized_Hook_Below = 0x0321,					//	U+0321	Combining Palatalized Hook Below
-	U_Combining_Retroflex_Hook_Below = 0x0322,						//	U+0322	Combining Retroflex Hook Below
-	U_Combining_Dot_Below = 0x0323,									//	U+0323	Combining Dot Below
-	U_Combining_Diaeresis_Below = 0x0324,							//	U+0324	Combining Diaeresis Below
-	U_Combining_Ring_Below = 0x0325,								//	U+0325	Combining Ring Below
-	U_Combining_Comma_Below = 0x0326,								//	U+0326	Combining Comma Below
-	U_Combining_Cedilla = 0x0327,									//	U+0327	Combining Cedilla
-	U_Combining_Ogonek = 0x0328,									//	U+0328	Combining Ogonek
-	U_Combining_Vertical_Line_Below = 0x0329,						//	U+0329	Combining Vertical Line Below
-	U_Combining_Bridge_Below = 0x032A,								//	U+032A	Combining Bridge Below
-	U_Combining_Inverted_Double_Arch_Below = 0x032B,				//	U+032B	Combining Inverted Double Arch Below
-	U_Combining_Caron_Below = 0x032C,								//	U+032C	Combining Caron Below
-	U_Combining_Circumflex_Accent_Below = 0x032D,					//	U+032D	Combining Circumflex Accent Below
-	U_Combining_Breve_Below = 0x032E,								//	U+032E	Combining Breve Below
-	U_Combining_Inverted_Breve_Below = 0x032F,						//	U+032F	Combining Inverted Breve Below
-	U_Combining_Tilde_Below = 0x0330,								//	U+0330	Combining Tilde Below
-	U_Combining_Macron_Below = 0x0331,								//	U+0331	Combining Macron Below
-	U_Combining_Low_Line = 0x0332,									//	U+0332	Combining Low Line
-	U_Combining_Double_Low_Line = 0x0333,							//	U+0333	Combining Double Low Line
-	U_Combining_Tilde_Overlay = 0x0334,								//	U+0334	Combining Tilde Overlay
-	U_Combining_Short_Stroke_Overlay = 0x0335,						//	U+0335	Combining Short Stroke Overlay
-	U_Combining_Long_Stroke_Overlay = 0x0336,						//	U+0336	Combining Long Stroke Overlay
-	U_Combining_Short_Solidus_Overlay = 0x0337,						//	U+0337	Combining Short Solidus Overlay
-	U_Combining_Long_Solidus_Overlay = 0x0338,						//	U+0338	Combining Long Solidus Overlay
-	U_Combining_Right_Half_Ring_Below = 0x0339,						//	U+0339	Combining Right Half Ring Below
-	U_Combining_Inverted_Bridge_Below = 0x033A,						//	U+033A	Combining Inverted Bridge Below
-	U_Combining_Square_Below = 0x033B,								//	U+033B	Combining Square Below
-	U_Combining_Seagull_Below = 0x033C,								//	U+033C	Combining Seagull Below
-	U_Combining_X_Above = 0x033D,									//	U+033D	Combining X Above
-	U_Combining_Vertical_Tilde = 0x033E,							//	U+033E	Combining Vertical Tilde
-	U_Combining_Double_Overline = 0x033F,							//	U+033F	Combining Double Overline
-	U_Combining_Grave_Tone_Mark = 0x0340,							//	U+0340	Combining Grave Tone Mark
-	U_Combining_Acute_Tone_Mark = 0x0341,							//	U+0341	Combining Acute Tone Mark
-	U_Combining_Greek_Perispomeni = 0x0342,							//	U+0342	Combining Greek Perispomeni
-	U_Combining_Greek_Koronis = 0x0343,								//	U+0343	Combining Greek Koronis
-	U_Combining_Greek_Dialytika_Tonos = 0x0344,						//	U+0344	Combining Greek Dialytika Tonos
-	U_Combining_Greek_Ypogegrammeni = 0x0345,						//	U+0345	Combining Greek Ypogegrammeni
-	U_Combining_Bridge_Above = 0x0346,								//	U+0346	Combining Bridge Above
-	U_Combining_Equals_Sign_Below = 0x0347,							//	U+0347	Combining Equals Sign Below
-	U_Combining_Double_Vertical_Line_Below = 0x0348,				//	U+0348	Combining Double Vertical Line Below
-	U_Combining_Left_Angle_Below = 0x0349,							//	U+0349	Combining Left Angle Below
-	U_Combining_Not_Tilde_Above = 0x034A,							//	U+034A	Combining Not Tilde Above
-	U_Combining_Homothetic_Above = 0x034B,							//	U+034B	Combining Homothetic Above
-	U_Combining_Almost_Equal_To_Above = 0x034C,						//	U+034C	Combining Almost Equal To Above
-	U_Combining_Left_Right_Arrow_Below = 0x034D,					//	U+034D	Combining Left Right Arrow Below
-	U_Combining_Upwards_Arrow_Below = 0x034E,						//	U+034E	Combining Upwards Arrow Below
-	U_Combining_Grapheme_Joiner = 0x034F,							//	U+034F	Combining Grapheme Joiner
-	U_Combining_Right_Arrowhead_Above = 0x0350,						//	U+0350	Combining Right Arrowhead Above
-	U_Combining_Left_Half_Ring_Above = 0x0351,						//	U+0351	Combining Left Half Ring Above
-	U_Combining_Fermata = 0x0352,									//	U+0352	Combining Fermata
-	U_Combining_X_Below = 0x0353,									//	U+0353	Combining X Below
-	U_Combining_Left_Arrowhead_Below = 0x0354,						//	U+0354	Combining Left Arrowhead Below
-	U_Combining_Right_Arrowhead_Below = 0x0355,						//	U+0355	Combining Right Arrowhead Below
-	U_Combining_Right_Arrowhead_And_Up_Arrowhead_Below = 0x0356,	//	U+0356	Combining Right Arrowhead And Up Arrowhead Below
-	U_Combining_Right_Half_Ring_Above = 0x0357,						//	U+0357	Combining Right Half Ring Above
-	U_Combining_Dot_Above_Right = 0x0358,							//	U+0358	Combining Dot Above Right
-	U_Combining_Asterisk_Below = 0x0359,							//	U+0359	Combining Asterisk Below
-	U_Combining_Double_Ring_Below = 0x035A,							//	U+035A	Combining Double Ring Below
-	U_Combining_Zigzag_Above = 0x035B,								//	U+035B	Combining Zigzag Above
-	U_Combining_Double_Breve_Below = 0x035C,						//	U+035C	Combining Double Breve Below
-	U_Combining_Double_Breve = 0x035D,								//	U+035D	Combining Double Breve
-	U_Combining_Double_Macron = 0x035E,								//	U+035E	Combining Double Macron
-	U_Combining_Double_Macron_Below = 0x035F,						//	U+035F	Combining Double Macron Below
-	U_Combining_Double_Tilde = 0x0360,								//	U+0360	Combining Double Tilde
-	U_Combining_Double_Inverted_Breve = 0x0361,						//	U+0361	Combining Double Inverted Breve
-	U_Combining_Double_Rightwards_Arrow_Below = 0x0362,				//	U+0362	Combining Double Rightwards Arrow Below
-	U_Combining_Latin_Small_Letter_A = 0x0363, 						//	U+0363	Combining Latin Small Letter A
-	U_Combining_Latin_Small_Letter_E = 0x0364, 						//	U+0364	Combining Latin Small Letter E
-	U_Combining_Latin_Small_Letter_I = 0x0365, 						//	U+0365	Combining Latin Small Letter I
-	U_Combining_Latin_Small_Letter_O = 0x0366, 						//	U+0366	Combining Latin Small Letter O
-	U_Combining_Latin_Small_Letter_U = 0x0367, 						//	U+0367	Combining Latin Small Letter U
-	U_Combining_Latin_Small_Letter_C = 0x0368, 						//	U+0368	Combining Latin Small Letter C
-	U_Combining_Latin_Small_Letter_D = 0x0369, 						//	U+0369	Combining Latin Small Letter D
-	U_Combining_Latin_Small_Letter_H = 0x036A, 						//	U+036A	Combining Latin Small Letter H
-	U_Combining_Latin_Small_Letter_M = 0x036B, 						//	U+036B	Combining Latin Small Letter M
-	U_Combining_Latin_Small_Letter_R = 0x036C, 						//	U+036C	Combining Latin Small Letter R
-	U_Combining_Latin_Small_Letter_T = 0x036D, 						//	U+036D	Combining Latin Small Letter T
-	U_Combining_Latin_Small_Letter_V = 0x036E, 						//	U+036E	Combining Latin Small Letter V
-	U_Combining_Latin_Small_Letter_X = 0x036F, 						//	U+036F	Combining Latin Small Letter X
+	U_Combining_Grave_Accent = 0x0300, //	U+0300	Combining Grave Accent
+	U_Combining_Acute_Accent = 0x0301, //	U+0301	Combining Acute Accent
+	U_Combining_Circumflex_Accent = 0x0302, //	U+0302	Combining Circumflex Accent
+	U_Combining_Tilde = 0x0303, //	U+0303	Combining Tilde
+	U_Combining_Macron = 0x0304, //	U+0304	Combining Macron
+	U_Combining_Overline = 0x0305, //	U+0305	Combining Overline
+	U_Combining_Breve = 0x0306, //	U+0306	Combining Breve
+	U_Combining_Dot_Above = 0x0307, //	U+0307	Combining Dot Above
+	U_Combining_Diaeresis = 0x0308, //	U+0308	Combining Diaeresis
+	U_Combining_Hook_Above = 0x0309, //	U+0309	Combining Hook Above
+	U_Combining_Ring_Above = 0x030a, //	U+030A	Combining Ring Above
+	U_Combining_Double_Acute_Accent = 0x030b, //	U+030B	Combining Double Acute Accent
+	U_Combining_Caron = 0x030c, //	U+030C	Combining Caron
+	U_Combining_Vertical_Line_Above = 0x030d, //	U+030D	Combining Vertical Line Above
+	U_Combining_Double_Vertical_Line_Above = 0x030e, //	U+030E	Combining Double Vertical Line Above
+	U_Combining_Double_Grave_Accent = 0x030f, //	U+030F	Combining Double Grave Accent
+	U_Combining_Candrabindu = 0x0310, //	U+0310	Combining Candrabindu
+	U_Combining_Inverted_Breve = 0x0311, //	U+0311	Combining Inverted Breve
+	U_Combining_Turned_Comma_Above = 0x0312, //	U+0312	Combining Turned Comma Above
+	U_Combining_Comma_Above = 0x0313, //	U+0313	Combining Comma Above
+	U_Combining_Reversed_Comma_Above = 0x0314, //	U+0314	Combining Reversed Comma Above
+	U_Combining_Comma_Above_Right = 0x0315, //	U+0315	Combining Comma Above Right
+	U_Combining_Grave_Accent_Below = 0x0316, //	U+0316	Combining Grave Accent Below
+	U_Combining_Acute_Accent_Below = 0x0317, //	U+0317	Combining Acute Accent Below
+	U_Combining_Left_Tack_Below = 0x0318, //	U+0318	Combining Left Tack Below
+	U_Combining_Right_Tack_Below = 0x0319, //	U+0319	Combining Right Tack Below
+	U_Combining_Left_Angle_Above = 0x031a, //	U+031A	Combining Left Angle Above
+	U_Combining_Horn = 0x031b, //	U+031B	Combining Horn
+	U_Combining_Left_Half_Ring_Below = 0x031c, //	U+031C	Combining Left Half Ring Below
+	U_Combining_Up_Tack_Below = 0x031d, //	U+031D	Combining Up Tack Below
+	U_Combining_Down_Tack_Below = 0x031e, //	U+031E	Combining Down Tack Below
+	U_Combining_Plus_Sign_Below = 0x031f, //	U+031F	Combining Plus Sign Below
+	U_Combining_Minus_Sign_Below = 0x0320, //	U+0320	Combining Minus Sign Below
+	U_Combining_Palatalized_Hook_Below = 0x0321, //	U+0321	Combining Palatalized Hook Below
+	U_Combining_Retroflex_Hook_Below = 0x0322, //	U+0322	Combining Retroflex Hook Below
+	U_Combining_Dot_Below = 0x0323, //	U+0323	Combining Dot Below
+	U_Combining_Diaeresis_Below = 0x0324, //	U+0324	Combining Diaeresis Below
+	U_Combining_Ring_Below = 0x0325, //	U+0325	Combining Ring Below
+	U_Combining_Comma_Below = 0x0326, //	U+0326	Combining Comma Below
+	U_Combining_Cedilla = 0x0327, //	U+0327	Combining Cedilla
+	U_Combining_Ogonek = 0x0328, //	U+0328	Combining Ogonek
+	U_Combining_Vertical_Line_Below = 0x0329, //	U+0329	Combining Vertical Line Below
+	U_Combining_Bridge_Below = 0x032a, //	U+032A	Combining Bridge Below
+	U_Combining_Inverted_Double_Arch_Below = 0x032b, //	U+032B	Combining Inverted Double Arch Below
+	U_Combining_Caron_Below = 0x032c, //	U+032C	Combining Caron Below
+	U_Combining_Circumflex_Accent_Below = 0x032d, //	U+032D	Combining Circumflex Accent Below
+	U_Combining_Breve_Below = 0x032e, //	U+032E	Combining Breve Below
+	U_Combining_Inverted_Breve_Below = 0x032f, //	U+032F	Combining Inverted Breve Below
+	U_Combining_Tilde_Below = 0x0330, //	U+0330	Combining Tilde Below
+	U_Combining_Macron_Below = 0x0331, //	U+0331	Combining Macron Below
+	U_Combining_Low_Line = 0x0332, //	U+0332	Combining Low Line
+	U_Combining_Double_Low_Line = 0x0333, //	U+0333	Combining Double Low Line
+	U_Combining_Tilde_Overlay = 0x0334, //	U+0334	Combining Tilde Overlay
+	U_Combining_Short_Stroke_Overlay = 0x0335, //	U+0335	Combining Short Stroke Overlay
+	U_Combining_Long_Stroke_Overlay = 0x0336, //	U+0336	Combining Long Stroke Overlay
+	U_Combining_Short_Solidus_Overlay = 0x0337, //	U+0337	Combining Short Solidus Overlay
+	U_Combining_Long_Solidus_Overlay = 0x0338, //	U+0338	Combining Long Solidus Overlay
+	U_Combining_Right_Half_Ring_Below = 0x0339, //	U+0339	Combining Right Half Ring Below
+	U_Combining_Inverted_Bridge_Below = 0x033a, //	U+033A	Combining Inverted Bridge Below
+	U_Combining_Square_Below = 0x033b, //	U+033B	Combining Square Below
+	U_Combining_Seagull_Below = 0x033c, //	U+033C	Combining Seagull Below
+	U_Combining_X_Above = 0x033d, //	U+033D	Combining X Above
+	U_Combining_Vertical_Tilde = 0x033e, //	U+033E	Combining Vertical Tilde
+	U_Combining_Double_Overline = 0x033f, //	U+033F	Combining Double Overline
+	U_Combining_Grave_Tone_Mark = 0x0340, //	U+0340	Combining Grave Tone Mark
+	U_Combining_Acute_Tone_Mark = 0x0341, //	U+0341	Combining Acute Tone Mark
+	U_Combining_Greek_Perispomeni = 0x0342, //	U+0342	Combining Greek Perispomeni
+	U_Combining_Greek_Koronis = 0x0343, //	U+0343	Combining Greek Koronis
+	U_Combining_Greek_Dialytika_Tonos = 0x0344, //	U+0344	Combining Greek Dialytika Tonos
+	U_Combining_Greek_Ypogegrammeni = 0x0345, //	U+0345	Combining Greek Ypogegrammeni
+	U_Combining_Bridge_Above = 0x0346, //	U+0346	Combining Bridge Above
+	U_Combining_Equals_Sign_Below = 0x0347, //	U+0347	Combining Equals Sign Below
+	U_Combining_Double_Vertical_Line_Below = 0x0348, //	U+0348	Combining Double Vertical Line Below
+	U_Combining_Left_Angle_Below = 0x0349, //	U+0349	Combining Left Angle Below
+	U_Combining_Not_Tilde_Above = 0x034a, //	U+034A	Combining Not Tilde Above
+	U_Combining_Homothetic_Above = 0x034b, //	U+034B	Combining Homothetic Above
+	U_Combining_Almost_Equal_To_Above = 0x034c, //	U+034C	Combining Almost Equal To Above
+	U_Combining_Left_Right_Arrow_Below = 0x034d, //	U+034D	Combining Left Right Arrow Below
+	U_Combining_Upwards_Arrow_Below = 0x034e, //	U+034E	Combining Upwards Arrow Below
+	U_Combining_Grapheme_Joiner = 0x034f, //	U+034F	Combining Grapheme Joiner
+	U_Combining_Right_Arrowhead_Above = 0x0350, //	U+0350	Combining Right Arrowhead Above
+	U_Combining_Left_Half_Ring_Above = 0x0351, //	U+0351	Combining Left Half Ring Above
+	U_Combining_Fermata = 0x0352, //	U+0352	Combining Fermata
+	U_Combining_X_Below = 0x0353, //	U+0353	Combining X Below
+	U_Combining_Left_Arrowhead_Below = 0x0354, //	U+0354	Combining Left Arrowhead Below
+	U_Combining_Right_Arrowhead_Below = 0x0355, //	U+0355	Combining Right Arrowhead Below
+	U_Combining_Right_Arrowhead_And_Up_Arrowhead_Below = 0x0356, //	U+0356	Combining Right Arrowhead And Up Arrowhead Below
+	U_Combining_Right_Half_Ring_Above = 0x0357, //	U+0357	Combining Right Half Ring Above
+	U_Combining_Dot_Above_Right = 0x0358, //	U+0358	Combining Dot Above Right
+	U_Combining_Asterisk_Below = 0x0359, //	U+0359	Combining Asterisk Below
+	U_Combining_Double_Ring_Below = 0x035a, //	U+035A	Combining Double Ring Below
+	U_Combining_Zigzag_Above = 0x035b, //	U+035B	Combining Zigzag Above
+	U_Combining_Double_Breve_Below = 0x035c, //	U+035C	Combining Double Breve Below
+	U_Combining_Double_Breve = 0x035d, //	U+035D	Combining Double Breve
+	U_Combining_Double_Macron = 0x035e, //	U+035E	Combining Double Macron
+	U_Combining_Double_Macron_Below = 0x035f, //	U+035F	Combining Double Macron Below
+	U_Combining_Double_Tilde = 0x0360, //	U+0360	Combining Double Tilde
+	U_Combining_Double_Inverted_Breve = 0x0361, //	U+0361	Combining Double Inverted Breve
+	U_Combining_Double_Rightwards_Arrow_Below = 0x0362, //	U+0362	Combining Double Rightwards Arrow Below
+	U_Combining_Latin_Small_Letter_A = 0x0363, //	U+0363	Combining Latin Small Letter A
+	U_Combining_Latin_Small_Letter_E = 0x0364, //	U+0364	Combining Latin Small Letter E
+	U_Combining_Latin_Small_Letter_I = 0x0365, //	U+0365	Combining Latin Small Letter I
+	U_Combining_Latin_Small_Letter_O = 0x0366, //	U+0366	Combining Latin Small Letter O
+	U_Combining_Latin_Small_Letter_U = 0x0367, //	U+0367	Combining Latin Small Letter U
+	U_Combining_Latin_Small_Letter_C = 0x0368, //	U+0368	Combining Latin Small Letter C
+	U_Combining_Latin_Small_Letter_D = 0x0369, //	U+0369	Combining Latin Small Letter D
+	U_Combining_Latin_Small_Letter_H = 0x036a, //	U+036A	Combining Latin Small Letter H
+	U_Combining_Latin_Small_Letter_M = 0x036b, //	U+036B	Combining Latin Small Letter M
+	U_Combining_Latin_Small_Letter_R = 0x036c, //	U+036C	Combining Latin Small Letter R
+	U_Combining_Latin_Small_Letter_T = 0x036d, //	U+036D	Combining Latin Small Letter T
+	U_Combining_Latin_Small_Letter_V = 0x036e, //	U+036E	Combining Latin Small Letter V
+	U_Combining_Latin_Small_Letter_X = 0x036f, //	U+036F	Combining Latin Small Letter X
 
 	/**
 	 * Unicode Character 'LINE SEPARATOR' (U+2028)
@@ -349,82 +349,81 @@ export const enum CharCode {
 	NEXT_LINE = 0x0085,
 
 	// http://www.fileformat.info/info/unicode/category/Sk/list.htm
-	U_CIRCUMFLEX = 0x005E,									// U+005E	CIRCUMFLEX
-	U_GRAVE_ACCENT = 0x0060,								// U+0060	GRAVE ACCENT
-	U_DIAERESIS = 0x00A8,									// U+00A8	DIAERESIS
-	U_MACRON = 0x00AF,										// U+00AF	MACRON
-	U_ACUTE_ACCENT = 0x00B4,								// U+00B4	ACUTE ACCENT
-	U_CEDILLA = 0x00B8,										// U+00B8	CEDILLA
-	U_MODIFIER_LETTER_LEFT_ARROWHEAD = 0x02C2,				// U+02C2	MODIFIER LETTER LEFT ARROWHEAD
-	U_MODIFIER_LETTER_RIGHT_ARROWHEAD = 0x02C3,				// U+02C3	MODIFIER LETTER RIGHT ARROWHEAD
-	U_MODIFIER_LETTER_UP_ARROWHEAD = 0x02C4,				// U+02C4	MODIFIER LETTER UP ARROWHEAD
-	U_MODIFIER_LETTER_DOWN_ARROWHEAD = 0x02C5,				// U+02C5	MODIFIER LETTER DOWN ARROWHEAD
-	U_MODIFIER_LETTER_CENTRED_RIGHT_HALF_RING = 0x02D2,		// U+02D2	MODIFIER LETTER CENTRED RIGHT HALF RING
-	U_MODIFIER_LETTER_CENTRED_LEFT_HALF_RING = 0x02D3,		// U+02D3	MODIFIER LETTER CENTRED LEFT HALF RING
-	U_MODIFIER_LETTER_UP_TACK = 0x02D4,						// U+02D4	MODIFIER LETTER UP TACK
-	U_MODIFIER_LETTER_DOWN_TACK = 0x02D5,					// U+02D5	MODIFIER LETTER DOWN TACK
-	U_MODIFIER_LETTER_PLUS_SIGN = 0x02D6,					// U+02D6	MODIFIER LETTER PLUS SIGN
-	U_MODIFIER_LETTER_MINUS_SIGN = 0x02D7,					// U+02D7	MODIFIER LETTER MINUS SIGN
-	U_BREVE = 0x02D8,										// U+02D8	BREVE
-	U_DOT_ABOVE = 0x02D9,									// U+02D9	DOT ABOVE
-	U_RING_ABOVE = 0x02DA,									// U+02DA	RING ABOVE
-	U_OGONEK = 0x02DB,										// U+02DB	OGONEK
-	U_SMALL_TILDE = 0x02DC,									// U+02DC	SMALL TILDE
-	U_DOUBLE_ACUTE_ACCENT = 0x02DD,							// U+02DD	DOUBLE ACUTE ACCENT
-	U_MODIFIER_LETTER_RHOTIC_HOOK = 0x02DE,					// U+02DE	MODIFIER LETTER RHOTIC HOOK
-	U_MODIFIER_LETTER_CROSS_ACCENT = 0x02DF,				// U+02DF	MODIFIER LETTER CROSS ACCENT
-	U_MODIFIER_LETTER_EXTRA_HIGH_TONE_BAR = 0x02E5,			// U+02E5	MODIFIER LETTER EXTRA-HIGH TONE BAR
-	U_MODIFIER_LETTER_HIGH_TONE_BAR = 0x02E6,				// U+02E6	MODIFIER LETTER HIGH TONE BAR
-	U_MODIFIER_LETTER_MID_TONE_BAR = 0x02E7,				// U+02E7	MODIFIER LETTER MID TONE BAR
-	U_MODIFIER_LETTER_LOW_TONE_BAR = 0x02E8,				// U+02E8	MODIFIER LETTER LOW TONE BAR
-	U_MODIFIER_LETTER_EXTRA_LOW_TONE_BAR = 0x02E9,			// U+02E9	MODIFIER LETTER EXTRA-LOW TONE BAR
-	U_MODIFIER_LETTER_YIN_DEPARTING_TONE_MARK = 0x02EA,		// U+02EA	MODIFIER LETTER YIN DEPARTING TONE MARK
-	U_MODIFIER_LETTER_YANG_DEPARTING_TONE_MARK = 0x02EB,	// U+02EB	MODIFIER LETTER YANG DEPARTING TONE MARK
-	U_MODIFIER_LETTER_UNASPIRATED = 0x02ED,					// U+02ED	MODIFIER LETTER UNASPIRATED
-	U_MODIFIER_LETTER_LOW_DOWN_ARROWHEAD = 0x02EF,			// U+02EF	MODIFIER LETTER LOW DOWN ARROWHEAD
-	U_MODIFIER_LETTER_LOW_UP_ARROWHEAD = 0x02F0,			// U+02F0	MODIFIER LETTER LOW UP ARROWHEAD
-	U_MODIFIER_LETTER_LOW_LEFT_ARROWHEAD = 0x02F1,			// U+02F1	MODIFIER LETTER LOW LEFT ARROWHEAD
-	U_MODIFIER_LETTER_LOW_RIGHT_ARROWHEAD = 0x02F2,			// U+02F2	MODIFIER LETTER LOW RIGHT ARROWHEAD
-	U_MODIFIER_LETTER_LOW_RING = 0x02F3,					// U+02F3	MODIFIER LETTER LOW RING
-	U_MODIFIER_LETTER_MIDDLE_GRAVE_ACCENT = 0x02F4,			// U+02F4	MODIFIER LETTER MIDDLE GRAVE ACCENT
-	U_MODIFIER_LETTER_MIDDLE_DOUBLE_GRAVE_ACCENT = 0x02F5,	// U+02F5	MODIFIER LETTER MIDDLE DOUBLE GRAVE ACCENT
-	U_MODIFIER_LETTER_MIDDLE_DOUBLE_ACUTE_ACCENT = 0x02F6,	// U+02F6	MODIFIER LETTER MIDDLE DOUBLE ACUTE ACCENT
-	U_MODIFIER_LETTER_LOW_TILDE = 0x02F7,					// U+02F7	MODIFIER LETTER LOW TILDE
-	U_MODIFIER_LETTER_RAISED_COLON = 0x02F8,				// U+02F8	MODIFIER LETTER RAISED COLON
-	U_MODIFIER_LETTER_BEGIN_HIGH_TONE = 0x02F9,				// U+02F9	MODIFIER LETTER BEGIN HIGH TONE
-	U_MODIFIER_LETTER_END_HIGH_TONE = 0x02FA,				// U+02FA	MODIFIER LETTER END HIGH TONE
-	U_MODIFIER_LETTER_BEGIN_LOW_TONE = 0x02FB,				// U+02FB	MODIFIER LETTER BEGIN LOW TONE
-	U_MODIFIER_LETTER_END_LOW_TONE = 0x02FC,				// U+02FC	MODIFIER LETTER END LOW TONE
-	U_MODIFIER_LETTER_SHELF = 0x02FD,						// U+02FD	MODIFIER LETTER SHELF
-	U_MODIFIER_LETTER_OPEN_SHELF = 0x02FE,					// U+02FE	MODIFIER LETTER OPEN SHELF
-	U_MODIFIER_LETTER_LOW_LEFT_ARROW = 0x02FF,				// U+02FF	MODIFIER LETTER LOW LEFT ARROW
-	U_GREEK_LOWER_NUMERAL_SIGN = 0x0375,					// U+0375	GREEK LOWER NUMERAL SIGN
-	U_GREEK_TONOS = 0x0384,									// U+0384	GREEK TONOS
-	U_GREEK_DIALYTIKA_TONOS = 0x0385,						// U+0385	GREEK DIALYTIKA TONOS
-	U_GREEK_KORONIS = 0x1FBD,								// U+1FBD	GREEK KORONIS
-	U_GREEK_PSILI = 0x1FBF,									// U+1FBF	GREEK PSILI
-	U_GREEK_PERISPOMENI = 0x1FC0,							// U+1FC0	GREEK PERISPOMENI
-	U_GREEK_DIALYTIKA_AND_PERISPOMENI = 0x1FC1,				// U+1FC1	GREEK DIALYTIKA AND PERISPOMENI
-	U_GREEK_PSILI_AND_VARIA = 0x1FCD,						// U+1FCD	GREEK PSILI AND VARIA
-	U_GREEK_PSILI_AND_OXIA = 0x1FCE,						// U+1FCE	GREEK PSILI AND OXIA
-	U_GREEK_PSILI_AND_PERISPOMENI = 0x1FCF,					// U+1FCF	GREEK PSILI AND PERISPOMENI
-	U_GREEK_DASIA_AND_VARIA = 0x1FDD,						// U+1FDD	GREEK DASIA AND VARIA
-	U_GREEK_DASIA_AND_OXIA = 0x1FDE,						// U+1FDE	GREEK DASIA AND OXIA
-	U_GREEK_DASIA_AND_PERISPOMENI = 0x1FDF,					// U+1FDF	GREEK DASIA AND PERISPOMENI
-	U_GREEK_DIALYTIKA_AND_VARIA = 0x1FED,					// U+1FED	GREEK DIALYTIKA AND VARIA
-	U_GREEK_DIALYTIKA_AND_OXIA = 0x1FEE,					// U+1FEE	GREEK DIALYTIKA AND OXIA
-	U_GREEK_VARIA = 0x1FEF,									// U+1FEF	GREEK VARIA
-	U_GREEK_OXIA = 0x1FFD,									// U+1FFD	GREEK OXIA
-	U_GREEK_DASIA = 0x1FFE,									// U+1FFE	GREEK DASIA
+	U_CIRCUMFLEX = 0x005e, // U+005E	CIRCUMFLEX
+	U_GRAVE_ACCENT = 0x0060, // U+0060	GRAVE ACCENT
+	U_DIAERESIS = 0x00a8, // U+00A8	DIAERESIS
+	U_MACRON = 0x00af, // U+00AF	MACRON
+	U_ACUTE_ACCENT = 0x00b4, // U+00B4	ACUTE ACCENT
+	U_CEDILLA = 0x00b8, // U+00B8	CEDILLA
+	U_MODIFIER_LETTER_LEFT_ARROWHEAD = 0x02c2, // U+02C2	MODIFIER LETTER LEFT ARROWHEAD
+	U_MODIFIER_LETTER_RIGHT_ARROWHEAD = 0x02c3, // U+02C3	MODIFIER LETTER RIGHT ARROWHEAD
+	U_MODIFIER_LETTER_UP_ARROWHEAD = 0x02c4, // U+02C4	MODIFIER LETTER UP ARROWHEAD
+	U_MODIFIER_LETTER_DOWN_ARROWHEAD = 0x02c5, // U+02C5	MODIFIER LETTER DOWN ARROWHEAD
+	U_MODIFIER_LETTER_CENTRED_RIGHT_HALF_RING = 0x02d2, // U+02D2	MODIFIER LETTER CENTRED RIGHT HALF RING
+	U_MODIFIER_LETTER_CENTRED_LEFT_HALF_RING = 0x02d3, // U+02D3	MODIFIER LETTER CENTRED LEFT HALF RING
+	U_MODIFIER_LETTER_UP_TACK = 0x02d4, // U+02D4	MODIFIER LETTER UP TACK
+	U_MODIFIER_LETTER_DOWN_TACK = 0x02d5, // U+02D5	MODIFIER LETTER DOWN TACK
+	U_MODIFIER_LETTER_PLUS_SIGN = 0x02d6, // U+02D6	MODIFIER LETTER PLUS SIGN
+	U_MODIFIER_LETTER_MINUS_SIGN = 0x02d7, // U+02D7	MODIFIER LETTER MINUS SIGN
+	U_BREVE = 0x02d8, // U+02D8	BREVE
+	U_DOT_ABOVE = 0x02d9, // U+02D9	DOT ABOVE
+	U_RING_ABOVE = 0x02da, // U+02DA	RING ABOVE
+	U_OGONEK = 0x02db, // U+02DB	OGONEK
+	U_SMALL_TILDE = 0x02dc, // U+02DC	SMALL TILDE
+	U_DOUBLE_ACUTE_ACCENT = 0x02dd, // U+02DD	DOUBLE ACUTE ACCENT
+	U_MODIFIER_LETTER_RHOTIC_HOOK = 0x02de, // U+02DE	MODIFIER LETTER RHOTIC HOOK
+	U_MODIFIER_LETTER_CROSS_ACCENT = 0x02df, // U+02DF	MODIFIER LETTER CROSS ACCENT
+	U_MODIFIER_LETTER_EXTRA_HIGH_TONE_BAR = 0x02e5, // U+02E5	MODIFIER LETTER EXTRA-HIGH TONE BAR
+	U_MODIFIER_LETTER_HIGH_TONE_BAR = 0x02e6, // U+02E6	MODIFIER LETTER HIGH TONE BAR
+	U_MODIFIER_LETTER_MID_TONE_BAR = 0x02e7, // U+02E7	MODIFIER LETTER MID TONE BAR
+	U_MODIFIER_LETTER_LOW_TONE_BAR = 0x02e8, // U+02E8	MODIFIER LETTER LOW TONE BAR
+	U_MODIFIER_LETTER_EXTRA_LOW_TONE_BAR = 0x02e9, // U+02E9	MODIFIER LETTER EXTRA-LOW TONE BAR
+	U_MODIFIER_LETTER_YIN_DEPARTING_TONE_MARK = 0x02ea, // U+02EA	MODIFIER LETTER YIN DEPARTING TONE MARK
+	U_MODIFIER_LETTER_YANG_DEPARTING_TONE_MARK = 0x02eb, // U+02EB	MODIFIER LETTER YANG DEPARTING TONE MARK
+	U_MODIFIER_LETTER_UNASPIRATED = 0x02ed, // U+02ED	MODIFIER LETTER UNASPIRATED
+	U_MODIFIER_LETTER_LOW_DOWN_ARROWHEAD = 0x02ef, // U+02EF	MODIFIER LETTER LOW DOWN ARROWHEAD
+	U_MODIFIER_LETTER_LOW_UP_ARROWHEAD = 0x02f0, // U+02F0	MODIFIER LETTER LOW UP ARROWHEAD
+	U_MODIFIER_LETTER_LOW_LEFT_ARROWHEAD = 0x02f1, // U+02F1	MODIFIER LETTER LOW LEFT ARROWHEAD
+	U_MODIFIER_LETTER_LOW_RIGHT_ARROWHEAD = 0x02f2, // U+02F2	MODIFIER LETTER LOW RIGHT ARROWHEAD
+	U_MODIFIER_LETTER_LOW_RING = 0x02f3, // U+02F3	MODIFIER LETTER LOW RING
+	U_MODIFIER_LETTER_MIDDLE_GRAVE_ACCENT = 0x02f4, // U+02F4	MODIFIER LETTER MIDDLE GRAVE ACCENT
+	U_MODIFIER_LETTER_MIDDLE_DOUBLE_GRAVE_ACCENT = 0x02f5, // U+02F5	MODIFIER LETTER MIDDLE DOUBLE GRAVE ACCENT
+	U_MODIFIER_LETTER_MIDDLE_DOUBLE_ACUTE_ACCENT = 0x02f6, // U+02F6	MODIFIER LETTER MIDDLE DOUBLE ACUTE ACCENT
+	U_MODIFIER_LETTER_LOW_TILDE = 0x02f7, // U+02F7	MODIFIER LETTER LOW TILDE
+	U_MODIFIER_LETTER_RAISED_COLON = 0x02f8, // U+02F8	MODIFIER LETTER RAISED COLON
+	U_MODIFIER_LETTER_BEGIN_HIGH_TONE = 0x02f9, // U+02F9	MODIFIER LETTER BEGIN HIGH TONE
+	U_MODIFIER_LETTER_END_HIGH_TONE = 0x02fa, // U+02FA	MODIFIER LETTER END HIGH TONE
+	U_MODIFIER_LETTER_BEGIN_LOW_TONE = 0x02fb, // U+02FB	MODIFIER LETTER BEGIN LOW TONE
+	U_MODIFIER_LETTER_END_LOW_TONE = 0x02fc, // U+02FC	MODIFIER LETTER END LOW TONE
+	U_MODIFIER_LETTER_SHELF = 0x02fd, // U+02FD	MODIFIER LETTER SHELF
+	U_MODIFIER_LETTER_OPEN_SHELF = 0x02fe, // U+02FE	MODIFIER LETTER OPEN SHELF
+	U_MODIFIER_LETTER_LOW_LEFT_ARROW = 0x02ff, // U+02FF	MODIFIER LETTER LOW LEFT ARROW
+	U_GREEK_LOWER_NUMERAL_SIGN = 0x0375, // U+0375	GREEK LOWER NUMERAL SIGN
+	U_GREEK_TONOS = 0x0384, // U+0384	GREEK TONOS
+	U_GREEK_DIALYTIKA_TONOS = 0x0385, // U+0385	GREEK DIALYTIKA TONOS
+	U_GREEK_KORONIS = 0x1fbd, // U+1FBD	GREEK KORONIS
+	U_GREEK_PSILI = 0x1fbf, // U+1FBF	GREEK PSILI
+	U_GREEK_PERISPOMENI = 0x1fc0, // U+1FC0	GREEK PERISPOMENI
+	U_GREEK_DIALYTIKA_AND_PERISPOMENI = 0x1fc1, // U+1FC1	GREEK DIALYTIKA AND PERISPOMENI
+	U_GREEK_PSILI_AND_VARIA = 0x1fcd, // U+1FCD	GREEK PSILI AND VARIA
+	U_GREEK_PSILI_AND_OXIA = 0x1fce, // U+1FCE	GREEK PSILI AND OXIA
+	U_GREEK_PSILI_AND_PERISPOMENI = 0x1fcf, // U+1FCF	GREEK PSILI AND PERISPOMENI
+	U_GREEK_DASIA_AND_VARIA = 0x1fdd, // U+1FDD	GREEK DASIA AND VARIA
+	U_GREEK_DASIA_AND_OXIA = 0x1fde, // U+1FDE	GREEK DASIA AND OXIA
+	U_GREEK_DASIA_AND_PERISPOMENI = 0x1fdf, // U+1FDF	GREEK DASIA AND PERISPOMENI
+	U_GREEK_DIALYTIKA_AND_VARIA = 0x1fed, // U+1FED	GREEK DIALYTIKA AND VARIA
+	U_GREEK_DIALYTIKA_AND_OXIA = 0x1fee, // U+1FEE	GREEK DIALYTIKA AND OXIA
+	U_GREEK_VARIA = 0x1fef, // U+1FEF	GREEK VARIA
+	U_GREEK_OXIA = 0x1ffd, // U+1FFD	GREEK OXIA
+	U_GREEK_DASIA = 0x1ffe, // U+1FFE	GREEK DASIA
 
-	U_IDEOGRAPHIC_FULL_STOP = 0x3002,						// U+3002	IDEOGRAPHIC FULL STOP
-	U_LEFT_CORNER_BRACKET = 0x300C,							// U+300C	LEFT CORNER BRACKET
-	U_RIGHT_CORNER_BRACKET = 0x300D,						// U+300D	RIGHT CORNER BRACKET
-	U_LEFT_BLACK_LENTICULAR_BRACKET = 0x3010,				// U+3010	LEFT BLACK LENTICULAR BRACKET
-	U_RIGHT_BLACK_LENTICULAR_BRACKET = 0x3011,				// U+3011	RIGHT BLACK LENTICULAR BRACKET
+	U_IDEOGRAPHIC_FULL_STOP = 0x3002, // U+3002	IDEOGRAPHIC FULL STOP
+	U_LEFT_CORNER_BRACKET = 0x300c, // U+300C	LEFT CORNER BRACKET
+	U_RIGHT_CORNER_BRACKET = 0x300d, // U+300D	RIGHT CORNER BRACKET
+	U_LEFT_BLACK_LENTICULAR_BRACKET = 0x3010, // U+3010	LEFT BLACK LENTICULAR BRACKET
+	U_RIGHT_BLACK_LENTICULAR_BRACKET = 0x3011, // U+3011	RIGHT BLACK LENTICULAR BRACKET
 
-
-	U_OVERLINE = 0x203E, // Unicode Character 'OVERLINE'
+	U_OVERLINE = 0x203e, // Unicode Character 'OVERLINE'
 
 	/**
 	 * UTF-8 BOM
@@ -433,8 +432,8 @@ export const enum CharCode {
 	 */
 	UTF8_BOM = 65279,
 
-	U_FULLWIDTH_SEMICOLON = 0xFF1B,							// U+FF1B	FULLWIDTH SEMICOLON
-	U_FULLWIDTH_COMMA = 0xFF0C,								// U+FF0C	FULLWIDTH COMMA
+	U_FULLWIDTH_SEMICOLON = 0xff1b, // U+FF1B	FULLWIDTH SEMICOLON
+	U_FULLWIDTH_COMMA = 0xff0c, // U+FF0C	FULLWIDTH COMMA
 }
 
 function roundFloat(number: number, decimalPoints: number): number {
@@ -478,7 +477,6 @@ export class RGBA {
 }
 
 export class HSLA {
-
 	_hslaBrand: void = undefined;
 
 	/**
@@ -532,12 +530,18 @@ export class HSLA {
 		const chroma = max - min;
 
 		if (chroma > 0) {
-			s = Math.min((l <= 0.5 ? chroma / (2 * l) : chroma / (2 - (2 * l))), 1);
+			s = Math.min(l <= 0.5 ? chroma / (2 * l) : chroma / (2 - 2 * l), 1);
 
 			switch (max) {
-				case r: h = (g - b) / chroma + (g < b ? 6 : 0); break;
-				case g: h = (b - r) / chroma + 2; break;
-				case b: h = (r - g) / chroma + 4; break;
+				case r:
+					h = (g - b) / chroma + (g < b ? 6 : 0);
+					break;
+				case g:
+					h = (b - r) / chroma + 2;
+					break;
+				case b:
+					h = (r - g) / chroma + 4;
+					break;
 			}
 
 			h *= 60;
@@ -586,12 +590,16 @@ export class HSLA {
 			b = HSLA._hue2rgb(p, q, h - 1 / 3);
 		}
 
-		return new RGBA(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a);
+		return new RGBA(
+			Math.round(r * 255),
+			Math.round(g * 255),
+			Math.round(b * 255),
+			a,
+		);
 	}
 }
 
 export class HSVA {
-
 	_hsvaBrand: void = undefined;
 
 	/**
@@ -633,7 +641,7 @@ export class HSVA {
 		const cmax = Math.max(r, g, b);
 		const cmin = Math.min(r, g, b);
 		const delta = cmax - cmin;
-		const s = cmax === 0 ? 0 : (delta / cmax);
+		const s = cmax === 0 ? 0 : delta / cmax;
 		let m: number;
 
 		if (delta === 0) {
@@ -641,9 +649,9 @@ export class HSVA {
 		} else if (cmax === r) {
 			m = ((((g - b) / delta) % 6) + 6) % 6;
 		} else if (cmax === g) {
-			m = ((b - r) / delta) + 2;
+			m = (b - r) / delta + 2;
 		} else {
-			m = ((r - g) / delta) + 4;
+			m = (r - g) / delta + 4;
 		}
 
 		return new HSVA(Math.round(m * 60), s, cmax, rgba.a);
@@ -653,7 +661,7 @@ export class HSVA {
 	static toRGBA(hsva: HSVA): RGBA {
 		const { h, s, v, a } = hsva;
 		const c = v * s;
-		const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+		const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
 		const m = v - c;
 		let [r, g, b] = [0, 0, 0];
 
@@ -686,7 +694,6 @@ export class HSVA {
 }
 
 export class Color {
-
 	static fromHex(hex: string): Color {
 		return Color.Format.CSS.parseHex(hex) || Color.red;
 	}
@@ -711,7 +718,7 @@ export class Color {
 
 	constructor(arg: RGBA | HSLA | HSVA) {
 		if (!arg) {
-			throw new Error('Color needs a value');
+			throw new Error("Color needs a value");
 		} else if (arg instanceof RGBA) {
 			this.rgba = arg;
 		} else if (arg instanceof HSLA) {
@@ -721,12 +728,17 @@ export class Color {
 			this._hsva = arg;
 			this.rgba = HSVA.toRGBA(arg);
 		} else {
-			throw new Error('Invalid color ctor argument');
+			throw new Error("Invalid color ctor argument");
 		}
 	}
 
 	equals(other: Color | null): boolean {
-		return !!other && RGBA.equals(this.rgba, other.rgba) && HSLA.equals(this.hsla, other.hsla) && HSVA.equals(this.hsva, other.hsva);
+		return (
+			!!other &&
+			RGBA.equals(this.rgba, other.rgba) &&
+			HSLA.equals(this.hsla, other.hsla) &&
+			HSVA.equals(this.hsva, other.hsva)
+		);
 	}
 
 	/**
@@ -744,7 +756,7 @@ export class Color {
 
 	private static _relativeLuminanceForComponent(color: number): number {
 		const c = color / 255;
-		return (c <= 0.03928) ? c / 12.92 : Math.pow(((c + 0.055) / 1.055), 2.4);
+		return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 	}
 
 	/**
@@ -754,7 +766,9 @@ export class Color {
 	getContrastRatio(another: Color): number {
 		const lum1 = this.getRelativeLuminance();
 		const lum2 = another.getRelativeLuminance();
-		return lum1 > lum2 ? (lum1 + 0.05) / (lum2 + 0.05) : (lum2 + 0.05) / (lum1 + 0.05);
+		return lum1 > lum2
+			? (lum1 + 0.05) / (lum2 + 0.05)
+			: (lum2 + 0.05) / (lum1 + 0.05);
 	}
 
 	/**
@@ -762,7 +776,8 @@ export class Color {
 	 *  Return 'true' if darker color otherwise 'false'
 	 */
 	isDarker(): boolean {
-		const yiq = (this.rgba.r * 299 + this.rgba.g * 587 + this.rgba.b * 114) / 1000;
+		const yiq =
+			(this.rgba.r * 299 + this.rgba.g * 587 + this.rgba.b * 114) / 1000;
 		return yiq < 128;
 	}
 
@@ -771,7 +786,8 @@ export class Color {
 	 *  Return 'true' if lighter color otherwise 'false'
 	 */
 	isLighter(): boolean {
-		const yiq = (this.rgba.r * 299 + this.rgba.g * 587 + this.rgba.b * 114) / 1000;
+		const yiq =
+			(this.rgba.r * 299 + this.rgba.g * 587 + this.rgba.b * 114) / 1000;
 		return yiq >= 128;
 	}
 
@@ -788,11 +804,25 @@ export class Color {
 	}
 
 	lighten(factor: number): Color {
-		return new Color(new HSLA(this.hsla.h, this.hsla.s, this.hsla.l + this.hsla.l * factor, this.hsla.a));
+		return new Color(
+			new HSLA(
+				this.hsla.h,
+				this.hsla.s,
+				this.hsla.l + this.hsla.l * factor,
+				this.hsla.a,
+			),
+		);
 	}
 
 	darken(factor: number): Color {
-		return new Color(new HSLA(this.hsla.h, this.hsla.s, this.hsla.l - this.hsla.l * factor, this.hsla.a));
+		return new Color(
+			new HSLA(
+				this.hsla.h,
+				this.hsla.s,
+				this.hsla.l - this.hsla.l * factor,
+				this.hsla.a,
+			),
+		);
 	}
 
 	transparent(factor: number): Color {
@@ -809,7 +839,14 @@ export class Color {
 	}
 
 	opposite(): Color {
-		return new Color(new RGBA(255 - this.rgba.r, 255 - this.rgba.g, 255 - this.rgba.b, this.rgba.a));
+		return new Color(
+			new RGBA(
+				255 - this.rgba.r,
+				255 - this.rgba.g,
+				255 - this.rgba.b,
+				this.rgba.a,
+			),
+		);
 	}
 
 	blend(c: Color): Color {
@@ -824,9 +861,12 @@ export class Color {
 			return Color.transparent;
 		}
 
-		const r = this.rgba.r * thisA / a + rgba.r * colorA * (1 - thisA) / a;
-		const g = this.rgba.g * thisA / a + rgba.g * colorA * (1 - thisA) / a;
-		const b = this.rgba.b * thisA / a + rgba.b * colorA * (1 - thisA) / a;
+		const r =
+			(this.rgba.r * thisA) / a + (rgba.r * colorA * (1 - thisA)) / a;
+		const g =
+			(this.rgba.g * thisA) / a + (rgba.g * colorA * (1 - thisA)) / a;
+		const b =
+			(this.rgba.b * thisA) / a + (rgba.b * colorA * (1 - thisA)) / a;
 
 		return new Color(new RGBA(r, g, b, a));
 	}
@@ -840,12 +880,14 @@ export class Color {
 		const { r, g, b, a } = this.rgba;
 
 		// https://stackoverflow.com/questions/12228548/finding-equivalent-color-with-opacity
-		return new Color(new RGBA(
-			opaqueBackground.rgba.r - a * (opaqueBackground.rgba.r - r),
-			opaqueBackground.rgba.g - a * (opaqueBackground.rgba.g - g),
-			opaqueBackground.rgba.b - a * (opaqueBackground.rgba.b - b),
-			1
-		));
+		return new Color(
+			new RGBA(
+				opaqueBackground.rgba.r - a * (opaqueBackground.rgba.r - r),
+				opaqueBackground.rgba.g - a * (opaqueBackground.rgba.g - g),
+				opaqueBackground.rgba.b - a * (opaqueBackground.rgba.b - b),
+				1,
+			),
+		);
 	}
 
 	flatten(...backgrounds: Color[]): Color {
@@ -857,11 +899,16 @@ export class Color {
 
 	private static _flatten(foreground: Color, background: Color) {
 		const backgroundAlpha = 1 - foreground.rgba.a;
-		return new Color(new RGBA(
-			backgroundAlpha * background.rgba.r + foreground.rgba.a * foreground.rgba.r,
-			backgroundAlpha * background.rgba.g + foreground.rgba.a * foreground.rgba.g,
-			backgroundAlpha * background.rgba.b + foreground.rgba.a * foreground.rgba.b
-		));
+		return new Color(
+			new RGBA(
+				backgroundAlpha * background.rgba.r +
+					foreground.rgba.a * foreground.rgba.r,
+				backgroundAlpha * background.rgba.g +
+					foreground.rgba.a * foreground.rgba.g,
+				backgroundAlpha * background.rgba.b +
+					foreground.rgba.a * foreground.rgba.b,
+			),
+		);
 	}
 
 	private _toString?: string;
@@ -877,7 +924,7 @@ export class Color {
 		factor = factor ? factor : 0.5;
 		const lum1 = of.getRelativeLuminance();
 		const lum2 = relative.getRelativeLuminance();
-		factor = factor * (lum2 - lum1) / lum2;
+		factor = (factor * (lum2 - lum1)) / lum2;
 		return of.lighten(factor);
 	}
 
@@ -888,7 +935,7 @@ export class Color {
 		factor = factor ? factor : 0.5;
 		const lum1 = of.getRelativeLuminance();
 		const lum2 = relative.getRelativeLuminance();
-		factor = factor * (lum1 - lum2) / lum1;
+		factor = (factor * (lum1 - lum2)) / lum1;
 		return of.darken(factor);
 	}
 
@@ -905,7 +952,6 @@ export class Color {
 export namespace Color {
 	export namespace Format {
 		export namespace CSS {
-
 			export function formatRGB(color: Color): string {
 				if (color.rgba.a === 1) {
 					return `rgb(${color.rgba.r}, ${color.rgba.g}, ${color.rgba.b})`;
@@ -915,7 +961,7 @@ export namespace Color {
 			}
 
 			export function formatRGBA(color: Color): string {
-				return `rgba(${color.rgba.r}, ${color.rgba.g}, ${color.rgba.b}, ${+(color.rgba.a).toFixed(2)})`;
+				return `rgba(${color.rgba.r}, ${color.rgba.g}, ${color.rgba.b}, ${+color.rgba.a.toFixed(2)})`;
 			}
 
 			export function formatHSL(color: Color): string {
@@ -932,7 +978,7 @@ export namespace Color {
 
 			function _toTwoDigitHex(n: number): string {
 				const r = n.toString(16);
-				return r.length !== 2 ? '0' + r : r;
+				return r.length !== 2 ? "0" + r : r;
 			}
 
 			/**
@@ -985,18 +1031,32 @@ export namespace Color {
 
 				if (length === 7) {
 					// #RRGGBB format
-					const r = 16 * _parseHexDigit(hex.charCodeAt(1)) + _parseHexDigit(hex.charCodeAt(2));
-					const g = 16 * _parseHexDigit(hex.charCodeAt(3)) + _parseHexDigit(hex.charCodeAt(4));
-					const b = 16 * _parseHexDigit(hex.charCodeAt(5)) + _parseHexDigit(hex.charCodeAt(6));
+					const r =
+						16 * _parseHexDigit(hex.charCodeAt(1)) +
+						_parseHexDigit(hex.charCodeAt(2));
+					const g =
+						16 * _parseHexDigit(hex.charCodeAt(3)) +
+						_parseHexDigit(hex.charCodeAt(4));
+					const b =
+						16 * _parseHexDigit(hex.charCodeAt(5)) +
+						_parseHexDigit(hex.charCodeAt(6));
 					return new Color(new RGBA(r, g, b, 1));
 				}
 
 				if (length === 9) {
 					// #RRGGBBAA format
-					const r = 16 * _parseHexDigit(hex.charCodeAt(1)) + _parseHexDigit(hex.charCodeAt(2));
-					const g = 16 * _parseHexDigit(hex.charCodeAt(3)) + _parseHexDigit(hex.charCodeAt(4));
-					const b = 16 * _parseHexDigit(hex.charCodeAt(5)) + _parseHexDigit(hex.charCodeAt(6));
-					const a = 16 * _parseHexDigit(hex.charCodeAt(7)) + _parseHexDigit(hex.charCodeAt(8));
+					const r =
+						16 * _parseHexDigit(hex.charCodeAt(1)) +
+						_parseHexDigit(hex.charCodeAt(2));
+					const g =
+						16 * _parseHexDigit(hex.charCodeAt(3)) +
+						_parseHexDigit(hex.charCodeAt(4));
+					const b =
+						16 * _parseHexDigit(hex.charCodeAt(5)) +
+						_parseHexDigit(hex.charCodeAt(6));
+					const a =
+						16 * _parseHexDigit(hex.charCodeAt(7)) +
+						_parseHexDigit(hex.charCodeAt(8));
 					return new Color(new RGBA(r, g, b, a / 255));
 				}
 
@@ -1005,7 +1065,9 @@ export namespace Color {
 					const r = _parseHexDigit(hex.charCodeAt(1));
 					const g = _parseHexDigit(hex.charCodeAt(2));
 					const b = _parseHexDigit(hex.charCodeAt(3));
-					return new Color(new RGBA(16 * r + r, 16 * g + g, 16 * b + b));
+					return new Color(
+						new RGBA(16 * r + r, 16 * g + g, 16 * b + b),
+					);
 				}
 
 				if (length === 5) {
@@ -1014,7 +1076,14 @@ export namespace Color {
 					const g = _parseHexDigit(hex.charCodeAt(2));
 					const b = _parseHexDigit(hex.charCodeAt(3));
 					const a = _parseHexDigit(hex.charCodeAt(4));
-					return new Color(new RGBA(16 * r + r, 16 * g + g, 16 * b + b, (16 * a + a) / 255));
+					return new Color(
+						new RGBA(
+							16 * r + r,
+							16 * g + g,
+							16 * b + b,
+							(16 * a + a) / 255,
+						),
+					);
 				}
 
 				// Invalid color
@@ -1023,28 +1092,50 @@ export namespace Color {
 
 			function _parseHexDigit(charCode: CharCode): number {
 				switch (charCode) {
-					case CharCode.Digit0: return 0;
-					case CharCode.Digit1: return 1;
-					case CharCode.Digit2: return 2;
-					case CharCode.Digit3: return 3;
-					case CharCode.Digit4: return 4;
-					case CharCode.Digit5: return 5;
-					case CharCode.Digit6: return 6;
-					case CharCode.Digit7: return 7;
-					case CharCode.Digit8: return 8;
-					case CharCode.Digit9: return 9;
-					case CharCode.a: return 10;
-					case CharCode.A: return 10;
-					case CharCode.b: return 11;
-					case CharCode.B: return 11;
-					case CharCode.c: return 12;
-					case CharCode.C: return 12;
-					case CharCode.d: return 13;
-					case CharCode.D: return 13;
-					case CharCode.e: return 14;
-					case CharCode.E: return 14;
-					case CharCode.f: return 15;
-					case CharCode.F: return 15;
+					case CharCode.Digit0:
+						return 0;
+					case CharCode.Digit1:
+						return 1;
+					case CharCode.Digit2:
+						return 2;
+					case CharCode.Digit3:
+						return 3;
+					case CharCode.Digit4:
+						return 4;
+					case CharCode.Digit5:
+						return 5;
+					case CharCode.Digit6:
+						return 6;
+					case CharCode.Digit7:
+						return 7;
+					case CharCode.Digit8:
+						return 8;
+					case CharCode.Digit9:
+						return 9;
+					case CharCode.a:
+						return 10;
+					case CharCode.A:
+						return 10;
+					case CharCode.b:
+						return 11;
+					case CharCode.B:
+						return 11;
+					case CharCode.c:
+						return 12;
+					case CharCode.C:
+						return 12;
+					case CharCode.d:
+						return 13;
+					case CharCode.D:
+						return 13;
+					case CharCode.e:
+						return 14;
+					case CharCode.E:
+						return 14;
+					case CharCode.f:
+						return 15;
+					case CharCode.F:
+						return 15;
 				}
 				return 0;
 			}

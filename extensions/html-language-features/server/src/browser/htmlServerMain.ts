@@ -3,8 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createConnection, BrowserMessageReader, BrowserMessageWriter, Disposable } from 'vscode-languageserver/browser';
-import { RuntimeEnvironment, startServer } from '../htmlServer';
+import {
+	BrowserMessageReader,
+	BrowserMessageWriter,
+	createConnection,
+	Disposable,
+} from "vscode-languageserver/browser";
+
+import { RuntimeEnvironment, startServer } from "../htmlServer";
 
 const messageReader = new BrowserMessageReader(self);
 const messageWriter = new BrowserMessageWriter(self);
@@ -16,15 +22,22 @@ console.error = connection.console.error.bind(connection.console);
 
 const runtime: RuntimeEnvironment = {
 	timer: {
-		setImmediate(callback: (...args: any[]) => void, ...args: any[]): Disposable {
+		setImmediate(
+			callback: (...args: any[]) => void,
+			...args: any[]
+		): Disposable {
 			const handle = setTimeout(callback, 0, ...args);
 			return { dispose: () => clearTimeout(handle) };
 		},
-		setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): Disposable {
+		setTimeout(
+			callback: (...args: any[]) => void,
+			ms: number,
+			...args: any[]
+		): Disposable {
 			const handle = setTimeout(callback, ms, ...args);
 			return { dispose: () => clearTimeout(handle) };
-		}
-	}
+		},
+	},
 };
 
 startServer(connection, runtime);

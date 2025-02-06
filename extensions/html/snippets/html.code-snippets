@@ -11,8 +11,8 @@
 			"<body>",
 			"\t$0",
 			"</body>",
-			"</html>"
+			"</html>",
 		],
-		"description": "HTML Document"
-	}
+		"description": "HTML Document",
+	},
 }

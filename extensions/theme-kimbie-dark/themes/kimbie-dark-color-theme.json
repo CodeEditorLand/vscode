@@ -79,10 +79,7 @@
 		},
 		{
 			"name": "Comments",
-			"scope": [
-				"comment",
-				"punctuation.definition.comment"
-			],
+			"scope": ["comment", "punctuation.definition.comment"],
 			"settings": {
 				"foreground": "#a57a4c"
 			}
@@ -282,10 +279,7 @@
 		},
 		{
 			"name": "Bold",
-			"scope": [
-				"markup.bold",
-				"punctuation.definition.bold"
-			],
+			"scope": ["markup.bold", "punctuation.definition.bold"],
 			"settings": {
 				"fontStyle": "bold",
 				"foreground": "#f06431"
@@ -293,10 +287,7 @@
 		},
 		{
 			"name": "Italic",
-			"scope": [
-				"markup.italic",
-				"punctuation.definition.italic"
-			],
+			"scope": ["markup.italic", "punctuation.definition.italic"],
 			"settings": {
 				"fontStyle": "italic",
 				"foreground": "#98676a"
@@ -394,10 +385,7 @@
 		},
 		{
 			"name": "Embedded",
-			"scope": [
-				"punctuation.section.embedded",
-				"variable.interpolation"
-			],
+			"scope": ["punctuation.section.embedded", "variable.interpolation"],
 			"settings": {
 				"foreground": "#088649"
 			}

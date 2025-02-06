@@ -13,7 +13,7 @@
 							"type": "object",
 							"description": "Configuration relative to the given repositories, following the format 'owner/repo'.\n  A wildcard (*) is permitted for the repo name (eg: 'microsoft/*')",
 							"patternProperties": {
-								"^[a-zA-Z0-9-_.]+[.]*\/[a-zA-Z0-9-_*]+[.]*$": {
+								"^[a-zA-Z0-9-_.]+[.]*/[a-zA-Z0-9-_*]+[.]*$": {
 									"type": "object",
 									"additionalProperties": true,
 									"oneOf": [

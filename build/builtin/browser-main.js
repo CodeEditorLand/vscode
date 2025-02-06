@@ -4,19 +4,24 @@
  *--------------------------------------------------------------------------------------------*/
 //@ts-check
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { ipcRenderer } = require('electron');
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const { ipcRenderer } = require("electron");
 
-const builtInExtensionsPath = path.join(__dirname, '..', '..', 'product.json');
-const controlFilePath = path.join(os.homedir(), '.vscode-oss-dev', 'extensions', 'control.json');
+const builtInExtensionsPath = path.join(__dirname, "..", "..", "product.json");
+const controlFilePath = path.join(
+	os.homedir(),
+	".vscode-oss-dev",
+	"extensions",
+	"control.json",
+);
 
 /**
  * @param {string} filePath
  */
 function readJson(filePath) {
-	return JSON.parse(fs.readFileSync(filePath, { encoding: 'utf8' }));
+	return JSON.parse(fs.readFileSync(filePath, { encoding: "utf8" }));
 }
 
 /**
@@ -35,16 +40,16 @@ function writeJson(filePath, obj) {
  * @param {boolean} checked
  */
 function renderOption(form, id, title, value, checked) {
-	const input = document.createElement('input');
-	input.type = 'radio';
+	const input = document.createElement("input");
+	input.type = "radio";
 	input.id = id;
-	input.name = 'choice';
+	input.name = "choice";
 	input.value = value;
 	input.checked = !!checked;
 	form.appendChild(input);
 
-	const label = document.createElement('label');
-	label.setAttribute('for', id);
+	const label = document.createElement("label");
+	label.setAttribute("for", id);
 	label.textContent = title;
 	form.appendChild(label);
 
@@ -66,47 +71,65 @@ function render(el, state) {
 			console.error(err);
 		}
 
-		el.innerHTML = '';
+		el.innerHTML = "";
 		render(el, state);
 	}
 
-	const ul = document.createElement('ul');
+	const ul = document.createElement("ul");
 	const { builtin, control } = state;
 
 	for (const ext of builtin) {
-		const controlState = control[ext.name] || 'marketplace';
+		const controlState = control[ext.name] || "marketplace";
 
-		const li = document.createElement('li');
+		const li = document.createElement("li");
 		ul.appendChild(li);
 
-		const name = document.createElement('code');
+		const name = document.createElement("code");
 		name.textContent = ext.name;
 		li.appendChild(name);
 
-		const form = document.createElement('form');
+		const form = document.createElement("form");
 		li.appendChild(form);
 
-		const marketplaceInput = renderOption(form, `marketplace-${ext.name}`, 'Marketplace', 'marketplace', controlState === 'marketplace');
+		const marketplaceInput = renderOption(
+			form,
+			`marketplace-${ext.name}`,
+			"Marketplace",
+			"marketplace",
+			controlState === "marketplace",
+		);
 		marketplaceInput.onchange = function () {
-			control[ext.name] = 'marketplace';
+			control[ext.name] = "marketplace";
 			setState({ builtin, control });
 		};
 
-		const disabledInput = renderOption(form, `disabled-${ext.name}`, 'Disabled', 'disabled', controlState === 'disabled');
+		const disabledInput = renderOption(
+			form,
+			`disabled-${ext.name}`,
+			"Disabled",
+			"disabled",
+			controlState === "disabled",
+		);
 		disabledInput.onchange = function () {
-			control[ext.name] = 'disabled';
+			control[ext.name] = "disabled";
 			setState({ builtin, control });
 		};
 
 		let local = undefined;
 
-		if (controlState !== 'marketplace' && controlState !== 'disabled') {
+		if (controlState !== "marketplace" && controlState !== "disabled") {
 			local = controlState;
 		}
 
-		const localInput = renderOption(form, `local-${ext.name}`, 'Local', 'local', !!local);
+		const localInput = renderOption(
+			form,
+			`local-${ext.name}`,
+			"Local",
+			"local",
+			!!local,
+		);
 		localInput.onchange = async function () {
-			const result = await ipcRenderer.invoke('pickdir');
+			const result = await ipcRenderer.invoke("pickdir");
 
 			if (result) {
 				control[ext.name] = result;
@@ -115,8 +138,8 @@ function render(el, state) {
 		};
 
 		if (local) {
-			const localSpan = document.createElement('code');
-			localSpan.className = 'local';
+			const localSpan = document.createElement("code");
+			localSpan.className = "local";
 			localSpan.textContent = local;
 			form.appendChild(localSpan);
 		}
@@ -126,7 +149,7 @@ function render(el, state) {
 }
 
 function main() {
-	const el = document.getElementById('extensions');
+	const el = document.getElementById("extensions");
 	const builtin = readJson(builtInExtensionsPath).builtInExtensions;
 	let control;
 

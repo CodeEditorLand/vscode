@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface PackageInfo {
 	name: string;
@@ -13,11 +13,11 @@ export interface PackageInfo {
 
 export function getPackageInfo(context: vscode.ExtensionContext) {
 	const packageJSON = context.extension.packageJSON;
-	if (packageJSON && typeof packageJSON === 'object') {
+	if (packageJSON && typeof packageJSON === "object") {
 		return {
-			name: packageJSON.name ?? '',
-			version: packageJSON.version ?? '',
-			aiKey: packageJSON.aiKey ?? '',
+			name: packageJSON.name ?? "",
+			version: packageJSON.version ?? "",
+			aiKey: packageJSON.aiKey ?? "",
 		};
 	}
 	return null;

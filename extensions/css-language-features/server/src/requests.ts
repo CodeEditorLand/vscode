@@ -3,18 +3,26 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestType, Connection } from 'vscode-languageserver';
-import { RuntimeEnvironment } from './cssServer';
+import { Connection, RequestType } from "vscode-languageserver";
+
+import { RuntimeEnvironment } from "./cssServer";
 
 export namespace FsContentRequest {
-	export const type: RequestType<{ uri: string; encoding?: string }, string, any> = new RequestType('fs/content');
+	export const type: RequestType<
+		{ uri: string; encoding?: string },
+		string,
+		any
+	> = new RequestType("fs/content");
 }
 export namespace FsStatRequest {
-	export const type: RequestType<string, FileStat, any> = new RequestType('fs/stat');
+	export const type: RequestType<string, FileStat, any> = new RequestType(
+		"fs/stat",
+	);
 }
 
 export namespace FsReadDirRequest {
-	export const type: RequestType<string, [string, FileType][], any> = new RequestType('fs/readDir');
+	export const type: RequestType<string, [string, FileType][], any> =
+		new RequestType("fs/readDir");
 }
 
 export enum FileType {
@@ -33,7 +41,7 @@ export enum FileType {
 	/**
 	 * A symbolic link to a file.
 	 */
-	SymbolicLink = 64
+	SymbolicLink = 64,
 }
 export interface FileStat {
 	/**
@@ -62,13 +70,17 @@ export interface RequestService {
 	readDirectory(uri: string): Promise<[string, FileType][]>;
 }
 
-
-export function getRequestService(handledSchemas: string[], connection: Connection, runtime: RuntimeEnvironment): RequestService {
-	const builtInHandlers: { [protocol: string]: RequestService | undefined } = {};
+export function getRequestService(
+	handledSchemas: string[],
+	connection: Connection,
+	runtime: RuntimeEnvironment,
+): RequestService {
+	const builtInHandlers: { [protocol: string]: RequestService | undefined } =
+		{};
 	for (const protocol of handledSchemas) {
-		if (protocol === 'file') {
+		if (protocol === "file") {
 			builtInHandlers[protocol] = runtime.file;
-		} else if (protocol === 'http' || protocol === 'https') {
+		} else if (protocol === "http" || protocol === "https") {
 			builtInHandlers[protocol] = runtime.http;
 		}
 	}
@@ -78,7 +90,10 @@ export function getRequestService(handledSchemas: string[], connection: Connecti
 			if (handler) {
 				return handler.stat(uri);
 			}
-			const res = await connection.sendRequest(FsStatRequest.type, uri.toString());
+			const res = await connection.sendRequest(
+				FsStatRequest.type,
+				uri.toString(),
+			);
 			return res;
 		},
 		readDirectory(uri: string): Promise<[string, FileType][]> {
@@ -86,18 +101,24 @@ export function getRequestService(handledSchemas: string[], connection: Connecti
 			if (handler) {
 				return handler.readDirectory(uri);
 			}
-			return connection.sendRequest(FsReadDirRequest.type, uri.toString());
+			return connection.sendRequest(
+				FsReadDirRequest.type,
+				uri.toString(),
+			);
 		},
 		getContent(uri: string, encoding?: string): Promise<string> {
 			const handler = builtInHandlers[getScheme(uri)];
 			if (handler) {
 				return handler.getContent(uri, encoding);
 			}
-			return connection.sendRequest(FsContentRequest.type, { uri: uri.toString(), encoding });
-		}
+			return connection.sendRequest(FsContentRequest.type, {
+				uri: uri.toString(),
+				encoding,
+			});
+		},
 	};
 }
 
 function getScheme(uri: string) {
-	return uri.substr(0, uri.indexOf(':'));
+	return uri.substr(0, uri.indexOf(":"));
 }

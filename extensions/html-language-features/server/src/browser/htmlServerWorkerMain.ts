@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as l10n from '@vscode/l10n';
+import * as l10n from "@vscode/l10n";
 
 let initialized = false;
 const pendingMessages: any[] = [];
@@ -17,14 +17,16 @@ const messageHandler = async (e: any) => {
 				await l10n.config({ uri: i10lLocation });
 				l10nLog.push(`l10n: Configured to ${i10lLocation.toString()}.`);
 			} catch (e) {
-				l10nLog.push(`l10n: Problems loading ${i10lLocation.toString()} : ${e}.`);
+				l10nLog.push(
+					`l10n: Problems loading ${i10lLocation.toString()} : ${e}.`,
+				);
 			}
 		} else {
 			l10nLog.push(`l10n: No bundle configured.`);
 		}
-		await import('./htmlServerMain.js');
+		await import("./htmlServerMain.js");
 		if (self.onmessage !== messageHandler) {
-			pendingMessages.forEach(msg => self.onmessage?.(msg));
+			pendingMessages.forEach((msg) => self.onmessage?.(msg));
 			pendingMessages.length = 0;
 		}
 		l10nLog.forEach(console.log);

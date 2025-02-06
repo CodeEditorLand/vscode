@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ts from 'typescript';
-import path from 'path';
+import path from "path";
+import ts from "typescript";
 
 export class StaticLanguageServiceHost implements ts.LanguageServiceHost {
-
 	private readonly _cmdLine: ts.ParsedCommandLine;
-	private readonly _scriptSnapshots: Map<string, ts.IScriptSnapshot> = new Map();
+	private readonly _scriptSnapshots: Map<string, ts.IScriptSnapshot> =
+		new Map();
 
 	constructor(readonly projectPath: string) {
 		const existingOptions: Partial<ts.CompilerOptions> = {};
@@ -17,7 +17,12 @@ export class StaticLanguageServiceHost implements ts.LanguageServiceHost {
 		if (parsed.error) {
 			throw parsed.error;
 		}
-		this._cmdLine = ts.parseJsonConfigFileContent(parsed.config, ts.sys, path.dirname(projectPath), existingOptions);
+		this._cmdLine = ts.parseJsonConfigFileContent(
+			parsed.config,
+			ts.sys,
+			path.dirname(projectPath),
+			existingOptions,
+		);
 		if (this._cmdLine.errors.length > 0) {
 			throw parsed.error;
 		}
@@ -29,13 +34,14 @@ export class StaticLanguageServiceHost implements ts.LanguageServiceHost {
 		return this._cmdLine.fileNames;
 	}
 	getScriptVersion(_fileName: string): string {
-		return '1';
+		return "1";
 	}
 	getProjectVersion(): string {
-		return '1';
+		return "1";
 	}
 	getScriptSnapshot(fileName: string): ts.IScriptSnapshot | undefined {
-		let result: ts.IScriptSnapshot | undefined = this._scriptSnapshots.get(fileName);
+		let result: ts.IScriptSnapshot | undefined =
+			this._scriptSnapshots.get(fileName);
 		if (result === undefined) {
 			const content = ts.sys.readFile(fileName);
 			if (content === undefined) {

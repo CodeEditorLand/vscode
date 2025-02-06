@@ -10,9 +10,9 @@
 	const vscode = acquireVsCodeApi();
 
 	function getSettings() {
-		const element = document.getElementById('settings');
+		const element = document.getElementById("settings");
 		if (element) {
-			const data = element.getAttribute('data-settings');
+			const data = element.getAttribute("data-settings");
 			if (data) {
 				return JSON.parse(data);
 			}
@@ -27,7 +27,7 @@
 	let hasLoadedMedia = false;
 
 	// Elements
-	const video = document.createElement('video');
+	const video = document.createElement("video");
 	if (settings.src !== null) {
 		video.src = settings.src;
 	}
@@ -43,33 +43,35 @@
 		}
 		hasLoadedMedia = true;
 
-		document.body.classList.remove('loading');
-		document.body.classList.add('ready');
+		document.body.classList.remove("loading");
+		document.body.classList.add("ready");
 		document.body.append(video);
 	}
 
-	video.addEventListener('error', e => {
+	video.addEventListener("error", (e) => {
 		if (hasLoadedMedia) {
 			return;
 		}
 
 		hasLoadedMedia = true;
-		document.body.classList.add('error');
-		document.body.classList.remove('loading');
+		document.body.classList.add("error");
+		document.body.classList.remove("loading");
 	});
 
 	if (settings.src === null) {
 		onLoaded();
 	} else {
-		video.addEventListener('canplaythrough', () => {
+		video.addEventListener("canplaythrough", () => {
 			onLoaded();
 		});
 	}
 
-	document.querySelector('.open-file-link')?.addEventListener('click', (e) => {
-		e.preventDefault();
-		vscode.postMessage({
-			type: 'reopen-as-text',
+	document
+		.querySelector(".open-file-link")
+		?.addEventListener("click", (e) => {
+			e.preventDefault();
+			vscode.postMessage({
+				type: "reopen-as-text",
+			});
 		});
-	});
-}());
+})();

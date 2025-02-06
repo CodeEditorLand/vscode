@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
+"use strict";
 
-const { ESLint } = require('eslint');
-const { Transform } = require('stream');
-const { relative } = require('path');
-const fancyLog = require('fancy-log');
+const { ESLint } = require("eslint");
+const { Transform } = require("stream");
+const { relative } = require("path");
+const fancyLog = require("fancy-log");
 
 /**
  * @param {Function} action - A function to handle all ESLint results
@@ -16,7 +16,7 @@ const fancyLog = require('fancy-log');
  */
 function eslint(action) {
 	const linter = new ESLint({});
-	const formatter = linter.loadFormatter('compact');
+	const formatter = linter.loadFormatter("compact");
 
 	const results = [];
 	results.errorCount = 0;
@@ -32,7 +32,11 @@ function eslint(action) {
 			}
 
 			if (file.isStream()) {
-				cb(new Error('vinyl files with Stream contents are not supported'));
+				cb(
+					new Error(
+						"vinyl files with Stream contents are not supported",
+					),
+				);
 				return;
 			}
 
@@ -43,7 +47,11 @@ function eslint(action) {
 					return;
 				}
 
-				const result = (await linter.lintText(file.contents.toString(), { filePath }))[0];
+				const result = (
+					await linter.lintText(file.contents.toString(), {
+						filePath,
+					})
+				)[0];
 				results.push(result);
 				results.errorCount += result.errorCount;
 				results.warningCount += result.warningCount;
@@ -64,14 +72,15 @@ function eslint(action) {
 			} catch (error) {
 				done(error);
 			}
-		});
+		},
+	);
 }
 
 function transform(transform, flush) {
 	return new Transform({
 		objectMode: true,
 		transform,
-		flush
+		flush,
 	});
 }
 

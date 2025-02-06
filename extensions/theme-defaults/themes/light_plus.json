@@ -2,7 +2,8 @@
 	"$schema": "vscode://schemas/color-theme",
 	"name": "Light+",
 	"include": "./light_vs.json",
-	"tokenColors": [ // adds rules to the light vs rules
+	"tokenColors": [
+		// adds rules to the light vs rules
 		{
 			"name": "Function declarations",
 			"scope": [
@@ -93,8 +94,7 @@
 				"meta.definition.variable.name",
 				"support.variable",
 				"entity.name.variable",
-				"constant.other.placeholder", // placeholders in strings
-
+				"constant.other.placeholder" // placeholders in strings
 			],
 			"settings": {
 				"foreground": "#001080"
@@ -102,19 +102,14 @@
 		},
 		{
 			"name": "Constants and enums",
-			"scope": [
-				"variable.other.constant",
-				"variable.other.enummember"
-			],
+			"scope": ["variable.other.constant", "variable.other.enummember"],
 			"settings": {
-				"foreground": "#0070C1",
+				"foreground": "#0070C1"
 			}
 		},
 		{
 			"name": "Object keys, TS grammar specific",
-			"scope": [
-				"meta.object-literal.key"
-			],
+			"scope": ["meta.object-literal.key"],
 			"settings": {
 				"foreground": "#001080"
 			}
@@ -176,10 +171,7 @@
 			}
 		},
 		{
-			"scope": [
-				"constant.character",
-				"constant.other.option"
-			],
+			"scope": ["constant.character", "constant.other.option"],
 			"settings": {
 				"foreground": "#0000ff"
 			}
@@ -202,6 +194,6 @@
 		"newOperator": "#AF00DB",
 		"stringLiteral": "#a31515",
 		"customLiteral": "#795E26",
-		"numberLiteral": "#098658",
+		"numberLiteral": "#098658"
 	}
 }

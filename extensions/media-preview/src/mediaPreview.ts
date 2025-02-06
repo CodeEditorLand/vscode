@@ -3,13 +3,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Utils } from 'vscode-uri';
-import { BinarySizeStatusBarEntry } from './binarySizeStatusBarEntry';
-import { Disposable } from './util/dispose';
+import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
 
-export function reopenAsText(resource: vscode.Uri, viewColumn: vscode.ViewColumn | undefined) {
-	vscode.commands.executeCommand('vscode.openWith', resource, 'default', viewColumn);
+import { BinarySizeStatusBarEntry } from "./binarySizeStatusBarEntry";
+import { Disposable } from "./util/dispose";
+
+export function reopenAsText(
+	resource: vscode.Uri,
+	viewColumn: vscode.ViewColumn | undefined,
+) {
+	vscode.commands.executeCommand(
+		"vscode.openWith",
+		resource,
+		"default",
+		viewColumn,
+	);
 }
 
 export const enum PreviewState {
@@ -19,7 +28,6 @@ export const enum PreviewState {
 }
 
 export abstract class MediaPreview extends Disposable {
-
 	protected previewState = PreviewState.Visible;
 	private _binarySize: number | undefined;
 
@@ -34,34 +42,43 @@ export abstract class MediaPreview extends Disposable {
 		webviewEditor.webview.options = {
 			enableScripts: true,
 			enableForms: false,
-			localResourceRoots: [
-				Utils.dirname(resource),
-				extensionRoot,
-			]
+			localResourceRoots: [Utils.dirname(resource), extensionRoot],
 		};
 
-		this._register(webviewEditor.onDidChangeViewState(() => {
-			this.updateState();
-		}));
+		this._register(
+			webviewEditor.onDidChangeViewState(() => {
+				this.updateState();
+			}),
+		);
 
-		this._register(webviewEditor.onDidDispose(() => {
-			this.previewState = PreviewState.Disposed;
-			this.dispose();
-		}));
+		this._register(
+			webviewEditor.onDidDispose(() => {
+				this.previewState = PreviewState.Disposed;
+				this.dispose();
+			}),
+		);
 
-		const watcher = this._register(vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(resource, '*')));
-		this._register(watcher.onDidChange(e => {
-			if (e.toString() === this.resource.toString()) {
-				this.updateBinarySize();
-				this.render();
-			}
-		}));
+		const watcher = this._register(
+			vscode.workspace.createFileSystemWatcher(
+				new vscode.RelativePattern(resource, "*"),
+			),
+		);
+		this._register(
+			watcher.onDidChange((e) => {
+				if (e.toString() === this.resource.toString()) {
+					this.updateBinarySize();
+					this.render();
+				}
+			}),
+		);
 
-		this._register(watcher.onDidDelete(e => {
-			if (e.toString() === this.resource.toString()) {
-				this.webviewEditor.dispose();
-			}
-		}));
+		this._register(
+			watcher.onDidDelete((e) => {
+				if (e.toString() === this.resource.toString()) {
+					this.webviewEditor.dispose();
+				}
+			}),
+		);
 	}
 
 	public override dispose() {
@@ -82,7 +99,7 @@ export abstract class MediaPreview extends Disposable {
 		}
 
 		const content = await this.getWebviewContents();
-		if (this.previewState as PreviewState === PreviewState.Disposed) {
+		if ((this.previewState as PreviewState) === PreviewState.Disposed) {
 			return;
 		}
 

@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface IMergeRegion {
 	name: string;
@@ -14,7 +14,7 @@ export interface IMergeRegion {
 export const enum CommitType {
 	Current,
 	Incoming,
-	Both
+	Both,
 }
 
 export interface IExtensionConfiguration {
@@ -23,9 +23,18 @@ export interface IExtensionConfiguration {
 	enableEditorOverview: boolean;
 }
 
-export interface IDocumentMergeConflict extends IDocumentMergeConflictDescriptor {
-	commitEdit(type: CommitType, editor: vscode.TextEditor, edit?: vscode.TextEditorEdit): Thenable<boolean>;
-	applyEdit(type: CommitType, document: vscode.TextDocument, edit: { replace(range: vscode.Range, newText: string): void }): void;
+export interface IDocumentMergeConflict
+	extends IDocumentMergeConflictDescriptor {
+	commitEdit(
+		type: CommitType,
+		editor: vscode.TextEditor,
+		edit?: vscode.TextEditorEdit,
+	): Thenable<boolean>;
+	applyEdit(
+		type: CommitType,
+		document: vscode.TextDocument,
+		edit: { replace(range: vscode.Range, newText: string): void },
+	): void;
 }
 
 export interface IDocumentMergeConflictDescriptor {
@@ -37,7 +46,9 @@ export interface IDocumentMergeConflictDescriptor {
 }
 
 export interface IDocumentMergeConflictTracker {
-	getConflicts(document: vscode.TextDocument): PromiseLike<IDocumentMergeConflict[]>;
+	getConflicts(
+		document: vscode.TextDocument,
+	): PromiseLike<IDocumentMergeConflict[]>;
 	isPending(document: vscode.TextDocument): boolean;
 	forget(document: vscode.TextDocument): void;
 }

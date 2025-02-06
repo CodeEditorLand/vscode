@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { workspace } from 'vscode';
+import { workspace } from "vscode";
 
-const DEFAULT_CLIENT_ID_V1 = 'aebc6443-996d-45c2-90f0-388ff96faa56';
-const DEFAULT_TENANT_V1 = 'organizations';
-const DEFAULT_CLIENT_ID_V2 = 'c27c220f-ce2f-4904-927d-333864217eeb';
-const DEFAULT_TENANT_V2 = 'common';
+const DEFAULT_CLIENT_ID_V1 = "aebc6443-996d-45c2-90f0-388ff96faa56";
+const DEFAULT_TENANT_V1 = "organizations";
+const DEFAULT_CLIENT_ID_V2 = "c27c220f-ce2f-4904-927d-333864217eeb";
+const DEFAULT_TENANT_V2 = "common";
 
-const OIDC_SCOPES = ['openid', 'email', 'profile', 'offline_access'];
-const GRAPH_TACK_ON_SCOPE = 'User.Read';
+const OIDC_SCOPES = ["openid", "email", "profile", "offline_access"];
+const GRAPH_TACK_ON_SCOPE = "User.Read";
 
 export class ScopeData {
-
 	private readonly _defaultClientId: string;
 	private readonly _defaultTenant: string;
 
@@ -47,7 +46,11 @@ export class ScopeData {
 	readonly tenant: string;
 
 	constructor(readonly originalScopes: readonly string[] = []) {
-		if (workspace.getConfiguration('microsoft-authentication').get<'v1' | 'v2'>('clientIdVersion') === 'v2') {
+		if (
+			workspace
+				.getConfiguration("microsoft-authentication")
+				.get<"v1" | "v2">("clientIdVersion") === "v2"
+		) {
 			this._defaultClientId = DEFAULT_CLIENT_ID_V2;
 			this._defaultTenant = DEFAULT_TENANT_V2;
 		} else {
@@ -58,32 +61,36 @@ export class ScopeData {
 		const modifiedScopes = [...originalScopes];
 		modifiedScopes.sort();
 		this.allScopes = modifiedScopes;
-		this.scopeStr = modifiedScopes.join(' ');
+		this.scopeStr = modifiedScopes.join(" ");
 		this.scopesToSend = this.getScopesToSend(modifiedScopes);
 		this.clientId = this.getClientId(this.allScopes);
 		this.tenant = this.getTenantId(this.allScopes);
 	}
 
 	private getClientId(scopes: string[]) {
-		return scopes.reduce<string | undefined>((prev, current) => {
-			if (current.startsWith('VSCODE_CLIENT_ID:')) {
-				return current.split('VSCODE_CLIENT_ID:')[1];
-			}
-			return prev;
-		}, undefined) ?? this._defaultClientId;
+		return (
+			scopes.reduce<string | undefined>((prev, current) => {
+				if (current.startsWith("VSCODE_CLIENT_ID:")) {
+					return current.split("VSCODE_CLIENT_ID:")[1];
+				}
+				return prev;
+			}, undefined) ?? this._defaultClientId
+		);
 	}
 
 	private getTenantId(scopes: string[]) {
-		return scopes.reduce<string | undefined>((prev, current) => {
-			if (current.startsWith('VSCODE_TENANT:')) {
-				return current.split('VSCODE_TENANT:')[1];
-			}
-			return prev;
-		}, undefined) ?? this._defaultTenant;
+		return (
+			scopes.reduce<string | undefined>((prev, current) => {
+				if (current.startsWith("VSCODE_TENANT:")) {
+					return current.split("VSCODE_TENANT:")[1];
+				}
+				return prev;
+			}, undefined) ?? this._defaultTenant
+		);
 	}
 
 	private getScopesToSend(scopes: string[]) {
-		const scopesToSend = scopes.filter(s => !s.startsWith('VSCODE_'));
+		const scopesToSend = scopes.filter((s) => !s.startsWith("VSCODE_"));
 
 		const set = new Set(scopesToSend);
 		for (const scope of OIDC_SCOPES) {

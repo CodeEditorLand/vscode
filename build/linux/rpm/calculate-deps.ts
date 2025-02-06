@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { spawnSync } from 'child_process';
-import { constants, statSync } from 'fs';
-import { additionalDeps } from './dep-lists';
+import { spawnSync } from "child_process";
+import { constants, statSync } from "fs";
+
+import { additionalDeps } from "./dep-lists";
 
 export function generatePackageDeps(files: string[]): Set<string>[] {
-	const dependencies: Set<string>[] = files.map(file => calculatePackageDeps(file));
+	const dependencies: Set<string>[] = files.map((file) =>
+		calculatePackageDeps(file),
+	);
 	const additionalDepsSet = new Set(additionalDeps);
 	dependencies.push(additionalDepsSet);
 	return dependencies;
@@ -18,18 +21,26 @@ export function generatePackageDeps(files: string[]): Set<string>[] {
 function calculatePackageDeps(binaryPath: string): Set<string> {
 	try {
 		if (!(statSync(binaryPath).mode & constants.S_IXUSR)) {
-			throw new Error(`Binary ${binaryPath} needs to have an executable bit set.`);
+			throw new Error(
+				`Binary ${binaryPath} needs to have an executable bit set.`,
+			);
 		}
 	} catch (e) {
 		// The package might not exist. Don't re-throw the error here.
-		console.error('Tried to stat ' + binaryPath + ' but failed.');
+		console.error("Tried to stat " + binaryPath + " but failed.");
 	}
 
-	const findRequiresResult = spawnSync('/usr/lib/rpm/find-requires', { input: binaryPath + '\n' });
+	const findRequiresResult = spawnSync("/usr/lib/rpm/find-requires", {
+		input: binaryPath + "\n",
+	});
 	if (findRequiresResult.status !== 0) {
-		throw new Error(`find-requires failed with exit code ${findRequiresResult.status}.\nstderr: ${findRequiresResult.stderr}`);
+		throw new Error(
+			`find-requires failed with exit code ${findRequiresResult.status}.\nstderr: ${findRequiresResult.stderr}`,
+		);
 	}
 
-	const requires = new Set(findRequiresResult.stdout.toString('utf-8').trimEnd().split('\n'));
+	const requires = new Set(
+		findRequiresResult.stdout.toString("utf-8").trimEnd().split("\n"),
+	);
 	return requires;
 }

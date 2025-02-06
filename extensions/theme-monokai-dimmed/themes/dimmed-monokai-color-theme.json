@@ -123,7 +123,7 @@
 			"scope": "constant.character, constant.other",
 			"settings": {
 				"fontStyle": "",
-				"foreground": "#8080FF",
+				"foreground": "#8080FF"
 			}
 		},
 		{
@@ -155,7 +155,7 @@
 			"scope": "entity.name.class, entity.name.type, entity.name.namespace, entity.name.scope-resolution",
 			"settings": {
 				"fontStyle": "",
-				"foreground": "#9B0000",
+				"foreground": "#9B0000"
 			}
 		},
 		{
@@ -410,9 +410,7 @@
 		},
 		{
 			"name": "Reset JavaScript string interpolation expression",
-			"scope": [
-				"meta.template.expression"
-			],
+			"scope": ["meta.template.expression"],
 			"settings": {
 				"foreground": "#C5C8C6"
 			}
@@ -622,9 +620,7 @@
 		},
 		{
 			"name": "Markdown List Punctuation",
-			"scope": [
-				"punctuation.definition.list.begin.markdown"
-			],
+			"scope": ["punctuation.definition.list.begin.markdown"],
 			"settings": {
 				"foreground": ""
 			}

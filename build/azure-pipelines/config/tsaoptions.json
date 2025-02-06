@@ -4,9 +4,7 @@
 	"instanceUrl": "https://devdiv.visualstudio.com/defaultcollection",
 	"projectName": "DevDiv",
 	"areaPath": "DevDiv\\VS Code (compliance tracking only)\\Visual Studio Code Client",
-	"notificationAliases": [
-		"monacotools@microsoft.com"
-	],
+	"notificationAliases": ["monacotools@microsoft.com"],
 	"validateToolOutput": "None",
 	"allTools": true
 }

@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs';
-import 'mocha';
-import { basename, join, normalize } from 'path';
-import { commands, ConfigurationTarget, Uri, workspace } from 'vscode';
+import * as fs from "fs";
+
+import "mocha";
+
+import { basename, join, normalize } from "path";
+import { commands, ConfigurationTarget, Uri, workspace } from "vscode";
 
 interface BestsAndWorsts {
 	bestParse?: number;
@@ -19,7 +21,14 @@ interface BestsAndWorsts {
 	worstCombined: number;
 }
 
-function findBestsAndWorsts(results: { parseTime?: number; captureTime?: number; metadataTime?: number; tokenizeTime?: number }[]): BestsAndWorsts {
+function findBestsAndWorsts(
+	results: {
+		parseTime?: number;
+		captureTime?: number;
+		metadataTime?: number;
+		tokenizeTime?: number;
+	}[],
+): BestsAndWorsts {
 	let bestParse: number | undefined;
 	let bestCapture: number | undefined;
 	let bestMetadata: number | undefined;
@@ -33,14 +42,18 @@ function findBestsAndWorsts(results: { parseTime?: number; captureTime?: number;
 		const result = results[i];
 		if (result.parseTime && result.captureTime && result.metadataTime) {
 			// Tree Sitter
-			const combined = result.parseTime + result.captureTime + result.metadataTime;
+			const combined =
+				result.parseTime + result.captureTime + result.metadataTime;
 			if (bestParse === undefined || result.parseTime < bestParse) {
 				bestParse = result.parseTime;
 			}
 			if (bestCapture === undefined || result.captureTime < bestCapture) {
 				bestCapture = result.captureTime;
 			}
-			if (bestMetadata === undefined || result.metadataTime < bestMetadata) {
+			if (
+				bestMetadata === undefined ||
+				result.metadataTime < bestMetadata
+			) {
 				bestMetadata = result.metadataTime;
 			}
 			if (bestCombined === undefined || combined < bestCombined) {
@@ -50,10 +63,16 @@ function findBestsAndWorsts(results: { parseTime?: number; captureTime?: number;
 				if (worstParse === undefined || result.parseTime > worstParse) {
 					worstParse = result.parseTime;
 				}
-				if (worstCapture === undefined || result.captureTime > worstCapture) {
+				if (
+					worstCapture === undefined ||
+					result.captureTime > worstCapture
+				) {
 					worstCapture = result.captureTime;
 				}
-				if (worstMetadata === undefined || result.metadataTime > worstMetadata) {
+				if (
+					worstMetadata === undefined ||
+					result.metadataTime > worstMetadata
+				) {
 					worstMetadata = result.metadataTime;
 				}
 				if (worstCombined === undefined || combined > worstCombined) {
@@ -62,10 +81,17 @@ function findBestsAndWorsts(results: { parseTime?: number; captureTime?: number;
 			}
 		} else if (result.tokenizeTime) {
 			// TextMate
-			if (bestCombined === undefined || result.tokenizeTime < bestCombined) {
+			if (
+				bestCombined === undefined ||
+				result.tokenizeTime < bestCombined
+			) {
 				bestCombined = result.tokenizeTime;
 			}
-			if (i !== 0 && (worstCombined === undefined || result.tokenizeTime > worstCombined)) {
+			if (
+				i !== 0 &&
+				(worstCombined === undefined ||
+					result.tokenizeTime > worstCombined)
+			) {
 				worstCombined = result.tokenizeTime;
 			}
 		}
@@ -92,7 +118,11 @@ interface TextMateTimes {
 	tokenizeTime: number;
 }
 
-async function runCommand<TimesType = TreeSitterTimes | TextMateTimes>(command: string, file: Uri, times: number): Promise<TimesType[]> {
+async function runCommand<TimesType = TreeSitterTimes | TextMateTimes>(
+	command: string,
+	file: Uri,
+	times: number,
+): Promise<TimesType[]> {
 	const results: TimesType[] = [];
 	for (let i = 0; i < times; i++) {
 		results.push(await commands.executeCommand(command, file));
@@ -101,15 +131,32 @@ async function runCommand<TimesType = TreeSitterTimes | TextMateTimes>(command: 
 }
 
 async function doTest(file: Uri, times: number) {
-	const treeSitterResults = await runCommand<TreeSitterTimes>('_workbench.colorizeTreeSitterTokens', file, times);
+	const treeSitterResults = await runCommand<TreeSitterTimes>(
+		"_workbench.colorizeTreeSitterTokens",
+		file,
+		times,
+	);
 
-	const { bestParse, bestCapture, bestMetadata, bestCombined, worstParse, worstCapture, worstMetadata, worstCombined } = findBestsAndWorsts(treeSitterResults);
-	const textMateResults = await runCommand<TextMateTimes>('_workbench.colorizeTextMateTokens', file, times);
+	const {
+		bestParse,
+		bestCapture,
+		bestMetadata,
+		bestCombined,
+		worstParse,
+		worstCapture,
+		worstMetadata,
+		worstCombined,
+	} = findBestsAndWorsts(treeSitterResults);
+	const textMateResults = await runCommand<TextMateTimes>(
+		"_workbench.colorizeTextMateTokens",
+		file,
+		times,
+	);
 	const textMateBestWorst = findBestsAndWorsts(textMateResults);
 
 	const toString = (time: number, charLength: number) => {
 		// truncate time to charLength characters
-		return time.toString().slice(0, charLength).padEnd(charLength, ' ');
+		return time.toString().slice(0, charLength).padEnd(charLength, " ");
 	};
 	const numLength = 7;
 	const resultString = `                        | First   | Best    | Worst   |
@@ -124,22 +171,36 @@ async function doTest(file: Uri, times: number) {
 	console.log(resultString);
 }
 
-suite('Tokenization Performance', () => {
-	const testPath = normalize(join(__dirname, '../test'));
-	const fixturesPath = join(testPath, 'colorize-fixtures');
+suite("Tokenization Performance", () => {
+	const testPath = normalize(join(__dirname, "../test"));
+	const fixturesPath = join(testPath, "colorize-fixtures");
 	let originalSettingValue: any;
 
 	suiteSetup(async function () {
-		originalSettingValue = workspace.getConfiguration('editor').get('experimental.preferTreeSitter');
-		await workspace.getConfiguration('editor').update('experimental.preferTreeSitter', ["typescript"], ConfigurationTarget.Global);
+		originalSettingValue = workspace
+			.getConfiguration("editor")
+			.get("experimental.preferTreeSitter");
+		await workspace
+			.getConfiguration("editor")
+			.update(
+				"experimental.preferTreeSitter",
+				["typescript"],
+				ConfigurationTarget.Global,
+			);
 	});
 	suiteTeardown(async function () {
-		await workspace.getConfiguration('editor').update('experimental.preferTreeSitter', originalSettingValue, ConfigurationTarget.Global);
+		await workspace
+			.getConfiguration("editor")
+			.update(
+				"experimental.preferTreeSitter",
+				originalSettingValue,
+				ConfigurationTarget.Global,
+			);
 	});
 
 	for (const fixture of fs.readdirSync(fixturesPath)) {
 		test(`Full file colorize: ${fixture}`, async function () {
-			await commands.executeCommand('workbench.action.closeAllEditors');
+			await commands.executeCommand("workbench.action.closeAllEditors");
 			await doTest(Uri.file(join(fixturesPath, fixture)), 6);
 		});
 	}

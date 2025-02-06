@@ -5,20 +5,20 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withDefaults = require('../shared.webpack.config');
+const withDefaults = require("../shared.webpack.config");
 
 module.exports = withDefaults({
 	context: __dirname,
 	entry: {
-		extension: './src/npmMain.ts',
+		extension: "./src/npmMain.ts",
 	},
 	output: {
-		filename: 'npmMain.js',
+		filename: "npmMain.js",
 	},
 	resolve: {
-		mainFields: ['module', 'main'],
-		extensions: ['.ts', '.js'] // support ts-files and js-files
-	}
+		mainFields: ["module", "main"],
+		extensions: [".ts", ".js"], // support ts-files and js-files
+	},
 });

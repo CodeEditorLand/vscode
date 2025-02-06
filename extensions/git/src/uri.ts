@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri } from 'vscode';
-import { Change, Status } from './api/git';
+import { Uri } from "vscode";
+
+import { Change, Status } from "./api/git";
 
 export interface GitUriParams {
 	path: string;
@@ -29,10 +30,14 @@ export interface GitUriOptions {
 // As a mitigation for extensions like ESLint showing warnings and errors
 // for git URIs, let's change the file extension of these uris to .git,
 // when `replaceFileExtension` is true.
-export function toGitUri(uri: Uri, ref: string, options: GitUriOptions = {}): Uri {
+export function toGitUri(
+	uri: Uri,
+	ref: string,
+	options: GitUriOptions = {},
+): Uri {
 	const params: GitUriParams = {
 		path: uri.fsPath,
-		ref
+		ref,
 	};
 
 	if (options.submoduleOf) {
@@ -47,7 +52,11 @@ export function toGitUri(uri: Uri, ref: string, options: GitUriOptions = {}): Ur
 		path = `${path}.diff`;
 	}
 
-	return uri.with({ scheme: options.scheme ?? 'git', path, query: JSON.stringify(params) });
+	return uri.with({
+		scheme: options.scheme ?? "git",
+		path,
+		query: JSON.stringify(params),
+	});
 }
 
 /**
@@ -55,33 +64,37 @@ export function toGitUri(uri: Uri, ref: string, options: GitUriOptions = {}): Ur
  */
 export function toMergeUris(uri: Uri): { base: Uri; ours: Uri; theirs: Uri } {
 	return {
-		base: toGitUri(uri, ':1'),
-		ours: toGitUri(uri, ':2'),
-		theirs: toGitUri(uri, ':3'),
+		base: toGitUri(uri, ":1"),
+		ours: toGitUri(uri, ":2"),
+		theirs: toGitUri(uri, ":3"),
 	};
 }
 
-export function toMultiFileDiffEditorUris(change: Change, originalRef: string, modifiedRef: string): { originalUri: Uri | undefined; modifiedUri: Uri | undefined } {
+export function toMultiFileDiffEditorUris(
+	change: Change,
+	originalRef: string,
+	modifiedRef: string,
+): { originalUri: Uri | undefined; modifiedUri: Uri | undefined } {
 	switch (change.status) {
 		case Status.INDEX_ADDED:
 			return {
 				originalUri: undefined,
-				modifiedUri: toGitUri(change.uri, modifiedRef)
+				modifiedUri: toGitUri(change.uri, modifiedRef),
 			};
 		case Status.DELETED:
 			return {
 				originalUri: toGitUri(change.uri, originalRef),
-				modifiedUri: undefined
+				modifiedUri: undefined,
 			};
 		case Status.INDEX_RENAMED:
 			return {
 				originalUri: toGitUri(change.originalUri, originalRef),
-				modifiedUri: toGitUri(change.uri, modifiedRef)
+				modifiedUri: toGitUri(change.uri, modifiedRef),
 			};
 		default:
 			return {
 				originalUri: toGitUri(change.uri, originalRef),
-				modifiedUri: toGitUri(change.uri, modifiedRef)
+				modifiedUri: toGitUri(change.uri, modifiedRef),
 			};
 	}
 }

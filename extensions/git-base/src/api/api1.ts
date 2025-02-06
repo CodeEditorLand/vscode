@@ -3,17 +3,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable, commands } from 'vscode';
-import { Model } from '../model';
-import { getRemoteSourceActions, pickRemoteSource } from '../remoteSource';
-import { GitBaseExtensionImpl } from './extension';
-import { API, PickRemoteSourceOptions, PickRemoteSourceResult, RemoteSourceAction, RemoteSourceProvider } from './git-base';
+import { commands, Disposable } from "vscode";
+
+import { Model } from "../model";
+import { getRemoteSourceActions, pickRemoteSource } from "../remoteSource";
+import { GitBaseExtensionImpl } from "./extension";
+import {
+	API,
+	PickRemoteSourceOptions,
+	PickRemoteSourceResult,
+	RemoteSourceAction,
+	RemoteSourceProvider,
+} from "./git-base";
 
 export class ApiImpl implements API {
+	constructor(private _model: Model) {}
 
-	constructor(private _model: Model) { }
-
-	pickRemoteSource(options: PickRemoteSourceOptions): Promise<PickRemoteSourceResult | string | undefined> {
+	pickRemoteSource(
+		options: PickRemoteSourceOptions,
+	): Promise<PickRemoteSourceResult | string | undefined> {
 		return pickRemoteSource(this._model, options as any);
 	}
 
@@ -26,16 +34,23 @@ export class ApiImpl implements API {
 	}
 }
 
-export function registerAPICommands(extension: GitBaseExtensionImpl): Disposable {
+export function registerAPICommands(
+	extension: GitBaseExtensionImpl,
+): Disposable {
 	const disposables: Disposable[] = [];
 
-	disposables.push(commands.registerCommand('git-base.api.getRemoteSources', (opts?: PickRemoteSourceOptions) => {
-		if (!extension.model) {
-			return;
-		}
+	disposables.push(
+		commands.registerCommand(
+			"git-base.api.getRemoteSources",
+			(opts?: PickRemoteSourceOptions) => {
+				if (!extension.model) {
+					return;
+				}
 
-		return pickRemoteSource(extension.model, opts as any);
-	}));
+				return pickRemoteSource(extension.model, opts as any);
+			},
+		),
+	);
 
 	return Disposable.from(...disposables);
 }

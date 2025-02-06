@@ -17,11 +17,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/../../../node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
-			"args": [
-				"--timeout",
-				"999999",
-				"--colors"
-			],
+			"args": ["--timeout", "999999", "--colors"],
 			"cwd": "${workspaceFolder}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [],

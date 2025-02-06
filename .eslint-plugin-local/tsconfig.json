@@ -1,9 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es2020",
-		"lib": [
-			"ES2020"
-		],
+		"lib": ["ES2020"],
 		"module": "commonjs",
 		"esModuleInterop": true,
 		"alwaysStrict": true,
@@ -16,11 +14,6 @@
 		"newLine": "lf",
 		"noEmit": true
 	},
-	"include": [
-		"**/*.ts",
-		"**/*.js"
-	],
-	"exclude": [
-		"node_modules/**"
-	]
+	"include": ["**/*.ts", "**/*.js"],
+	"exclude": ["node_modules/**"]
 }

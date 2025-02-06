@@ -2,11 +2,11 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as http from 'http';
-import { URL } from 'url';
-import * as fs from 'fs';
-import * as path from 'path';
-import { randomBytes } from 'crypto';
+import { randomBytes } from "crypto";
+import * as fs from "fs";
+import * as http from "http";
+import * as path from "path";
+import { URL } from "url";
 
 function sendFile(res: http.ServerResponse, filepath: string) {
 	fs.readFile(filepath, (err, body) => {
@@ -16,7 +16,7 @@ function sendFile(res: http.ServerResponse, filepath: string) {
 			res.end();
 		} else {
 			res.writeHead(200, {
-				'content-length': body.length,
+				"content-length": body.length,
 			});
 			res.end(body);
 		}
@@ -68,51 +68,66 @@ export class LoopbackAuthServer implements ILoopbackServer {
 	private readonly _resultPromise: Promise<IOAuthResult>;
 	private _startingRedirect: URL;
 
-	public nonce = randomBytes(16).toString('base64');
+	public nonce = randomBytes(16).toString("base64");
 	public port: number | undefined;
 
 	public set state(state: string | undefined) {
 		if (state) {
-			this._startingRedirect.searchParams.set('state', state);
+			this._startingRedirect.searchParams.set("state", state);
 		} else {
-			this._startingRedirect.searchParams.delete('state');
+			this._startingRedirect.searchParams.delete("state");
 		}
 	}
 	public get state(): string | undefined {
-		return this._startingRedirect.searchParams.get('state') ?? undefined;
+		return this._startingRedirect.searchParams.get("state") ?? undefined;
 	}
 
 	constructor(serveRoot: string, startingRedirect: string) {
 		if (!serveRoot) {
-			throw new Error('serveRoot must be defined');
+			throw new Error("serveRoot must be defined");
 		}
 		if (!startingRedirect) {
-			throw new Error('startingRedirect must be defined');
+			throw new Error("startingRedirect must be defined");
 		}
 		this._startingRedirect = new URL(startingRedirect);
-		let deferred: { resolve: (result: IOAuthResult) => void; reject: (reason: any) => void };
-		this._resultPromise = new Promise<IOAuthResult>((resolve, reject) => deferred = { resolve, reject });
+		let deferred: {
+			resolve: (result: IOAuthResult) => void;
+			reject: (reason: any) => void;
+		};
+		this._resultPromise = new Promise<IOAuthResult>(
+			(resolve, reject) => (deferred = { resolve, reject }),
+		);
 
 		this._server = http.createServer((req, res) => {
 			const reqUrl = new URL(req.url!, `http://${req.headers.host}`);
 			switch (reqUrl.pathname) {
-				case '/signin': {
-					const receivedNonce = (reqUrl.searchParams.get('nonce') ?? '').replace(/ /g, '+');
+				case "/signin": {
+					const receivedNonce = (
+						reqUrl.searchParams.get("nonce") ?? ""
+					).replace(/ /g, "+");
 					if (receivedNonce !== this.nonce) {
-						res.writeHead(302, { location: `/?error=${encodeURIComponent('Nonce does not match.')}` });
+						res.writeHead(302, {
+							location: `/?error=${encodeURIComponent("Nonce does not match.")}`,
+						});
 						res.end();
 					}
-					res.writeHead(302, { location: this._startingRedirect.toString() });
+					res.writeHead(302, {
+						location: this._startingRedirect.toString(),
+					});
 					res.end();
 					break;
 				}
-				case '/callback': {
-					const code = reqUrl.searchParams.get('code') ?? undefined;
-					const state = reqUrl.searchParams.get('state') ?? undefined;
-					const nonce = (reqUrl.searchParams.get('nonce') ?? '').replace(/ /g, '+');
-					const error = reqUrl.searchParams.get('error') ?? undefined;
+				case "/callback": {
+					const code = reqUrl.searchParams.get("code") ?? undefined;
+					const state = reqUrl.searchParams.get("state") ?? undefined;
+					const nonce = (
+						reqUrl.searchParams.get("nonce") ?? ""
+					).replace(/ /g, "+");
+					const error = reqUrl.searchParams.get("error") ?? undefined;
 					if (error) {
-						res.writeHead(302, { location: `/?error=${reqUrl.searchParams.get('error_description')}` });
+						res.writeHead(302, {
+							location: `/?error=${reqUrl.searchParams.get("error_description")}`,
+						});
 						res.end();
 						deferred.reject(new Error(error));
 						break;
@@ -123,29 +138,36 @@ export class LoopbackAuthServer implements ILoopbackServer {
 						break;
 					}
 					if (this.state !== state) {
-						res.writeHead(302, { location: `/?error=${encodeURIComponent('State does not match.')}` });
+						res.writeHead(302, {
+							location: `/?error=${encodeURIComponent("State does not match.")}`,
+						});
 						res.end();
-						deferred.reject(new Error('State does not match.'));
+						deferred.reject(new Error("State does not match."));
 						break;
 					}
 					if (this.nonce !== nonce) {
-						res.writeHead(302, { location: `/?error=${encodeURIComponent('Nonce does not match.')}` });
+						res.writeHead(302, {
+							location: `/?error=${encodeURIComponent("Nonce does not match.")}`,
+						});
 						res.end();
-						deferred.reject(new Error('Nonce does not match.'));
+						deferred.reject(new Error("Nonce does not match."));
 						break;
 					}
 					deferred.resolve({ code, state });
-					res.writeHead(302, { location: '/' });
+					res.writeHead(302, { location: "/" });
 					res.end();
 					break;
 				}
 				// Serve the static files
-				case '/':
-					sendFile(res, path.join(serveRoot, 'index.html'));
+				case "/":
+					sendFile(res, path.join(serveRoot, "index.html"));
 					break;
 				default:
 					// substring to get rid of leading '/'
-					sendFile(res, path.join(serveRoot, reqUrl.pathname.substring(1)));
+					sendFile(
+						res,
+						path.join(serveRoot, reqUrl.pathname.substring(1)),
+					);
 					break;
 			}
 		});
@@ -154,19 +176,19 @@ export class LoopbackAuthServer implements ILoopbackServer {
 	public start(): Promise<number> {
 		return new Promise<number>((resolve, reject) => {
 			if (this._server.listening) {
-				throw new Error('Server is already started');
+				throw new Error("Server is already started");
 			}
 			const portTimeout = setTimeout(() => {
-				reject(new Error('Timeout waiting for port'));
+				reject(new Error("Timeout waiting for port"));
 			}, 5000);
-			this._server.on('listening', () => {
+			this._server.on("listening", () => {
 				const address = this._server.address();
-				if (typeof address === 'string') {
+				if (typeof address === "string") {
 					this.port = parseInt(address);
 				} else if (address instanceof Object) {
 					this.port = address.port;
 				} else {
-					throw new Error('Unable to determine port');
+					throw new Error("Unable to determine port");
 				}
 
 				clearTimeout(portTimeout);
@@ -176,20 +198,20 @@ export class LoopbackAuthServer implements ILoopbackServer {
 
 				resolve(this.port);
 			});
-			this._server.on('error', err => {
+			this._server.on("error", (err) => {
 				reject(new Error(`Error listening to server: ${err}`));
 			});
-			this._server.on('close', () => {
-				reject(new Error('Closed'));
+			this._server.on("close", () => {
+				reject(new Error("Closed"));
 			});
-			this._server.listen(0, '127.0.0.1');
+			this._server.listen(0, "127.0.0.1");
 		});
 	}
 
 	public stop(): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			if (!this._server.listening) {
-				throw new Error('Server is not started');
+				throw new Error("Server is not started");
 			}
 			this._server.close((err) => {
 				if (err) {

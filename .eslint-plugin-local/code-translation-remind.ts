@@ -3,29 +3,34 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from 'eslint';
-import { TSESTree } from '@typescript-eslint/utils';
-import { readFileSync } from 'fs';
-import { createImportRuleListener } from './utils';
+import { readFileSync } from "fs";
+import { TSESTree } from "@typescript-eslint/utils";
+import * as eslint from "eslint";
 
+import { createImportRuleListener } from "./utils";
 
-export = new class TranslationRemind implements eslint.Rule.RuleModule {
-
-	private static NLS_MODULE = 'vs/nls';
+export = new (class TranslationRemind implements eslint.Rule.RuleModule {
+	private static NLS_MODULE = "vs/nls";
 
 	readonly meta: eslint.Rule.RuleMetaData = {
 		messages: {
-			missing: 'Please add \'{{resource}}\' to ./build/lib/i18n.resources.json file to use translations here.'
+			missing:
+				"Please add '{{resource}}' to ./build/lib/i18n.resources.json file to use translations here.",
 		},
 		schema: false,
 	};
 
 	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-		return createImportRuleListener((node, path) => this._checkImport(context, node, path));
+		return createImportRuleListener((node, path) =>
+			this._checkImport(context, node, path),
+		);
 	}
 
-	private _checkImport(context: eslint.Rule.RuleContext, node: TSESTree.Node, path: string) {
-
+	private _checkImport(
+		context: eslint.Rule.RuleContext,
+		node: TSESTree.Node,
+		path: string,
+	) {
 		if (path !== TranslationRemind.NLS_MODULE) {
 			return;
 		}
@@ -42,9 +47,11 @@ export = new class TranslationRemind implements eslint.Rule.RuleModule {
 
 		let json;
 		try {
-			json = readFileSync('./build/lib/i18n.resources.json', 'utf8');
+			json = readFileSync("./build/lib/i18n.resources.json", "utf8");
 		} catch (e) {
-			console.error('[translation-remind rule]: File with resources to pull from Transifex was not found. Aborting translation resource check for newly defined workbench part/service.');
+			console.error(
+				"[translation-remind rule]: File with resources to pull from Transifex was not found. Aborting translation resource check for newly defined workbench part/service.",
+			);
 			return;
 		}
 		const workbenchResources = JSON.parse(json).workbench;
@@ -59,10 +66,9 @@ export = new class TranslationRemind implements eslint.Rule.RuleModule {
 		if (!resourceDefined) {
 			context.report({
 				loc: node.loc,
-				messageId: 'missing',
-				data: { resource }
+				messageId: "missing",
+				data: { resource },
 			});
 		}
 	}
-};
-
+})();

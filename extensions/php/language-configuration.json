@@ -1,96 +1,52 @@
 {
 	"comments": {
 		"lineComment": "//", // "#"
-		"blockComment": [
-			"/*",
-			"*/"
-		]
+		"blockComment": ["/*", "*/"]
 	},
 	"brackets": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		]
+		["{", "}"],
+		["[", "]"],
+		["(", ")"]
 	],
 	"autoClosingPairs": [
 		{
 			"open": "{",
 			"close": "}",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "[",
 			"close": "]",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "(",
 			"close": ")",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "'",
 			"close": "'",
-			"notIn": [
-				"string",
-				"comment"
-			]
+			"notIn": ["string", "comment"]
 		},
 		{
 			"open": "\"",
 			"close": "\"",
-			"notIn": [
-				"string",
-				"comment"
-			]
+			"notIn": ["string", "comment"]
 		},
 		{
 			"open": "/**",
 			"close": " */",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		}
 	],
 	"surroundingPairs": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		],
-		[
-			"'",
-			"'"
-		],
-		[
-			"\"",
-			"\""
-		],
-		[
-			"`",
-			"`"
-		]
+		["{", "}"],
+		["[", "]"],
+		["(", ")"],
+		["'", "'"],
+		["\"", "\""],
+		["`", "`"]
 	],
 	"indentationRules": {
 		"increaseIndentPattern": "({(?!.*}).*|\\(|\\[|((else(\\s)?)?if|else|for(each)?|while|switch|case).*:)\\s*((/[/*].*|)?$|\\?>)",
@@ -98,8 +54,8 @@
 	},
 	"folding": {
 		"markers": {
-			"start": "^\\s*(#|\/\/)region\\b",
-			"end": "^\\s*(#|\/\/)endregion\\b"
+			"start": "^\\s*(#|//)region\\b",
+			"end": "^\\s*(#|//)endregion\\b"
 		}
 	},
 	"wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\-\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
@@ -126,8 +82,8 @@
 			"beforeText": "^(\\t|(\\ \\ ))*\\ \\*(\\ ([^\\*]|\\*(?!\\/))*)?$",
 			"action": {
 				"indent": "none",
-				"appendText": "* ",
-			},
+				"appendText": "* "
+			}
 		},
 		{
 			// e.g.  */|
@@ -135,7 +91,7 @@
 			"action": {
 				"indent": "none",
 				"removeText": 1
-			},
+			}
 		},
 		{
 			// e.g.  *-----*/|
@@ -157,7 +113,7 @@
 		// Add // when pressing enter from inside line comment
 		{
 			"beforeText": {
-				"pattern": "\/\/.*"
+				"pattern": "//.*"
 			},
 			"afterText": {
 				"pattern": "^(?!\\s*$).+"
@@ -166,6 +122,6 @@
 				"indent": "none",
 				"appendText": "// "
 			}
-		},
+		}
 	]
 }

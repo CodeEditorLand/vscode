@@ -3,32 +3,44 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { TypeScriptServiceConfiguration } from '../configuration/configuration';
-import { DiagnosticLanguage } from '../configuration/languageDescription';
-import { TelemetryReporter } from '../logging/telemetry';
-import { DiagnosticPerformanceData as TsDiagnosticPerformanceData } from '../tsServer/protocol/protocol';
-import * as arrays from '../utils/arrays';
-import { Disposable } from '../utils/dispose';
-import { equals } from '../utils/objects';
-import { ResourceMap } from '../utils/resourceMap';
+import * as vscode from "vscode";
 
-function diagnosticsEquals(a: vscode.Diagnostic, b: vscode.Diagnostic): boolean {
+import { TypeScriptServiceConfiguration } from "../configuration/configuration";
+import { DiagnosticLanguage } from "../configuration/languageDescription";
+import { TelemetryReporter } from "../logging/telemetry";
+import { DiagnosticPerformanceData as TsDiagnosticPerformanceData } from "../tsServer/protocol/protocol";
+import * as arrays from "../utils/arrays";
+import { Disposable } from "../utils/dispose";
+import { equals } from "../utils/objects";
+import { ResourceMap } from "../utils/resourceMap";
+
+function diagnosticsEquals(
+	a: vscode.Diagnostic,
+	b: vscode.Diagnostic,
+): boolean {
 	if (a === b) {
 		return true;
 	}
 
-	return a.code === b.code
-		&& a.message === b.message
-		&& a.severity === b.severity
-		&& a.source === b.source
-		&& a.range.isEqual(b.range)
-		&& arrays.equals(a.relatedInformation || arrays.empty, b.relatedInformation || arrays.empty, (a, b) => {
-			return a.message === b.message
-				&& a.location.range.isEqual(b.location.range)
-				&& a.location.uri.fsPath === b.location.uri.fsPath;
-		})
-		&& arrays.equals(a.tags || arrays.empty, b.tags || arrays.empty);
+	return (
+		a.code === b.code &&
+		a.message === b.message &&
+		a.severity === b.severity &&
+		a.source === b.source &&
+		a.range.isEqual(b.range) &&
+		arrays.equals(
+			a.relatedInformation || arrays.empty,
+			b.relatedInformation || arrays.empty,
+			(a, b) => {
+				return (
+					a.message === b.message &&
+					a.location.range.isEqual(b.location.range) &&
+					a.location.uri.fsPath === b.location.uri.fsPath
+				);
+			},
+		) &&
+		arrays.equals(a.tags || arrays.empty, b.tags || arrays.empty)
+	);
 }
 
 export const enum DiagnosticKind {
@@ -39,19 +51,21 @@ export const enum DiagnosticKind {
 }
 
 class FileDiagnostics {
-
-	private readonly _diagnostics = new Map<DiagnosticKind, ReadonlyArray<vscode.Diagnostic>>();
+	private readonly _diagnostics = new Map<
+		DiagnosticKind,
+		ReadonlyArray<vscode.Diagnostic>
+	>();
 
 	constructor(
 		public readonly file: vscode.Uri,
-		public language: DiagnosticLanguage
-	) { }
+		public language: DiagnosticLanguage,
+	) {}
 
 	public updateDiagnostics(
 		language: DiagnosticLanguage,
 		kind: DiagnosticKind,
 		diagnostics: ReadonlyArray<vscode.Diagnostic>,
-		ranges: ReadonlyArray<vscode.Range> | undefined
+		ranges: ReadonlyArray<vscode.Range> | undefined,
 	): boolean {
 		if (language !== this.language) {
 			this._diagnostics.clear();
@@ -71,7 +85,9 @@ class FileDiagnostics {
 		return true;
 	}
 
-	public getAllDiagnostics(settings: DiagnosticSettings): vscode.Diagnostic[] {
+	public getAllDiagnostics(
+		settings: DiagnosticSettings,
+	): vscode.Diagnostic[] {
 		if (!settings.getValidate(this.language)) {
 			return [];
 		}
@@ -85,7 +101,10 @@ class FileDiagnostics {
 
 	public delete(toDelete: vscode.Diagnostic): void {
 		for (const [type, diags] of this._diagnostics) {
-			this._diagnostics.set(type, diags.filter(diag => !diagnosticsEquals(diag, toDelete)));
+			this._diagnostics.set(
+				type,
+				diags.filter((diag) => !diagnosticsEquals(diag, toDelete)),
+			);
 		}
 	}
 
@@ -94,13 +113,16 @@ class FileDiagnostics {
 	 */
 	private updateRegionDiagnostics(
 		diagnostics: ReadonlyArray<vscode.Diagnostic>,
-		ranges: ReadonlyArray<vscode.Range>): boolean {
+		ranges: ReadonlyArray<vscode.Range>,
+	): boolean {
 		if (!this._diagnostics.get(DiagnosticKind.Semantic)) {
 			this._diagnostics.set(DiagnosticKind.Semantic, diagnostics);
 			return true;
 		}
 		const oldDiagnostics = this._diagnostics.get(DiagnosticKind.Semantic)!;
-		const newDiagnostics = oldDiagnostics.filter(diag => !ranges.some(range => diag.range.intersection(range)));
+		const newDiagnostics = oldDiagnostics.filter(
+			(diag) => !ranges.some((range) => diag.range.intersection(range)),
+		);
 		newDiagnostics.push(...diagnostics);
 		this._diagnostics.set(DiagnosticKind.Semantic, newDiagnostics);
 		return true;
@@ -108,10 +130,14 @@ class FileDiagnostics {
 
 	private getSuggestionDiagnostics(settings: DiagnosticSettings) {
 		const enableSuggestions = settings.getEnableSuggestions(this.language);
-		return this.get(DiagnosticKind.Suggestion).filter(x => {
+		return this.get(DiagnosticKind.Suggestion).filter((x) => {
 			if (!enableSuggestions) {
 				// Still show unused
-				return x.tags && (x.tags.includes(vscode.DiagnosticTag.Unnecessary) || x.tags.includes(vscode.DiagnosticTag.Deprecated));
+				return (
+					x.tags &&
+					(x.tags.includes(vscode.DiagnosticTag.Unnecessary) ||
+						x.tags.includes(vscode.DiagnosticTag.Deprecated))
+				);
 			}
 			return true;
 		});
@@ -127,25 +153,33 @@ interface LanguageDiagnosticSettings {
 	readonly enableSuggestions: boolean;
 }
 
-function areLanguageDiagnosticSettingsEqual(currentSettings: LanguageDiagnosticSettings, newSettings: LanguageDiagnosticSettings): boolean {
-	return currentSettings.validate === newSettings.validate
-		&& currentSettings.enableSuggestions === newSettings.enableSuggestions;
+function areLanguageDiagnosticSettingsEqual(
+	currentSettings: LanguageDiagnosticSettings,
+	newSettings: LanguageDiagnosticSettings,
+): boolean {
+	return (
+		currentSettings.validate === newSettings.validate &&
+		currentSettings.enableSuggestions === newSettings.enableSuggestions
+	);
 }
 
 class DiagnosticSettings {
 	private static readonly defaultSettings: LanguageDiagnosticSettings = {
 		validate: true,
-		enableSuggestions: true
+		enableSuggestions: true,
 	};
 
-	private readonly _languageSettings = new Map<DiagnosticLanguage, LanguageDiagnosticSettings>();
+	private readonly _languageSettings = new Map<
+		DiagnosticLanguage,
+		LanguageDiagnosticSettings
+	>();
 
 	public getValidate(language: DiagnosticLanguage): boolean {
 		return this.get(language).validate;
 	}
 
 	public setValidate(language: DiagnosticLanguage, value: boolean): boolean {
-		return this.update(language, settings => ({
+		return this.update(language, (settings) => ({
 			validate: value,
 			enableSuggestions: settings.enableSuggestions,
 		}));
@@ -155,22 +189,34 @@ class DiagnosticSettings {
 		return this.get(language).enableSuggestions;
 	}
 
-	public setEnableSuggestions(language: DiagnosticLanguage, value: boolean): boolean {
-		return this.update(language, settings => ({
+	public setEnableSuggestions(
+		language: DiagnosticLanguage,
+		value: boolean,
+	): boolean {
+		return this.update(language, (settings) => ({
 			validate: settings.validate,
-			enableSuggestions: value
+			enableSuggestions: value,
 		}));
 	}
 
 	private get(language: DiagnosticLanguage): LanguageDiagnosticSettings {
-		return this._languageSettings.get(language) || DiagnosticSettings.defaultSettings;
+		return (
+			this._languageSettings.get(language) ||
+			DiagnosticSettings.defaultSettings
+		);
 	}
 
-	private update(language: DiagnosticLanguage, f: (x: LanguageDiagnosticSettings) => LanguageDiagnosticSettings): boolean {
+	private update(
+		language: DiagnosticLanguage,
+		f: (x: LanguageDiagnosticSettings) => LanguageDiagnosticSettings,
+	): boolean {
 		const currentSettings = this.get(language);
 		const newSettings = f(currentSettings);
 		this._languageSettings.set(language, newSettings);
-		return !areLanguageDiagnosticSettingsEqual(currentSettings, newSettings);
+		return !areLanguageDiagnosticSettingsEqual(
+			currentSettings,
+			newSettings,
+		);
 	}
 }
 
@@ -179,9 +225,10 @@ interface DiagnosticPerformanceData extends TsDiagnosticPerformanceData {
 }
 
 class DiagnosticsTelemetryManager extends Disposable {
-
 	private readonly _diagnosticCodesMap = new Map<number, number>();
-	private readonly _diagnosticSnapshotsMap = new ResourceMap<readonly vscode.Diagnostic[]>(uri => uri.toString(), { onCaseInsensitiveFileSystem: false });
+	private readonly _diagnosticSnapshotsMap = new ResourceMap<
+		readonly vscode.Diagnostic[]
+	>((uri) => uri.toString(), { onCaseInsensitiveFileSystem: false });
 	private _timeout: NodeJS.Timeout | undefined;
 	private _telemetryEmitter: NodeJS.Timeout | undefined;
 
@@ -190,16 +237,23 @@ class DiagnosticsTelemetryManager extends Disposable {
 		private readonly _diagnosticsCollection: vscode.DiagnosticCollection,
 	) {
 		super();
-		this._register(vscode.workspace.onDidChangeTextDocument(e => {
-			if (e.document.languageId === 'typescript' || e.document.languageId === 'typescriptreact') {
-				this._updateAllDiagnosticCodesAfterTimeout();
-			}
-		}));
+		this._register(
+			vscode.workspace.onDidChangeTextDocument((e) => {
+				if (
+					e.document.languageId === "typescript" ||
+					e.document.languageId === "typescriptreact"
+				) {
+					this._updateAllDiagnosticCodesAfterTimeout();
+				}
+			}),
+		);
 		this._updateAllDiagnosticCodesAfterTimeout();
 		this._registerTelemetryEventEmitter();
 	}
 
-	public logDiagnosticsPerformanceTelemetry(performanceData: DiagnosticPerformanceData[]): void {
+	public logDiagnosticsPerformanceTelemetry(
+		performanceData: DiagnosticPerformanceData[],
+	): void {
 		for (const data of performanceData) {
 			/* __GDPR__
 				"diagnostics.performance" : {
@@ -214,15 +268,13 @@ class DiagnosticsTelemetryManager extends Disposable {
 					]
 				}
 			*/
-			this._telemetryReporter.logTelemetry('diagnostics.performance',
-				{
-					syntaxDiagDuration: data.syntaxDiag,
-					semanticDiagDuration: data.semanticDiag,
-					suggestionDiagDuration: data.suggestionDiag,
-					regionSemanticDiagDuration: data.regionSemanticDiag,
-					fileLineCount: data.fileLineCount,
-				},
-			);
+			this._telemetryReporter.logTelemetry("diagnostics.performance", {
+				syntaxDiagDuration: data.syntaxDiag,
+				semanticDiagDuration: data.semanticDiag,
+				suggestionDiagDuration: data.suggestionDiag,
+				regionSemanticDiagDuration: data.regionSemanticDiag,
+				fileLineCount: data.fileLineCount,
+			});
 		}
 	}
 
@@ -235,30 +287,43 @@ class DiagnosticsTelemetryManager extends Disposable {
 		if (code === undefined) {
 			return;
 		}
-		this._diagnosticCodesMap.set(Number(code), (this._diagnosticCodesMap.get(Number(code)) || 0) + 1);
+		this._diagnosticCodesMap.set(
+			Number(code),
+			(this._diagnosticCodesMap.get(Number(code)) || 0) + 1,
+		);
 	}
 
 	private _updateDiagnosticCodes() {
 		this._diagnosticsCollection.forEach((uri, diagnostics) => {
 			const previousDiagnostics = this._diagnosticSnapshotsMap.get(uri);
 			this._diagnosticSnapshotsMap.set(uri, diagnostics);
-			const diagnosticsDiff = diagnostics.filter((diagnostic) => !previousDiagnostics?.some((previousDiagnostic) => equals(diagnostic, previousDiagnostic)));
+			const diagnosticsDiff = diagnostics.filter(
+				(diagnostic) =>
+					!previousDiagnostics?.some((previousDiagnostic) =>
+						equals(diagnostic, previousDiagnostic),
+					),
+			);
 			diagnosticsDiff.forEach((diagnostic) => {
 				const code = diagnostic.code;
-				this._increaseDiagnosticCodeCount(typeof code === 'string' || typeof code === 'number' ? code : code?.value);
+				this._increaseDiagnosticCodeCount(
+					typeof code === "string" || typeof code === "number"
+						? code
+						: code?.value,
+				);
 			});
 		});
 	}
 
 	private _registerTelemetryEventEmitter() {
-		this._telemetryEmitter = setInterval(() => {
-			if (this._diagnosticCodesMap.size > 0) {
-				let diagnosticCodes = '';
-				this._diagnosticCodesMap.forEach((value, key) => {
-					diagnosticCodes += `${key}:${value},`;
-				});
-				this._diagnosticCodesMap.clear();
-				/* __GDPR__
+		this._telemetryEmitter = setInterval(
+			() => {
+				if (this._diagnosticCodesMap.size > 0) {
+					let diagnosticCodes = "";
+					this._diagnosticCodesMap.forEach((value, key) => {
+						diagnosticCodes += `${key}:${value},`;
+					});
+					this._diagnosticCodesMap.clear();
+					/* __GDPR__
 					"typescript.diagnostics" : {
 						"owner": "aiday-mar",
 						"diagnosticCodes" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" },
@@ -267,11 +332,16 @@ class DiagnosticsTelemetryManager extends Disposable {
 						]
 					}
 				*/
-				this._telemetryReporter.logTelemetry('typescript.diagnostics', {
-					diagnosticCodes: diagnosticCodes
-				});
-			}
-		}, 5 * 60 * 1000); // 5 minutes
+					this._telemetryReporter.logTelemetry(
+						"typescript.diagnostics",
+						{
+							diagnosticCodes: diagnosticCodes,
+						},
+					);
+				}
+			},
+			5 * 60 * 1000,
+		); // 5 minutes
 	}
 
 	override dispose() {
@@ -289,22 +359,38 @@ export class DiagnosticsManager extends Disposable {
 
 	private readonly _updateDelay = 50;
 
-	private readonly _diagnosticsTelemetryManager: DiagnosticsTelemetryManager | undefined;
+	private readonly _diagnosticsTelemetryManager:
+		| DiagnosticsTelemetryManager
+		| undefined;
 
 	constructor(
 		owner: string,
 		configuration: TypeScriptServiceConfiguration,
 		telemetryReporter: TelemetryReporter,
-		onCaseInsensitiveFileSystem: boolean
+		onCaseInsensitiveFileSystem: boolean,
 	) {
 		super();
-		this._diagnostics = new ResourceMap<FileDiagnostics>(undefined, { onCaseInsensitiveFileSystem });
-		this._pendingUpdates = new ResourceMap<any>(undefined, { onCaseInsensitiveFileSystem });
+		this._diagnostics = new ResourceMap<FileDiagnostics>(undefined, {
+			onCaseInsensitiveFileSystem,
+		});
+		this._pendingUpdates = new ResourceMap<any>(undefined, {
+			onCaseInsensitiveFileSystem,
+		});
 
-		this._currentDiagnostics = this._register(vscode.languages.createDiagnosticCollection(owner));
+		this._currentDiagnostics = this._register(
+			vscode.languages.createDiagnosticCollection(owner),
+		);
 		// Here we are selecting only 1 user out of 1000 to send telemetry diagnostics
-		if (Math.random() * 1000 <= 1 || configuration.enableDiagnosticsTelemetry) {
-			this._diagnosticsTelemetryManager = this._register(new DiagnosticsTelemetryManager(telemetryReporter, this._currentDiagnostics));
+		if (
+			Math.random() * 1000 <= 1 ||
+			configuration.enableDiagnosticsTelemetry
+		) {
+			this._diagnosticsTelemetryManager = this._register(
+				new DiagnosticsTelemetryManager(
+					telemetryReporter,
+					this._currentDiagnostics,
+				),
+			);
 		}
 	}
 
@@ -346,10 +432,20 @@ export class DiagnosticsManager extends Disposable {
 		let didUpdate = false;
 		const entry = this._diagnostics.get(file);
 		if (entry) {
-			didUpdate = entry.updateDiagnostics(language, kind, diagnostics, ranges);
+			didUpdate = entry.updateDiagnostics(
+				language,
+				kind,
+				diagnostics,
+				ranges,
+			);
 		} else if (diagnostics.length) {
 			const fileDiagnostics = new FileDiagnostics(file, language);
-			fileDiagnostics.updateDiagnostics(language, kind, diagnostics, ranges);
+			fileDiagnostics.updateDiagnostics(
+				language,
+				kind,
+				diagnostics,
+				ranges,
+			);
 			this._diagnostics.set(file, fileDiagnostics);
 			didUpdate = true;
 		}
@@ -361,7 +457,7 @@ export class DiagnosticsManager extends Disposable {
 
 	public configFileDiagnosticsReceived(
 		file: vscode.Uri,
-		diagnostics: ReadonlyArray<vscode.Diagnostic>
+		diagnostics: ReadonlyArray<vscode.Diagnostic>,
 	): void {
 		this._currentDiagnostics.set(file, diagnostics);
 	}
@@ -371,7 +467,10 @@ export class DiagnosticsManager extends Disposable {
 		this._diagnostics.delete(resource);
 	}
 
-	public deleteDiagnostic(resource: vscode.Uri, diagnostic: vscode.Diagnostic): void {
+	public deleteDiagnostic(
+		resource: vscode.Uri,
+		diagnostic: vscode.Diagnostic,
+	): void {
 		const fileDiagnostics = this._diagnostics.get(resource);
 		if (fileDiagnostics) {
 			fileDiagnostics.delete(diagnostic);
@@ -383,13 +482,23 @@ export class DiagnosticsManager extends Disposable {
 		return this._currentDiagnostics.get(file) || [];
 	}
 
-	public logDiagnosticsPerformanceTelemetry(performanceData: DiagnosticPerformanceData[]): void {
-		this._diagnosticsTelemetryManager?.logDiagnosticsPerformanceTelemetry(performanceData);
+	public logDiagnosticsPerformanceTelemetry(
+		performanceData: DiagnosticPerformanceData[],
+	): void {
+		this._diagnosticsTelemetryManager?.logDiagnosticsPerformanceTelemetry(
+			performanceData,
+		);
 	}
 
 	private scheduleDiagnosticsUpdate(file: vscode.Uri) {
 		if (!this._pendingUpdates.has(file)) {
-			this._pendingUpdates.set(file, setTimeout(() => this.updateCurrentDiagnostics(file), this._updateDelay));
+			this._pendingUpdates.set(
+				file,
+				setTimeout(
+					() => this.updateCurrentDiagnostics(file),
+					this._updateDelay,
+				),
+			);
 		}
 	}
 
@@ -400,7 +509,12 @@ export class DiagnosticsManager extends Disposable {
 		}
 
 		const fileDiagnostics = this._diagnostics.get(file);
-		this._currentDiagnostics.set(file, fileDiagnostics ? fileDiagnostics.getAllDiagnostics(this._settings) : []);
+		this._currentDiagnostics.set(
+			file,
+			fileDiagnostics
+				? fileDiagnostics.getAllDiagnostics(this._settings)
+				: [],
+		);
 	}
 
 	private rebuildAll(): void {
@@ -411,6 +525,9 @@ export class DiagnosticsManager extends Disposable {
 	}
 
 	private rebuildFile(fileDiagnostic: FileDiagnostics) {
-		this._currentDiagnostics.set(fileDiagnostic.file, fileDiagnostic.getAllDiagnostics(this._settings));
+		this._currentDiagnostics.set(
+			fileDiagnostic.file,
+			fileDiagnostic.getAllDiagnostics(this._settings),
+		);
 	}
 }

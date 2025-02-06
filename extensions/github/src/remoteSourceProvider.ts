@@ -3,28 +3,37 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri, env, l10n, workspace } from 'vscode';
-import { RemoteSourceProvider, RemoteSource, RemoteSourceAction } from './typings/git-base';
-import { getOctokit } from './auth';
-import { Octokit } from '@octokit/rest';
-import { getRepositoryFromQuery, getRepositoryFromUrl } from './util';
-import { getBranchLink, getVscodeDevHost } from './links';
+import { Octokit } from "@octokit/rest";
+import { env, l10n, Uri, workspace } from "vscode";
+
+import { getOctokit } from "./auth";
+import { getBranchLink, getVscodeDevHost } from "./links";
+import {
+	RemoteSource,
+	RemoteSourceAction,
+	RemoteSourceProvider,
+} from "./typings/git-base";
+import { getRepositoryFromQuery, getRepositoryFromUrl } from "./util";
 
 function asRemoteSource(raw: any): RemoteSource {
-	const protocol = workspace.getConfiguration('github').get<'https' | 'ssh'>('gitProtocol');
+	const protocol = workspace
+		.getConfiguration("github")
+		.get<"https" | "ssh">("gitProtocol");
 	return {
 		name: `$(github) ${raw.full_name}`,
-		description: `${raw.stargazers_count > 0 ? `$(star-full) ${raw.stargazers_count}` : ''
-			}`,
+		description: `${
+			raw.stargazers_count > 0
+				? `$(star-full) ${raw.stargazers_count}`
+				: ""
+		}`,
 		detail: raw.description || undefined,
-		url: protocol === 'https' ? raw.clone_url : raw.ssh_url
+		url: protocol === "https" ? raw.clone_url : raw.ssh_url,
 	};
 }
 
 export class GithubRemoteSourceProvider implements RemoteSourceProvider {
-
-	readonly name = 'GitHub';
-	readonly icon = 'github';
+	readonly name = "GitHub";
+	readonly icon = "github";
 	readonly supportsQuery = true;
 
 	private userReposCache: RemoteSource[] = [];
@@ -57,18 +66,28 @@ export class GithubRemoteSourceProvider implements RemoteSourceProvider {
 		return [...map.values()];
 	}
 
-	private async getUserRemoteSources(octokit: Octokit, query?: string): Promise<RemoteSource[]> {
+	private async getUserRemoteSources(
+		octokit: Octokit,
+		query?: string,
+	): Promise<RemoteSource[]> {
 		if (!query) {
 			const user = await octokit.users.getAuthenticated({});
 			const username = user.data.login;
-			const res = await octokit.repos.listForAuthenticatedUser({ username, sort: 'updated', per_page: 100 });
+			const res = await octokit.repos.listForAuthenticatedUser({
+				username,
+				sort: "updated",
+				per_page: 100,
+			});
 			this.userReposCache = res.data.map(asRemoteSource);
 		}
 
 		return this.userReposCache;
 	}
 
-	private async getQueryRemoteSources(octokit: Octokit, query?: string): Promise<RemoteSource[]> {
+	private async getQueryRemoteSources(
+		octokit: Octokit,
+		query?: string,
+	): Promise<RemoteSource[]> {
 		if (!query) {
 			return [];
 		}
@@ -81,7 +100,7 @@ export class GithubRemoteSourceProvider implements RemoteSourceProvider {
 
 		query += ` fork:true`;
 
-		const raw = await octokit.search.repos({ q: query, sort: 'stars' });
+		const raw = await octokit.search.repos({ q: query, sort: "stars" });
 		return raw.data.items.map(asRemoteSource);
 	}
 
@@ -98,20 +117,26 @@ export class GithubRemoteSourceProvider implements RemoteSourceProvider {
 		let page = 1;
 
 		while (true) {
-			const res = await octokit.repos.listBranches({ ...repository, per_page: 100, page });
+			const res = await octokit.repos.listBranches({
+				...repository,
+				per_page: 100,
+				page,
+			});
 
 			if (res.data.length === 0) {
 				break;
 			}
 
-			branches.push(...res.data.map(b => b.name));
+			branches.push(...res.data.map((b) => b.name));
 			page++;
 		}
 
 		const repo = await octokit.repos.get(repository);
 		const defaultBranch = repo.data.default_branch;
 
-		return branches.sort((a, b) => a === defaultBranch ? -1 : b === defaultBranch ? 1 : 0);
+		return branches.sort((a, b) =>
+			a === defaultBranch ? -1 : b === defaultBranch ? 1 : 0,
+		);
 	}
 
 	async getRemoteSourceActions(url: string): Promise<RemoteSourceAction[]> {
@@ -120,20 +145,23 @@ export class GithubRemoteSourceProvider implements RemoteSourceProvider {
 			return [];
 		}
 
-		return [{
-			label: l10n.t('Open on GitHub'),
-			icon: 'github',
-			run(branch: string) {
-				const link = getBranchLink(url, branch);
-				env.openExternal(Uri.parse(link));
-			}
-		}, {
-			label: l10n.t('Checkout on vscode.dev'),
-			icon: 'globe',
-			run(branch: string) {
-				const link = getBranchLink(url, branch, getVscodeDevHost());
-				env.openExternal(Uri.parse(link));
-			}
-		}];
+		return [
+			{
+				label: l10n.t("Open on GitHub"),
+				icon: "github",
+				run(branch: string) {
+					const link = getBranchLink(url, branch);
+					env.openExternal(Uri.parse(link));
+				},
+			},
+			{
+				label: l10n.t("Checkout on vscode.dev"),
+				icon: "globe",
+				run(branch: string) {
+					const link = getBranchLink(url, branch, getVscodeDevHost());
+					env.openExternal(Uri.parse(link));
+				},
+			},
+		];
 	}
 }

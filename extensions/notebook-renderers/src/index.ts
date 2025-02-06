@@ -3,11 +3,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ActivationFunction, OutputItem, RendererContext } from 'vscode-notebook-renderer';
-import { createOutputContent, appendOutput, scrollableClass } from './textHelper';
-import { HtmlRenderingHook, IDisposable, IRichRenderContext, JavaScriptRenderingHook, OutputWithAppend, RenderOptions } from './rendererTypes';
-import { ttPolicy } from './htmlHelper';
-import { formatStackTrace } from './stackTraceHelper';
+import type {
+	ActivationFunction,
+	OutputItem,
+	RendererContext,
+} from "vscode-notebook-renderer";
+
+import { ttPolicy } from "./htmlHelper";
+import {
+	HtmlRenderingHook,
+	IDisposable,
+	IRichRenderContext,
+	JavaScriptRenderingHook,
+	OutputWithAppend,
+	RenderOptions,
+} from "./rendererTypes";
+import { formatStackTrace } from "./stackTraceHelper";
+import {
+	appendOutput,
+	createOutputContent,
+	scrollableClass,
+} from "./textHelper";
 
 function clearContainer(container: HTMLElement) {
 	while (container.firstChild) {
@@ -15,36 +31,46 @@ function clearContainer(container: HTMLElement) {
 	}
 }
 
-function renderImage(outputInfo: OutputItem, element: HTMLElement): IDisposable {
+function renderImage(
+	outputInfo: OutputItem,
+	element: HTMLElement,
+): IDisposable {
 	const blob = new Blob([outputInfo.data()], { type: outputInfo.mime });
 	const src = URL.createObjectURL(blob);
 	const disposable = {
 		dispose: () => {
 			URL.revokeObjectURL(src);
-		}
+		},
 	};
 
 	if (element.firstChild) {
 		const display = element.firstChild as HTMLElement;
-		if (display.firstChild && display.firstChild.nodeName === 'IMG' && display.firstChild instanceof HTMLImageElement) {
+		if (
+			display.firstChild &&
+			display.firstChild.nodeName === "IMG" &&
+			display.firstChild instanceof HTMLImageElement
+		) {
 			display.firstChild.src = src;
 			return disposable;
 		}
 	}
 
-	const image = document.createElement('img');
+	const image = document.createElement("img");
 	image.src = src;
 	const alt = getAltText(outputInfo);
 	if (alt) {
 		image.alt = alt;
 	}
-	image.setAttribute('data-vscode-context', JSON.stringify({
-		webviewSection: 'image',
-		outputId: outputInfo.id,
-		'preventDefaultContextMenuItems': true
-	}));
-	const display = document.createElement('div');
-	display.classList.add('display');
+	image.setAttribute(
+		"data-vscode-context",
+		JSON.stringify({
+			webviewSection: "image",
+			outputId: outputInfo.id,
+			"preventDefaultContextMenuItems": true,
+		}),
+	);
+	const display = document.createElement("div");
+	display.classList.add("display");
 	display.appendChild(image);
 	element.appendChild(display);
 
@@ -52,18 +78,24 @@ function renderImage(outputInfo: OutputItem, element: HTMLElement): IDisposable 
 }
 
 const preservedScriptAttributes: (keyof HTMLScriptElement)[] = [
-	'type', 'src', 'nonce', 'noModule', 'async',
+	"type",
+	"src",
+	"nonce",
+	"noModule",
+	"async",
 ];
 
 const domEval = (container: Element) => {
-	const arr = Array.from(container.getElementsByTagName('script'));
+	const arr = Array.from(container.getElementsByTagName("script"));
 	for (let n = 0; n < arr.length; n++) {
 		const node = arr[n];
-		const scriptTag = document.createElement('script');
-		const trustedScript = ttPolicy?.createScript(node.innerText) ?? node.innerText;
+		const scriptTag = document.createElement("script");
+		const trustedScript =
+			ttPolicy?.createScript(node.innerText) ?? node.innerText;
 		scriptTag.text = trustedScript as string;
 		for (const key of preservedScriptAttributes) {
-			const val = node[key] || node.getAttribute && node.getAttribute(key);
+			const val =
+				node[key] || (node.getAttribute && node.getAttribute(key));
 			if (val) {
 				scriptTag.setAttribute(key, val as any);
 			}
@@ -76,44 +108,58 @@ const domEval = (container: Element) => {
 
 function getAltText(outputInfo: OutputItem) {
 	const metadata = outputInfo.metadata;
-	if (typeof metadata === 'object' && metadata && 'vscode_altText' in metadata && typeof metadata.vscode_altText === 'string') {
+	if (
+		typeof metadata === "object" &&
+		metadata &&
+		"vscode_altText" in metadata &&
+		typeof metadata.vscode_altText === "string"
+	) {
 		return metadata.vscode_altText;
 	}
 	return undefined;
 }
 
 function fixUpSvgElement(outputInfo: OutputItem, element: HTMLElement) {
-	if (outputInfo.mime.indexOf('svg') > -1) {
-		const svgElement = element.querySelector('svg');
+	if (outputInfo.mime.indexOf("svg") > -1) {
+		const svgElement = element.querySelector("svg");
 		const altText = getAltText(outputInfo);
 		if (svgElement && altText) {
-			const title = document.createElement('title');
+			const title = document.createElement("title");
 			title.innerText = altText;
 			svgElement.prepend(title);
 		}
 
 		if (svgElement) {
-			svgElement.classList.add('output-image');
+			svgElement.classList.add("output-image");
 
-			svgElement.setAttribute('data-vscode-context', JSON.stringify({
-				webviewSection: 'image',
-				outputId: outputInfo.id,
-				'preventDefaultContextMenuItems': true
-			}));
+			svgElement.setAttribute(
+				"data-vscode-context",
+				JSON.stringify({
+					webviewSection: "image",
+					outputId: outputInfo.id,
+					"preventDefaultContextMenuItems": true,
+				}),
+			);
 		}
 	}
 }
 
-async function renderHTML(outputInfo: OutputItem, container: HTMLElement, signal: AbortSignal, hooks: Iterable<HtmlRenderingHook>): Promise<void> {
+async function renderHTML(
+	outputInfo: OutputItem,
+	container: HTMLElement,
+	signal: AbortSignal,
+	hooks: Iterable<HtmlRenderingHook>,
+): Promise<void> {
 	clearContainer(container);
-	let element: HTMLElement = document.createElement('div');
+	let element: HTMLElement = document.createElement("div");
 	const htmlContent = outputInfo.text();
 	const trustedHtml = ttPolicy?.createHTML(htmlContent) ?? htmlContent;
 	element.innerHTML = trustedHtml as string;
 	fixUpSvgElement(outputInfo, element);
 
 	for (const hook of hooks) {
-		element = (await hook.postRender(outputInfo, element, signal)) ?? element;
+		element =
+			(await hook.postRender(outputInfo, element, signal)) ?? element;
 		if (signal.aborted) {
 			return;
 		}
@@ -123,40 +169,59 @@ async function renderHTML(outputInfo: OutputItem, container: HTMLElement, signal
 	domEval(element);
 }
 
-async function renderJavascript(outputInfo: OutputItem, container: HTMLElement, signal: AbortSignal, hooks: Iterable<JavaScriptRenderingHook>): Promise<void> {
+async function renderJavascript(
+	outputInfo: OutputItem,
+	container: HTMLElement,
+	signal: AbortSignal,
+	hooks: Iterable<JavaScriptRenderingHook>,
+): Promise<void> {
 	let scriptText = outputInfo.text();
 
 	for (const hook of hooks) {
-		scriptText = (await hook.preEvaluate(outputInfo, container, scriptText, signal)) ?? scriptText;
+		scriptText =
+			(await hook.preEvaluate(
+				outputInfo,
+				container,
+				scriptText,
+				signal,
+			)) ?? scriptText;
 		if (signal.aborted) {
 			return;
 		}
 	}
 
-	const script = document.createElement('script');
-	script.type = 'module';
+	const script = document.createElement("script");
+	script.type = "module";
 	script.textContent = scriptText;
 
-	const element = document.createElement('div');
-	const trustedHtml = ttPolicy?.createHTML(script.outerHTML) ?? script.outerHTML;
+	const element = document.createElement("div");
+	const trustedHtml =
+		ttPolicy?.createHTML(script.outerHTML) ?? script.outerHTML;
 	element.innerHTML = trustedHtml as string;
 	container.appendChild(element);
 	domEval(element);
 }
 
 interface Event<T> {
-	(listener: (e: T) => any, thisArgs?: any, disposables?: IDisposable[]): IDisposable;
+	(
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: IDisposable[],
+	): IDisposable;
 }
 
-function createDisposableStore(): { push(...disposables: IDisposable[]): void; dispose(): void } {
+function createDisposableStore(): {
+	push(...disposables: IDisposable[]): void;
+	dispose(): void;
+} {
 	const localDisposables: IDisposable[] = [];
 	const disposable = {
 		push: (...disposables: IDisposable[]) => {
 			localDisposables.push(...disposables);
 		},
 		dispose: () => {
-			localDisposables.forEach(d => d.dispose());
-		}
+			localDisposables.forEach((d) => d.dispose());
+		},
 	};
 
 	return disposable;
@@ -168,7 +233,7 @@ function renderError(
 	outputInfo: OutputItem,
 	outputElement: HTMLElement,
 	ctx: IRichRenderContext,
-	trustHtml: boolean
+	trustHtml: boolean,
 ): IDisposable {
 	const disposableStore = createDisposableStore();
 
@@ -184,90 +249,119 @@ function renderError(
 		return disposableStore;
 	}
 
-	const headerMessage = err.name && err.message ? `${err.name}: ${err.message}` : err.name || err.message;
+	const headerMessage =
+		err.name && err.message
+			? `${err.name}: ${err.message}`
+			: err.name || err.message;
 
 	if (err.stack) {
-		const minimalError = ctx.settings.minimalError && !!headerMessage?.length;
-		outputElement.classList.add('traceback');
+		const minimalError =
+			ctx.settings.minimalError && !!headerMessage?.length;
+		outputElement.classList.add("traceback");
 
 		const { formattedStack, errorLocation } = formatStackTrace(err.stack);
 
-		const outputScrolling = !minimalError && scrollingEnabled(outputInfo, ctx.settings);
+		const outputScrolling =
+			!minimalError && scrollingEnabled(outputInfo, ctx.settings);
 		const lineLimit = minimalError ? 1000 : ctx.settings.lineLimit;
-		const outputOptions = { linesLimit: lineLimit, scrollable: outputScrolling, trustHtml, linkifyFilePaths: false };
+		const outputOptions = {
+			linesLimit: lineLimit,
+			scrollable: outputScrolling,
+			trustHtml,
+			linkifyFilePaths: false,
+		};
 
-		const content = createOutputContent(outputInfo.id, formattedStack, outputOptions);
-		const stackTraceElement = document.createElement('div');
+		const content = createOutputContent(
+			outputInfo.id,
+			formattedStack,
+			outputOptions,
+		);
+		const stackTraceElement = document.createElement("div");
 		stackTraceElement.appendChild(content);
-		outputElement.classList.toggle('word-wrap', ctx.settings.outputWordWrap);
-		disposableStore.push(ctx.onDidChangeSettings(e => {
-			outputElement.classList.toggle('word-wrap', e.outputWordWrap);
-		}));
+		outputElement.classList.toggle(
+			"word-wrap",
+			ctx.settings.outputWordWrap,
+		);
+		disposableStore.push(
+			ctx.onDidChangeSettings((e) => {
+				outputElement.classList.toggle("word-wrap", e.outputWordWrap);
+			}),
+		);
 
 		if (minimalError) {
-			createMinimalError(errorLocation, headerMessage, stackTraceElement, outputElement);
+			createMinimalError(
+				errorLocation,
+				headerMessage,
+				stackTraceElement,
+				outputElement,
+			);
 		} else {
-			stackTraceElement.classList.toggle('scrollable', outputScrolling);
+			stackTraceElement.classList.toggle("scrollable", outputScrolling);
 			outputElement.appendChild(stackTraceElement);
 			initializeScroll(stackTraceElement, disposableStore);
 		}
 	} else {
-		const header = document.createElement('div');
+		const header = document.createElement("div");
 		if (headerMessage) {
 			header.innerText = headerMessage;
 			outputElement.appendChild(header);
 		}
 	}
 
-	outputElement.classList.add('error');
+	outputElement.classList.add("error");
 	return disposableStore;
 }
 
-function createMinimalError(errorLocation: string | undefined, headerMessage: string, stackTrace: HTMLDivElement, outputElement: HTMLElement) {
-	const outputDiv = document.createElement('div');
-	const headerSection = document.createElement('div');
-	headerSection.classList.add('error-output-header');
+function createMinimalError(
+	errorLocation: string | undefined,
+	headerMessage: string,
+	stackTrace: HTMLDivElement,
+	outputElement: HTMLElement,
+) {
+	const outputDiv = document.createElement("div");
+	const headerSection = document.createElement("div");
+	headerSection.classList.add("error-output-header");
 
-	if (errorLocation && errorLocation.indexOf('<a') === 0) {
+	if (errorLocation && errorLocation.indexOf("<a") === 0) {
 		headerSection.innerHTML = errorLocation;
 	}
-	const header = document.createElement('span');
+	const header = document.createElement("span");
 	header.innerText = headerMessage;
 	headerSection.appendChild(header);
 	outputDiv.appendChild(headerSection);
 
 	function addButton(linkElement: HTMLElement) {
-		const button = document.createElement('li');
+		const button = document.createElement("li");
 		button.appendChild(linkElement);
 		// the :hover css selector doesn't work in the webview,
 		// so we need to add the hover class manually
 		button.onmouseover = function () {
-			button.classList.add('hover');
+			button.classList.add("hover");
 		};
 		button.onmouseout = function () {
-			button.classList.remove('hover');
+			button.classList.remove("hover");
 		};
 		return button;
 	}
 
-	const buttons = document.createElement('ul');
-	buttons.classList.add('error-output-actions');
+	const buttons = document.createElement("ul");
+	buttons.classList.add("error-output-actions");
 	outputDiv.appendChild(buttons);
 
-	const toggleStackLink = document.createElement('a');
-	toggleStackLink.innerText = 'Show Details';
-	toggleStackLink.href = '#!';
+	const toggleStackLink = document.createElement("a");
+	toggleStackLink.innerText = "Show Details";
+	toggleStackLink.href = "#!";
 	buttons.appendChild(addButton(toggleStackLink));
 
 	toggleStackLink.onclick = (e) => {
 		e.preventDefault();
-		const hidden = stackTrace.style.display === 'none';
-		stackTrace.style.display = hidden ? '' : 'none';
-		toggleStackLink.innerText = hidden ? 'Hide Details' : 'Show Details';
+		const hidden = stackTrace.style.display === "none";
+		stackTrace.style.display = hidden ? "" : "none";
+		toggleStackLink.innerText = hidden ? "Hide Details" : "Show Details";
 	};
 
 	outputDiv.appendChild(stackTrace);
-	stackTrace.style.display = 'none';
+	stackTrace.style.display = "none";
 	outputElement.appendChild(outputDiv);
 }
 
@@ -277,8 +371,11 @@ function getPreviousMatchingContentGroup(outputElement: HTMLElement) {
 
 	let previous = outputContainer?.previousSibling;
 	while (previous) {
-		const outputElement = (previous.firstChild as HTMLElement | null);
-		if (!outputElement || !outputElement.classList.contains('output-stream')) {
+		const outputElement = previous.firstChild as HTMLElement | null;
+		if (
+			!outputElement ||
+			!outputElement.classList.contains("output-stream")
+		) {
 			break;
 		}
 
@@ -292,9 +389,9 @@ function getPreviousMatchingContentGroup(outputElement: HTMLElement) {
 function onScrollHandler(e: globalThis.Event) {
 	const target = e.target as HTMLElement;
 	if (target.scrollTop === 0) {
-		target.classList.remove('more-above');
+		target.classList.remove("more-above");
 	} else {
-		target.classList.add('more-above');
+		target.classList.add("more-above");
 	}
 }
 
@@ -302,33 +399,67 @@ function onKeypressHandler(e: KeyboardEvent) {
 	if (e.ctrlKey || e.shiftKey) {
 		return;
 	}
-	if (e.code === 'ArrowDown' || e.code === 'ArrowUp' ||
-		e.code === 'End' || e.code === 'Home' ||
-		e.code === 'PageUp' || e.code === 'PageDown') {
+	if (
+		e.code === "ArrowDown" ||
+		e.code === "ArrowUp" ||
+		e.code === "End" ||
+		e.code === "Home" ||
+		e.code === "PageUp" ||
+		e.code === "PageDown"
+	) {
 		// These should change the scroll position, not adjust the selected cell in the notebook
 		e.stopPropagation();
 	}
 }
 
 // if there is a scrollable output, it will be scrolled to the given value if provided or the bottom of the element
-function initializeScroll(scrollableElement: HTMLElement, disposables: DisposableStore, scrollTop?: number) {
+function initializeScroll(
+	scrollableElement: HTMLElement,
+	disposables: DisposableStore,
+	scrollTop?: number,
+) {
 	if (scrollableElement.classList.contains(scrollableClass)) {
-		const scrollbarVisible = scrollableElement.scrollHeight > scrollableElement.clientHeight;
-		scrollableElement.classList.toggle('scrollbar-visible', scrollbarVisible);
-		scrollableElement.scrollTop = scrollTop !== undefined ? scrollTop : scrollableElement.scrollHeight;
+		const scrollbarVisible =
+			scrollableElement.scrollHeight > scrollableElement.clientHeight;
+		scrollableElement.classList.toggle(
+			"scrollbar-visible",
+			scrollbarVisible,
+		);
+		scrollableElement.scrollTop =
+			scrollTop !== undefined
+				? scrollTop
+				: scrollableElement.scrollHeight;
 		if (scrollbarVisible) {
-			scrollableElement.addEventListener('scroll', onScrollHandler);
-			disposables.push({ dispose: () => scrollableElement.removeEventListener('scroll', onScrollHandler) });
-			scrollableElement.addEventListener('keydown', onKeypressHandler);
-			disposables.push({ dispose: () => scrollableElement.removeEventListener('keydown', onKeypressHandler) });
+			scrollableElement.addEventListener("scroll", onScrollHandler);
+			disposables.push({
+				dispose: () =>
+					scrollableElement.removeEventListener(
+						"scroll",
+						onScrollHandler,
+					),
+			});
+			scrollableElement.addEventListener("keydown", onKeypressHandler);
+			disposables.push({
+				dispose: () =>
+					scrollableElement.removeEventListener(
+						"keydown",
+						onKeypressHandler,
+					),
+			});
 		}
 	}
 }
 
 // Find the scrollTop of the existing scrollable output, return undefined if at the bottom or element doesn't exist
 function findScrolledHeight(container: HTMLElement): number | undefined {
-	const scrollableElement = container.querySelector('.' + scrollableClass);
-	if (scrollableElement && scrollableElement.scrollHeight - scrollableElement.scrollTop - scrollableElement.clientHeight > 2) {
+	const scrollableElement = container.querySelector("." + scrollableClass);
+	if (
+		scrollableElement &&
+		scrollableElement.scrollHeight -
+			scrollableElement.scrollTop -
+			scrollableElement.clientHeight >
+			2
+	) {
 		// not scrolled to the bottom
 		return scrollableElement.scrollTop;
 	}
@@ -337,9 +468,12 @@ function findScrolledHeight(container: HTMLElement): number | undefined {
 
 function scrollingEnabled(output: OutputItem, options: RenderOptions) {
 	const metadata = output.metadata;
-	return (typeof metadata === 'object' && metadata
-		&& 'scrollable' in metadata && typeof metadata.scrollable === 'boolean') ?
-		metadata.scrollable : options.outputScrolling;
+	return typeof metadata === "object" &&
+		metadata &&
+		"scrollable" in metadata &&
+		typeof metadata.scrollable === "boolean"
+		? metadata.scrollable
+		: options.outputScrolling;
 }
 
 //  div.cell_container
@@ -347,35 +481,67 @@ function scrollingEnabled(output: OutputItem, options: RenderOptions) {
 //      div.output.output-stream		<-- outputElement parameter
 //        div.scrollable? tabindex="0" 	<-- contentParent
 //          div output-item-id="{guid}"	<-- content from outputItem parameter
-function renderStream(outputInfo: OutputWithAppend, outputElement: HTMLElement, error: boolean, ctx: IRichRenderContext): IDisposable {
+function renderStream(
+	outputInfo: OutputWithAppend,
+	outputElement: HTMLElement,
+	error: boolean,
+	ctx: IRichRenderContext,
+): IDisposable {
 	const disposableStore = createDisposableStore();
 	const outputScrolling = scrollingEnabled(outputInfo, ctx.settings);
-	const outputOptions = { linesLimit: ctx.settings.lineLimit, scrollable: outputScrolling, trustHtml: false, error, linkifyFilePaths: ctx.settings.linkifyFilePaths };
+	const outputOptions = {
+		linesLimit: ctx.settings.lineLimit,
+		scrollable: outputScrolling,
+		trustHtml: false,
+		error,
+		linkifyFilePaths: ctx.settings.linkifyFilePaths,
+	};
 
-	outputElement.classList.add('output-stream');
+	outputElement.classList.add("output-stream");
 
-	const scrollTop = outputScrolling ? findScrolledHeight(outputElement) : undefined;
+	const scrollTop = outputScrolling
+		? findScrolledHeight(outputElement)
+		: undefined;
 
 	const previousOutputParent = getPreviousMatchingContentGroup(outputElement);
 	// If the previous output item for the same cell was also a stream, append this output to the previous
 	if (previousOutputParent) {
-		const existingContent = previousOutputParent.querySelector(`[output-item-id="${outputInfo.id}"]`) as HTMLElement | null;
+		const existingContent = previousOutputParent.querySelector(
+			`[output-item-id="${outputInfo.id}"]`,
+		) as HTMLElement | null;
 		if (existingContent) {
 			appendOutput(outputInfo, existingContent, outputOptions);
 		} else {
-			const newContent = createOutputContent(outputInfo.id, outputInfo.text(), outputOptions);
+			const newContent = createOutputContent(
+				outputInfo.id,
+				outputInfo.text(),
+				outputOptions,
+			);
 			previousOutputParent.appendChild(newContent);
 		}
-		previousOutputParent.classList.toggle('scrollbar-visible', previousOutputParent.scrollHeight > previousOutputParent.clientHeight);
-		previousOutputParent.scrollTop = scrollTop !== undefined ? scrollTop : previousOutputParent.scrollHeight;
+		previousOutputParent.classList.toggle(
+			"scrollbar-visible",
+			previousOutputParent.scrollHeight >
+				previousOutputParent.clientHeight,
+		);
+		previousOutputParent.scrollTop =
+			scrollTop !== undefined
+				? scrollTop
+				: previousOutputParent.scrollHeight;
 	} else {
-		const existingContent = outputElement.querySelector(`[output-item-id="${outputInfo.id}"]`) as HTMLElement | null;
+		const existingContent = outputElement.querySelector(
+			`[output-item-id="${outputInfo.id}"]`,
+		) as HTMLElement | null;
 		let contentParent = existingContent?.parentElement;
 		if (existingContent && contentParent) {
 			appendOutput(outputInfo, existingContent, outputOptions);
 		} else {
-			const newContent = createOutputContent(outputInfo.id, outputInfo.text(), outputOptions);
-			contentParent = document.createElement('div');
+			const newContent = createOutputContent(
+				outputInfo.id,
+				outputInfo.text(),
+				outputOptions,
+			);
+			contentParent = document.createElement("div");
 			contentParent.appendChild(newContent);
 			while (outputElement.firstChild) {
 				outputElement.firstChild.remove();
@@ -383,11 +549,16 @@ function renderStream(outputInfo: OutputWithAppend, outputElement: HTMLElement, 
 			outputElement.appendChild(contentParent);
 		}
 
-		contentParent.classList.toggle('scrollable', outputScrolling);
-		outputElement.classList.toggle('word-wrap', ctx.settings.outputWordWrap);
-		disposableStore.push(ctx.onDidChangeSettings(e => {
-			outputElement.classList.toggle('word-wrap', e.outputWordWrap);
-		}));
+		contentParent.classList.toggle("scrollable", outputScrolling);
+		outputElement.classList.toggle(
+			"word-wrap",
+			ctx.settings.outputWordWrap,
+		);
+		disposableStore.push(
+			ctx.onDidChangeSettings((e) => {
+				outputElement.classList.toggle("word-wrap", e.outputWordWrap);
+			}),
+		);
 
 		initializeScroll(contentParent, disposableStore, scrollTop);
 	}
@@ -395,21 +566,32 @@ function renderStream(outputInfo: OutputWithAppend, outputElement: HTMLElement, 
 	return disposableStore;
 }
 
-function renderText(outputInfo: OutputItem, outputElement: HTMLElement, ctx: IRichRenderContext): IDisposable {
+function renderText(
+	outputInfo: OutputItem,
+	outputElement: HTMLElement,
+	ctx: IRichRenderContext,
+): IDisposable {
 	const disposableStore = createDisposableStore();
 	clearContainer(outputElement);
 
 	const text = outputInfo.text();
 	const outputScrolling = scrollingEnabled(outputInfo, ctx.settings);
-	const outputOptions = { linesLimit: ctx.settings.lineLimit, scrollable: outputScrolling, trustHtml: false, linkifyFilePaths: ctx.settings.linkifyFilePaths };
+	const outputOptions = {
+		linesLimit: ctx.settings.lineLimit,
+		scrollable: outputScrolling,
+		trustHtml: false,
+		linkifyFilePaths: ctx.settings.linkifyFilePaths,
+	};
 	const content = createOutputContent(outputInfo.id, text, outputOptions);
-	content.classList.add('output-plaintext');
-	content.classList.toggle('word-wrap', ctx.settings.outputWordWrap);
-	disposableStore.push(ctx.onDidChangeSettings(e => {
-		content.classList.toggle('word-wrap', e.outputWordWrap);
-	}));
+	content.classList.add("output-plaintext");
+	content.classList.toggle("word-wrap", ctx.settings.outputWordWrap);
+	disposableStore.push(
+		ctx.onDidChangeSettings((e) => {
+			content.classList.toggle("word-wrap", e.outputWordWrap);
+		}),
+	);
 
-	content.classList.toggle('scrollable', outputScrolling);
+	content.classList.toggle("scrollable", outputScrolling);
 	outputElement.appendChild(content);
 	initializeScroll(content, disposableStore);
 
@@ -421,9 +603,12 @@ export const activate: ActivationFunction<void> = (ctx) => {
 	const htmlHooks = new Set<HtmlRenderingHook>();
 	const jsHooks = new Set<JavaScriptRenderingHook>();
 
-	const latestContext = ctx as (RendererContext<void> & { readonly settings: RenderOptions; readonly onDidChangeSettings: Event<RenderOptions> });
+	const latestContext = ctx as RendererContext<void> & {
+		readonly settings: RenderOptions;
+		readonly onDidChangeSettings: Event<RenderOptions>;
+	};
 
-	const style = document.createElement('style');
+	const style = document.createElement("style");
 	style.textContent = `
 	#container div.output.remove-padding {
 		padding-left: 0;
@@ -539,10 +724,10 @@ export const activate: ActivationFunction<void> = (ctx) => {
 
 	return {
 		renderOutputItem: async (outputInfo, element, signal?: AbortSignal) => {
-			element.classList.add('remove-padding');
+			element.classList.add("remove-padding");
 			switch (outputInfo.mime) {
-				case 'text/html':
-				case 'image/svg+xml': {
+				case "text/html":
+				case "image/svg+xml": {
 					if (!ctx.workspace.isTrusted) {
 						return;
 					}
@@ -550,7 +735,7 @@ export const activate: ActivationFunction<void> = (ctx) => {
 					await renderHTML(outputInfo, element, signal!, htmlHooks);
 					break;
 				}
-				case 'application/javascript': {
+				case "application/javascript": {
 					if (!ctx.workspace.isTrusted) {
 						return;
 					}
@@ -558,82 +743,108 @@ export const activate: ActivationFunction<void> = (ctx) => {
 					renderJavascript(outputInfo, element, signal!, jsHooks);
 					break;
 				}
-				case 'image/gif':
-				case 'image/png':
-				case 'image/jpeg':
-				case 'image/git':
+				case "image/gif":
+				case "image/png":
+				case "image/jpeg":
+				case "image/git":
 					{
 						disposables.get(outputInfo.id)?.dispose();
 						const disposable = renderImage(outputInfo, element);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
-				case 'application/vnd.code.notebook.error':
+				case "application/vnd.code.notebook.error":
 					{
 						disposables.get(outputInfo.id)?.dispose();
-						const disposable = renderError(outputInfo, element, latestContext, ctx.workspace.isTrusted);
+						const disposable = renderError(
+							outputInfo,
+							element,
+							latestContext,
+							ctx.workspace.isTrusted,
+						);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
-				case 'application/vnd.code.notebook.stdout':
-				case 'application/x.notebook.stdout':
-				case 'application/x.notebook.stream':
+				case "application/vnd.code.notebook.stdout":
+				case "application/x.notebook.stdout":
+				case "application/x.notebook.stream":
 					{
 						disposables.get(outputInfo.id)?.dispose();
-						const disposable = renderStream(outputInfo, element, false, latestContext);
+						const disposable = renderStream(
+							outputInfo,
+							element,
+							false,
+							latestContext,
+						);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
-				case 'application/vnd.code.notebook.stderr':
-				case 'application/x.notebook.stderr':
+				case "application/vnd.code.notebook.stderr":
+				case "application/x.notebook.stderr":
 					{
 						disposables.get(outputInfo.id)?.dispose();
-						const disposable = renderStream(outputInfo, element, true, latestContext);
+						const disposable = renderStream(
+							outputInfo,
+							element,
+							true,
+							latestContext,
+						);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
-				case 'text/plain':
+				case "text/plain":
 					{
 						disposables.get(outputInfo.id)?.dispose();
-						const disposable = renderText(outputInfo, element, latestContext);
+						const disposable = renderText(
+							outputInfo,
+							element,
+							latestContext,
+						);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
 				default:
-					if (outputInfo.mime.indexOf('text/') > -1) {
+					if (outputInfo.mime.indexOf("text/") > -1) {
 						disposables.get(outputInfo.id)?.dispose();
-						const disposable = renderText(outputInfo, element, latestContext);
+						const disposable = renderText(
+							outputInfo,
+							element,
+							latestContext,
+						);
 						disposables.set(outputInfo.id, disposable);
 					}
 					break;
 			}
-			if (element.querySelector('div')) {
-				element.querySelector('div')!.tabIndex = 0;
+			if (element.querySelector("div")) {
+				element.querySelector("div")!.tabIndex = 0;
 			}
-
 		},
 		disposeOutputItem: (id: string | undefined) => {
 			if (id) {
 				disposables.get(id)?.dispose();
 			} else {
-				disposables.forEach(d => d.dispose());
+				disposables.forEach((d) => d.dispose());
 			}
 		},
-		experimental_registerHtmlRenderingHook: (hook: HtmlRenderingHook): IDisposable => {
+		experimental_registerHtmlRenderingHook: (
+			hook: HtmlRenderingHook,
+		): IDisposable => {
 			htmlHooks.add(hook);
 			return {
 				dispose: () => {
 					htmlHooks.delete(hook);
-				}
+				},
 			};
 		},
-		experimental_registerJavaScriptRenderingHook: (hook: JavaScriptRenderingHook): IDisposable => {
+		experimental_registerJavaScriptRenderingHook: (
+			hook: JavaScriptRenderingHook,
+		): IDisposable => {
 			jsHooks.add(hook);
 			return {
 				dispose: () => {
 					jsHooks.delete(hook);
-				}
+				},
 			};
-		}
+		},
 	};
 };

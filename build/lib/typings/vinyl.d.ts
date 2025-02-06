@@ -4,7 +4,6 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare module "vinyl" {
-
 	import fs = require("fs");
 
 	/**
@@ -13,8 +12,8 @@ declare module "vinyl" {
 	class File {
 		constructor(options?: {
 			/**
-			* Default: process.cwd()
-			*/
+			 * Default: process.cwd()
+			 */
 			cwd?: string;
 			/**
 			 * Used for relative pathing. Typically where a glob starts.
@@ -116,7 +115,8 @@ declare module "vinyl" {
 				 * If false, the destination stream will not be ended (same as node core).
 				 */
 				end?: boolean;
-			}): T;
+			},
+		): T;
 
 		/**
 		 * Returns a pretty String interpretation of the File. Useful for console.log.
@@ -128,8 +128,7 @@ declare module "vinyl" {
 	 * This is required as per:
 	 * https://github.com/microsoft/TypeScript/issues/5073
 	 */
-	namespace File { }
+	namespace File {}
 
 	export = File;
-
 }

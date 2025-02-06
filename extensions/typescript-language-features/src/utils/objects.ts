@@ -3,19 +3,24 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as array from './arrays';
+import * as array from "./arrays";
 
 export function equals(one: any, other: any): boolean {
 	if (one === other) {
 		return true;
 	}
-	if (one === null || one === undefined || other === null || other === undefined) {
+	if (
+		one === null ||
+		one === undefined ||
+		other === null ||
+		other === undefined
+	) {
 		return false;
 	}
 	if (typeof one !== typeof other) {
 		return false;
 	}
-	if (typeof one !== 'object') {
+	if (typeof one !== "object") {
 		return false;
 	}
 	if (Array.isArray(one) !== Array.isArray(other)) {
@@ -38,6 +43,6 @@ export function equals(one: any, other: any): boolean {
 		if (!array.equals(oneKeys, otherKeys)) {
 			return false;
 		}
-		return oneKeys.every(key => equals(one[key], other[key]));
+		return oneKeys.every((key) => equals(one[key], other[key]));
 	}
 }

@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { getElementsForSourceLine } from './scroll-sync';
+import { getElementsForSourceLine } from "./scroll-sync";
 
 export class ActiveLineMarker {
 	private _current: any;
@@ -22,7 +22,7 @@ export class ActiveLineMarker {
 		if (!element) {
 			return;
 		}
-		element.classList.toggle('code-active-line', false);
+		element.classList.toggle("code-active-line", false);
 	}
 
 	private _markActiveElement(element: HTMLElement | undefined) {
@@ -30,6 +30,6 @@ export class ActiveLineMarker {
 			return;
 		}
 
-		element.classList.toggle('code-active-line', true);
+		element.classList.toggle("code-active-line", true);
 	}
 }

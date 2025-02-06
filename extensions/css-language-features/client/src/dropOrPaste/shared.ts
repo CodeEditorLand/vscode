@@ -3,20 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { Utils } from 'vscode-uri';
+import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
 
 export const Schemes = Object.freeze({
-	file: 'file',
-	notebookCell: 'vscode-notebook-cell',
-	untitled: 'untitled',
+	file: "file",
+	notebookCell: "vscode-notebook-cell",
+	untitled: "untitled",
 });
 
 export const Mimes = Object.freeze({
-	plain: 'text/plain',
-	uriList: 'text/uri-list',
+	plain: "text/plain",
+	uriList: "text/uri-list",
 });
-
 
 export function getDocumentDir(uri: vscode.Uri): vscode.Uri | undefined {
 	const docUri = getParentDocumentUri(uri);

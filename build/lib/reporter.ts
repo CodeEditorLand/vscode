@@ -3,15 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import es from 'event-stream';
-import fancyLog from 'fancy-log';
-import ansiColors from 'ansi-colors';
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import ansiColors from "ansi-colors";
+import es from "event-stream";
+import fancyLog from "fancy-log";
 
 class ErrorLog {
-	constructor(public id: string) {
-	}
+	constructor(public id: string) {}
 	allErrors: string[][] = [];
 	startTime: number | null = null;
 	count = 0;
@@ -22,7 +21,9 @@ class ErrorLog {
 		}
 
 		this.startTime = new Date().getTime();
-		fancyLog(`Starting ${ansiColors.green('compilation')}${this.id ? ansiColors.blue(` ${this.id}`) : ''}...`);
+		fancyLog(
+			`Starting ${ansiColors.green("compilation")}${this.id ? ansiColors.blue(` ${this.id}`) : ""}...`,
+		);
 	}
 
 	onEnd(): void {
@@ -37,34 +38,43 @@ class ErrorLog {
 		const errors = this.allErrors.flat();
 		const seen = new Set<string>();
 
-		errors.map(err => {
+		errors.map((err) => {
 			if (!seen.has(err)) {
 				seen.add(err);
-				fancyLog(`${ansiColors.red('Error')}: ${err}`);
+				fancyLog(`${ansiColors.red("Error")}: ${err}`);
 			}
 		});
 
-		fancyLog(`Finished ${ansiColors.green('compilation')}${this.id ? ansiColors.blue(` ${this.id}`) : ''} with ${errors.length} errors after ${ansiColors.magenta((new Date().getTime() - this.startTime!) + ' ms')}`);
+		fancyLog(
+			`Finished ${ansiColors.green("compilation")}${this.id ? ansiColors.blue(` ${this.id}`) : ""} with ${errors.length} errors after ${ansiColors.magenta(new Date().getTime() - this.startTime! + " ms")}`,
+		);
 
 		const regex = /^([^(]+)\((\d+),(\d+)\): (.*)$/s;
 		const messages = errors
-			.map(err => regex.exec(err))
-			.filter(match => !!match)
-			.map(x => x as string[])
-			.map(([, path, line, column, message]) => ({ path, line: parseInt(line), column: parseInt(column), message }));
+			.map((err) => regex.exec(err))
+			.filter((match) => !!match)
+			.map((x) => x as string[])
+			.map(([, path, line, column, message]) => ({
+				path,
+				line: parseInt(line),
+				column: parseInt(column),
+				message,
+			}));
 
 		try {
-			const logFileName = 'log' + (this.id ? `_${this.id}` : '');
-			fs.writeFileSync(path.join(buildLogFolder, logFileName), JSON.stringify(messages));
+			const logFileName = "log" + (this.id ? `_${this.id}` : "");
+			fs.writeFileSync(
+				path.join(buildLogFolder, logFileName),
+				JSON.stringify(messages),
+			);
 		} catch (err) {
 			//noop
 		}
 	}
-
 }
 
 const errorLogsById = new Map<string, ErrorLog>();
-function getErrorLog(id: string = '') {
+function getErrorLog(id: string = "") {
 	let errorLog = errorLogsById.get(id);
 	if (!errorLog) {
 		errorLog = new ErrorLog(id);
@@ -73,7 +83,10 @@ function getErrorLog(id: string = '') {
 	return errorLog;
 }
 
-const buildLogFolder = path.join(path.dirname(path.dirname(__dirname)), '.build');
+const buildLogFolder = path.join(
+	path.dirname(path.dirname(__dirname)),
+	".build",
+);
 
 try {
 	fs.mkdirSync(buildLogFolder);
@@ -113,9 +126,9 @@ export function createReporter(id?: string): IReporter {
 
 				const err = new Error(`Found ${errors.length} errors`);
 				(err as any).__reporter__ = true;
-				this.emit('error', err);
+				this.emit("error", err);
 			} else {
-				this.emit('end');
+				this.emit("end");
 			}
 		});
 	};

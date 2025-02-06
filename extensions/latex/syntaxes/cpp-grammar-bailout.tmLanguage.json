@@ -15185,9 +15185,7 @@
 						}
 					},
 					"name": "string.quoted.double.raw.cpp",
-					"patterns": [
-						{}
-					]
+					"patterns": [{}]
 				},
 				{
 					"begin": "((?:u|u8|U|L)?R)\"(?:([^ ()\\\\\\t]{0,16})|([^ ()\\\\\\t]*))\\(",

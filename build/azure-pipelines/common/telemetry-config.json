@@ -1,33 +1,25 @@
 [
 	{
 		"eventPrefix": "typescript-language-features/",
-		"sourceDirs": [
-			"../../s/extensions/typescript-language-features"
-		],
+		"sourceDirs": ["../../s/extensions/typescript-language-features"],
 		"excludedDirs": [],
 		"applyEndpoints": true
 	},
 	{
 		"eventPrefix": "git/",
-		"sourceDirs": [
-			"../../s/extensions/git"
-		],
+		"sourceDirs": ["../../s/extensions/git"],
 		"excludedDirs": [],
 		"applyEndpoints": true
 	},
 	{
 		"eventPrefix": "extension-telemetry/",
-		"sourceDirs": [
-			"vscode-extension-telemetry"
-		],
+		"sourceDirs": ["vscode-extension-telemetry"],
 		"excludedDirs": [],
 		"applyEndpoints": true
 	},
 	{
 		"eventPrefix": "vscode-markdown/",
-		"sourceDirs": [
-			"../../s/extensions/markdown-language-features"
-		],
+		"sourceDirs": ["../../s/extensions/markdown-language-features"],
 		"excludedDirs": [],
 		"applyEndpoints": true
 	},
@@ -51,10 +43,7 @@
 	},
 	{
 		"eventPrefix": "ms-vscode.node/",
-		"sourceDirs": [
-			"vscode-chrome-debug-core",
-			"vscode-node-debug"
-		],
+		"sourceDirs": ["vscode-chrome-debug-core", "vscode-node-debug"],
 		"excludedDirs": [],
 		"applyEndpoints": true,
 		"patchDebugEvents": true

@@ -3,35 +3,39 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
-import * as testRunner from '../../../../test/integration/electron/testrunner';
+import * as path from "path";
+
+import * as testRunner from "../../../../test/integration/electron/testrunner";
 
 const options: any = {
-	ui: 'tdd',
+	ui: "tdd",
 	color: true,
-	timeout: 60000
+	timeout: 60000,
 };
 
 // These integration tests is being run in multiple environments (electron, web, remote)
 // so we need to set the suite name based on the environment as the suite name is used
 // for the test results file name
-let suite = '';
+let suite = "";
 if (process.env.VSCODE_BROWSER) {
 	suite = `${process.env.VSCODE_BROWSER} Browser Integration Single Folder Tests`;
 } else if (process.env.REMOTE_VSCODE) {
-	suite = 'Remote Integration Single Folder Tests';
+	suite = "Remote Integration Single Folder Tests";
 } else {
-	suite = 'Integration Single Folder Tests';
+	suite = "Integration Single Folder Tests";
 }
 
 if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
-	options.reporter = 'mocha-multi-reporters';
+	options.reporter = "mocha-multi-reporters";
 	options.reporterOptions = {
-		reporterEnabled: 'spec, mocha-junit-reporter',
+		reporterEnabled: "spec, mocha-junit-reporter",
 		mochaJunitReporterReporterOptions: {
 			testsuitesTitle: `${suite} ${process.platform}`,
-			mochaFile: path.join(process.env.BUILD_ARTIFACTSTAGINGDIRECTORY, `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, '-')}-results.xml`)
-		}
+			mochaFile: path.join(
+				process.env.BUILD_ARTIFACTSTAGINGDIRECTORY,
+				`test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, "-")}-results.xml`,
+			),
+		},
 	};
 }
 

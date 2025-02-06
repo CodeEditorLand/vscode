@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import * as fileSchemes from '../configuration/fileSchemes';
-import { looksLikeAbsoluteWindowsPath } from './fs';
+import * as vscode from "vscode";
+
+import * as fileSchemes from "../configuration/fileSchemes";
+import { looksLikeAbsoluteWindowsPath } from "./fs";
 
 /**
  * Maps of file resources
@@ -14,22 +15,28 @@ import { looksLikeAbsoluteWindowsPath } from './fs';
  * file systems.
  */
 export class ResourceMap<T> {
-
-	private static readonly defaultPathNormalizer = (resource: vscode.Uri): string => {
+	private static readonly defaultPathNormalizer = (
+		resource: vscode.Uri,
+	): string => {
 		if (resource.scheme === fileSchemes.file) {
 			return resource.fsPath;
 		}
 		return resource.toString(true);
 	};
 
-	private readonly _map = new Map<string, { readonly resource: vscode.Uri; value: T }>();
+	private readonly _map = new Map<
+		string,
+		{ readonly resource: vscode.Uri; value: T }
+	>();
 
 	constructor(
-		protected readonly _normalizePath: (resource: vscode.Uri) => string | undefined = ResourceMap.defaultPathNormalizer,
+		protected readonly _normalizePath: (
+			resource: vscode.Uri,
+		) => string | undefined = ResourceMap.defaultPathNormalizer,
 		protected readonly config: {
 			readonly onCaseInsensitiveFileSystem: boolean;
 		},
-	) { }
+	) {}
 
 	public get size() {
 		return this._map.size;
@@ -74,7 +81,7 @@ export class ResourceMap<T> {
 	}
 
 	public values(): Iterable<T> {
-		return Array.from(this._map.values(), x => x.value);
+		return Array.from(this._map.values(), (x) => x.value);
 	}
 
 	public entries(): Iterable<{ resource: vscode.Uri; value: T }> {
@@ -93,6 +100,6 @@ export class ResourceMap<T> {
 		if (looksLikeAbsoluteWindowsPath(path)) {
 			return true;
 		}
-		return path[0] === '/' && this.config.onCaseInsensitiveFileSystem;
+		return path[0] === "/" && this.config.onCaseInsensitiveFileSystem;
 	}
 }

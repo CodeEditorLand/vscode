@@ -3,34 +3,45 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri, workspace, Disposable } from 'vscode';
-import { RequestType, BaseLanguageClient } from 'vscode-languageclient';
-import { Runtime } from './htmlClient';
+import { Disposable, Uri, workspace } from "vscode";
+import { BaseLanguageClient, RequestType } from "vscode-languageclient";
+
+import { Runtime } from "./htmlClient";
 
 export namespace FsStatRequest {
-	export const type: RequestType<string, FileStat, any> = new RequestType('fs/stat');
+	export const type: RequestType<string, FileStat, any> = new RequestType(
+		"fs/stat",
+	);
 }
 
 export namespace FsReadDirRequest {
-	export const type: RequestType<string, [string, FileType][], any> = new RequestType('fs/readDir');
+	export const type: RequestType<string, [string, FileType][], any> =
+		new RequestType("fs/readDir");
 }
 
-export function serveFileSystemRequests(client: BaseLanguageClient, runtime: Runtime): Disposable {
+export function serveFileSystemRequests(
+	client: BaseLanguageClient,
+	runtime: Runtime,
+): Disposable {
 	const disposables = [];
-	disposables.push(client.onRequest(FsReadDirRequest.type, (uriString: string) => {
-		const uri = Uri.parse(uriString);
-		if (uri.scheme === 'file' && runtime.fileFs) {
-			return runtime.fileFs.readDirectory(uriString);
-		}
-		return workspace.fs.readDirectory(uri);
-	}));
-	disposables.push(client.onRequest(FsStatRequest.type, (uriString: string) => {
-		const uri = Uri.parse(uriString);
-		if (uri.scheme === 'file' && runtime.fileFs) {
-			return runtime.fileFs.stat(uriString);
-		}
-		return workspace.fs.stat(uri);
-	}));
+	disposables.push(
+		client.onRequest(FsReadDirRequest.type, (uriString: string) => {
+			const uri = Uri.parse(uriString);
+			if (uri.scheme === "file" && runtime.fileFs) {
+				return runtime.fileFs.readDirectory(uriString);
+			}
+			return workspace.fs.readDirectory(uri);
+		}),
+	);
+	disposables.push(
+		client.onRequest(FsStatRequest.type, (uriString: string) => {
+			const uri = Uri.parse(uriString);
+			if (uri.scheme === "file" && runtime.fileFs) {
+				return runtime.fileFs.stat(uriString);
+			}
+			return workspace.fs.stat(uri);
+		}),
+	);
 	return Disposable.from(...disposables);
 }
 
@@ -50,7 +61,7 @@ export enum FileType {
 	/**
 	 * A symbolic link to a file.
 	 */
-	SymbolicLink = 64
+	SymbolicLink = 64,
 }
 export interface FileStat {
 	/**

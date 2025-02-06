@@ -5,21 +5,21 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withBrowserDefaults = require('../shared.webpack.config').browser;
+const withBrowserDefaults = require("../shared.webpack.config").browser;
 
 module.exports = withBrowserDefaults({
 	context: __dirname,
 	entry: {
-		extension: './src/terminalSuggestMain.ts'
+		extension: "./src/terminalSuggestMain.ts",
 	},
 	output: {
-		filename: 'terminalSuggestMain.js'
+		filename: "terminalSuggestMain.js",
 	},
 	resolve: {
 		fallback: {
-			'child_process': false
-		}
-	}
+			"child_process": false,
+		},
+	},
 });

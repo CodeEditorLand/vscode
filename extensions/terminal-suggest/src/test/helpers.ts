@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'mocha';
-import * as vscode from 'vscode';
-import type { Uri } from 'vscode';
+import "mocha";
+
+import * as vscode from "vscode";
+import type { Uri } from "vscode";
 
 export interface ISuiteSpec {
 	name: string;
@@ -19,22 +20,25 @@ export interface ISuiteSpec {
 export interface ITestSpec {
 	input: string;
 	expectedResourceRequests?: {
-		type: 'files' | 'folders' | 'both';
+		type: "files" | "folders" | "both";
 		cwd: Uri;
 	};
 	expectedCompletions?: string[];
 }
 
-const fixtureDir = vscode.Uri.joinPath(vscode.Uri.file(__dirname), '../../testWorkspace');
+const fixtureDir = vscode.Uri.joinPath(
+	vscode.Uri.file(__dirname),
+	"../../testWorkspace",
+);
 
 /**
  * A default set of paths shared across tests.
  */
 export const testPaths = {
 	fixtureDir,
-	cwdParent: vscode.Uri.joinPath(fixtureDir, 'parent'),
-	cwd: vscode.Uri.joinPath(fixtureDir, 'parent/home'),
-	cwdChild: vscode.Uri.joinPath(fixtureDir, 'parent/home/child'),
+	cwdParent: vscode.Uri.joinPath(fixtureDir, "parent"),
+	cwd: vscode.Uri.joinPath(fixtureDir, "parent/home"),
+	cwdChild: vscode.Uri.joinPath(fixtureDir, "parent/home/child"),
 };
 
 export function removeArrayEntries<T>(array: T[], ...elements: T[]): T[] {

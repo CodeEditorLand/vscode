@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { serializeNotebookToString } from './serializers';
-import type { NotebookData } from 'vscode';
+import type { NotebookData } from "vscode";
+
+import { serializeNotebookToString } from "./serializers";
 
 onmessage = (e) => {
 	const data = e.data as { id: string; data: NotebookData };

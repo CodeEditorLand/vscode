@@ -3,22 +3,28 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as picomatch from 'picomatch';
-import * as vscode from 'vscode';
-import { Utils } from 'vscode-uri';
-import { getParentDocumentUri } from '../../util/document';
-import { CopyFileConfiguration, getCopyFileConfiguration, parseGlob, resolveCopyDestination } from './copyFiles';
+import * as picomatch from "picomatch";
+import * as vscode from "vscode";
+import { Utils } from "vscode-uri";
 
+import { getParentDocumentUri } from "../../util/document";
+import {
+	CopyFileConfiguration,
+	getCopyFileConfiguration,
+	parseGlob,
+	resolveCopyDestination,
+} from "./copyFiles";
 
 export class NewFilePathGenerator {
-
 	private readonly _usedPaths = new Set<string>();
 
 	async getNewFilePath(
 		document: vscode.TextDocument,
 		file: vscode.DataTransferFile,
-		token: vscode.CancellationToken
-	): Promise<{ readonly uri: vscode.Uri; readonly overwrite: boolean } | undefined> {
+		token: vscode.CancellationToken,
+	): Promise<
+		{ readonly uri: vscode.Uri; readonly overwrite: boolean } | undefined
+	> {
 		const config = getCopyFileConfiguration(document);
 		const desiredPath = getDesiredNewFilePath(config, document, file);
 
@@ -38,7 +44,7 @@ export class NewFilePathGenerator {
 			}
 
 			// Try overwriting if it already exists
-			if (config.overwriteBehavior === 'overwrite') {
+			if (config.overwriteBehavior === "overwrite") {
 				this._usedPaths.add(uri.toString());
 				return { uri, overwrite: true };
 			}
@@ -61,12 +67,21 @@ export class NewFilePathGenerator {
 	}
 }
 
-export function getDesiredNewFilePath(config: CopyFileConfiguration, document: vscode.TextDocument, file: vscode.DataTransferFile): vscode.Uri {
+export function getDesiredNewFilePath(
+	config: CopyFileConfiguration,
+	document: vscode.TextDocument,
+	file: vscode.DataTransferFile,
+): vscode.Uri {
 	const docUri = getParentDocumentUri(document.uri);
 	for (const [rawGlob, rawDest] of Object.entries(config.destination)) {
 		for (const glob of parseGlob(rawGlob)) {
 			if (picomatch.isMatch(docUri.path, glob, { dot: true })) {
-				return resolveCopyDestination(docUri, file.name, rawDest, uri => vscode.workspace.getWorkspaceFolder(uri)?.uri);
+				return resolveCopyDestination(
+					docUri,
+					file.name,
+					rawDest,
+					(uri) => vscode.workspace.getWorkspaceFolder(uri)?.uri,
+				);
 			}
 		}
 	}
@@ -74,4 +89,3 @@ export function getDesiredNewFilePath(config: CopyFileConfiguration, document: v
 	// Default to next to current file
 	return vscode.Uri.joinPath(Utils.dirname(docUri), file.name);
 }
-

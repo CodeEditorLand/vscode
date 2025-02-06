@@ -3,27 +3,26 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { TypeScriptServiceConfiguration } from '../configuration/configuration';
-import { API } from './api';
+import * as vscode from "vscode";
 
+import { TypeScriptServiceConfiguration } from "../configuration/configuration";
+import { API } from "./api";
 
 export const enum TypeScriptVersionSource {
-	Bundled = 'bundled',
-	TsNightlyExtension = 'ts-nightly-extension',
-	NodeModules = 'node-modules',
-	UserSetting = 'user-setting',
-	WorkspaceSetting = 'workspace-setting',
+	Bundled = "bundled",
+	TsNightlyExtension = "ts-nightly-extension",
+	NodeModules = "node-modules",
+	UserSetting = "user-setting",
+	WorkspaceSetting = "workspace-setting",
 }
 
 export class TypeScriptVersion {
-
 	constructor(
 		public readonly source: TypeScriptVersionSource,
 		public readonly path: string,
 		public readonly apiVersion: API | undefined,
 		private readonly _pathLabel?: string,
-	) { }
+	) {}
 
 	public get tsServerPath(): string {
 		return this.path;
@@ -53,7 +52,11 @@ export class TypeScriptVersion {
 
 	public get displayName(): string {
 		const version = this.apiVersion;
-		return version ? version.displayName : vscode.l10n.t("Could not load the TypeScript version at this path");
+		return version
+			? version.displayName
+			: vscode.l10n.t(
+					"Could not load the TypeScript version at this path",
+				);
 	}
 }
 

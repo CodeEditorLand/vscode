@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CspAlerter } from './csp';
-import { StyleLoadingMonitor } from './loading';
-import { SettingsManager } from './settings';
+import { CspAlerter } from "./csp";
+import { StyleLoadingMonitor } from "./loading";
+import { SettingsManager } from "./settings";
 
 declare global {
 	interface Window {

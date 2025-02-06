@@ -63,7 +63,7 @@
 	"tokenColors": [
 		{
 			"settings": {
-				"foreground": "#F8F8F8",
+				"foreground": "#F8F8F8"
 			}
 		},
 		{
@@ -154,7 +154,7 @@
 				"entity.other.inherited-class",
 				"punctuation.separator.namespace.ruby"
 			],
-		"settings": {
+			"settings": {
 				"fontStyle": "underline",
 				"foreground": "#aa5507ff"
 			}
@@ -166,10 +166,7 @@
 			}
 		},
 		{
-			"scope": [
-				"string constant",
-				"constant.character.escape"
-			],
+			"scope": ["string constant", "constant.character.escape"],
 			"settings": {
 				"fontStyle": "",
 				"foreground": "#ffe862ff"
@@ -199,7 +196,7 @@
 		},
 		{
 			"name": "Support.constant",
-			"scope": [ "support.constant", "support.variable"],
+			"scope": ["support.constant", "support.variable"],
 			"settings": {
 				"fontStyle": "",
 				"foreground": "#eb939aff"
@@ -303,10 +300,7 @@
 		},
 		{
 			"name": "diff.header",
-			"scope": [
-				"meta.diff",
-				"meta.diff.header"
-			],
+			"scope": ["meta.diff", "meta.diff.header"],
 			"settings": {
 				"fontStyle": "italic",
 				"foreground": "#f8f8f8ff"
@@ -349,10 +343,7 @@
 		},
 		{
 			"name": "Markup Styling",
-			"scope": [
-				"markup.bold",
-				"markup.italic"
-			],
+			"scope": ["markup.bold", "markup.italic"],
 			"settings": {
 				"foreground": "#fb9a4bff"
 			}

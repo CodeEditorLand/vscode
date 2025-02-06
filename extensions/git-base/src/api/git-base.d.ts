@@ -3,17 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Command, Disposable, Event, ProviderResult } from 'vscode';
-export { ProviderResult } from 'vscode';
+import { Command, Disposable, Event, ProviderResult } from "vscode";
+
+export { ProviderResult } from "vscode";
 
 export interface API {
 	registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable;
 	getRemoteSourceActions(url: string): Promise<RemoteSourceAction[]>;
-	pickRemoteSource(options: PickRemoteSourceOptions): Promise<string | PickRemoteSourceResult | undefined>;
+	pickRemoteSource(
+		options: PickRemoteSourceOptions,
+	): Promise<string | PickRemoteSourceResult | undefined>;
 }
 
 export interface GitBaseExtension {
-
 	readonly enabled: boolean;
 	readonly onDidChangeEnablement: Event<boolean>;
 
@@ -81,6 +83,8 @@ export interface RemoteSourceProvider {
 
 	getBranches?(url: string): ProviderResult<string[]>;
 	getRemoteSourceActions?(url: string): ProviderResult<RemoteSourceAction[]>;
-	getRecentRemoteSources?(query?: string): ProviderResult<RecentRemoteSource[]>;
+	getRecentRemoteSources?(
+		query?: string,
+	): ProviderResult<RecentRemoteSource[]>;
 	getRemoteSources(query?: string): ProviderResult<RemoteSource[]>;
 }

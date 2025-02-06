@@ -23,7 +23,7 @@ body {
 .loading-indicator {
 	width: 30px;
 	height: 30px;
-	background-image: url('./loading.svg');
+	background-image: url("./loading.svg");
 	background-size: cover;
 }
 
@@ -42,9 +42,9 @@ body {
 }
 
 .vscode-dark .loading-indicator {
-	background-image: url('./loading-dark.svg');
+	background-image: url("./loading-dark.svg");
 }
 
 .vscode-high-contrast .loading-indicator {
-	background-image: url('./loading-hc.svg');
+	background-image: url("./loading-hc.svg");
 }

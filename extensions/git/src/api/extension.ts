@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Model } from '../model';
-import { GitExtension, Repository, API } from './git';
-import { ApiRepository, ApiImpl } from './api1';
-import { Event, EventEmitter } from 'vscode';
+import { Event, EventEmitter } from "vscode";
+
+import { Model } from "../model";
+import { ApiImpl, ApiRepository } from "./api1";
+import { API, GitExtension, Repository } from "./git";
 
 export function deprecated(_target: any, key: string, descriptor: any): void {
-	if (typeof descriptor.value !== 'function') {
-		throw new Error('not supported');
+	if (typeof descriptor.value !== "function") {
+		throw new Error("not supported");
 	}
 
 	const fn = descriptor.value;
@@ -21,11 +22,11 @@ export function deprecated(_target: any, key: string, descriptor: any): void {
 }
 
 export class GitExtensionImpl implements GitExtension {
-
 	enabled: boolean = false;
 
 	private _onDidChangeEnablement = new EventEmitter<boolean>();
-	readonly onDidChangeEnablement: Event<boolean> = this._onDidChangeEnablement.event;
+	readonly onDidChangeEnablement: Event<boolean> =
+		this._onDidChangeEnablement.event;
 
 	private _model: Model | undefined = undefined;
 
@@ -56,7 +57,7 @@ export class GitExtensionImpl implements GitExtension {
 	@deprecated
 	async getGitPath(): Promise<string> {
 		if (!this._model) {
-			throw new Error('Git model not found');
+			throw new Error("Git model not found");
 		}
 
 		return this._model.git.path;
@@ -65,15 +66,17 @@ export class GitExtensionImpl implements GitExtension {
 	@deprecated
 	async getRepositories(): Promise<Repository[]> {
 		if (!this._model) {
-			throw new Error('Git model not found');
+			throw new Error("Git model not found");
 		}
 
-		return this._model.repositories.map(repository => new ApiRepository(repository));
+		return this._model.repositories.map(
+			(repository) => new ApiRepository(repository),
+		);
 	}
 
 	getAPI(version: number): API {
 		if (!this._model) {
-			throw new Error('Git model not found');
+			throw new Error("Git model not found");
 		}
 
 		if (version !== 1) {

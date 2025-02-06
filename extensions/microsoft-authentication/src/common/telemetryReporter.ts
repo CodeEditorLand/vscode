@@ -3,16 +3,20 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import TelemetryReporter, { TelemetryEventProperties } from '@vscode/extension-telemetry';
-import { IExperimentationTelemetry } from 'vscode-tas-client';
+import TelemetryReporter, {
+	TelemetryEventProperties,
+} from "@vscode/extension-telemetry";
+import { IExperimentationTelemetry } from "vscode-tas-client";
 
 export const enum MicrosoftAccountType {
-	AAD = 'aad',
-	MSA = 'msa',
-	Unknown = 'unknown'
+	AAD = "aad",
+	MSA = "msa",
+	Unknown = "unknown",
 }
 
-export class MicrosoftAuthenticationTelemetryReporter implements IExperimentationTelemetry {
+export class MicrosoftAuthenticationTelemetryReporter
+	implements IExperimentationTelemetry
+{
 	private sharedProperties: Record<string, string> = {};
 	protected _telemetryReporter: TelemetryReporter;
 	constructor(aiKey: string) {
@@ -28,11 +32,11 @@ export class MicrosoftAuthenticationTelemetryReporter implements IExperimentatio
 	}
 
 	postEvent(eventName: string, props: Map<string, string>): void {
-		const eventProperties: TelemetryEventProperties = { ...this.sharedProperties, ...Object.fromEntries(props) };
-		this._telemetryReporter.sendTelemetryEvent(
-			eventName,
-			eventProperties
-		);
+		const eventProperties: TelemetryEventProperties = {
+			...this.sharedProperties,
+			...Object.fromEntries(props),
+		};
+		this._telemetryReporter.sendTelemetryEvent(eventName, eventProperties);
 	}
 
 	sendLoginEvent(scopes: readonly string[]): void {
@@ -43,7 +47,7 @@ export class MicrosoftAuthenticationTelemetryReporter implements IExperimentatio
 				"scopes": { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight", "comment": "Used to determine what scope combinations are being requested." }
 			}
 		*/
-		this._telemetryReporter.sendTelemetryEvent('login', {
+		this._telemetryReporter.sendTelemetryEvent("login", {
 			// Get rid of guids from telemetry.
 			scopes: JSON.stringify(this._scrubGuids(scopes)),
 		});
@@ -52,19 +56,19 @@ export class MicrosoftAuthenticationTelemetryReporter implements IExperimentatio
 		/* __GDPR__
 			"loginFailed" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often users run into issues with the login flow." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('loginFailed');
+		this._telemetryReporter.sendTelemetryEvent("loginFailed");
 	}
 	sendLogoutEvent(): void {
 		/* __GDPR__
 			"logout" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often users log out." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('logout');
+		this._telemetryReporter.sendTelemetryEvent("logout");
 	}
 	sendLogoutFailedEvent(): void {
 		/* __GDPR__
 			"logoutFailed" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often fail to log out." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('logoutFailed');
+		this._telemetryReporter.sendTelemetryEvent("logoutFailed");
 	}
 	/**
 	 * Sends an event for an account type available at startup.
@@ -72,7 +76,10 @@ export class MicrosoftAuthenticationTelemetryReporter implements IExperimentatio
 	 * @param accountType The account type for the session
 	 * @todo Remove the scopes since we really don't care about them.
 	 */
-	sendAccountEvent(scopes: string[], accountType: MicrosoftAccountType): void {
+	sendAccountEvent(
+		scopes: string[],
+		accountType: MicrosoftAccountType,
+	): void {
 		/* __GDPR__
 			"login" : {
 				"owner": "TylerLeonhardt",
@@ -81,15 +88,20 @@ export class MicrosoftAuthenticationTelemetryReporter implements IExperimentatio
 				"accountType": { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight", "comment": "Used to determine what account types are being used." }
 			}
 		*/
-		this._telemetryReporter.sendTelemetryEvent('account', {
+		this._telemetryReporter.sendTelemetryEvent("account", {
 			// Get rid of guids from telemetry.
 			scopes: JSON.stringify(this._scrubGuids(scopes)),
-			accountType
+			accountType,
 		});
 	}
 
 	protected _scrubGuids(scopes: readonly string[]): string[] {
-		return scopes.map(s => s.replace(/[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/i, '{guid}'));
+		return scopes.map((s) =>
+			s.replace(
+				/[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/i,
+				"{guid}",
+			),
+		);
 	}
 }
 
@@ -102,27 +114,36 @@ export class MicrosoftSovereignCloudAuthenticationTelemetryReporter extends Micr
 				"scopes": { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight", "comment": "Used to determine what scope combinations are being requested." }
 			}
 		*/
-		this._telemetryReporter.sendTelemetryEvent('loginMicrosoftSovereignCloud', {
-			// Get rid of guids from telemetry.
-			scopes: JSON.stringify(this._scrubGuids(scopes)),
-		});
+		this._telemetryReporter.sendTelemetryEvent(
+			"loginMicrosoftSovereignCloud",
+			{
+				// Get rid of guids from telemetry.
+				scopes: JSON.stringify(this._scrubGuids(scopes)),
+			},
+		);
 	}
 	override sendLoginFailedEvent(): void {
 		/* __GDPR__
 			"loginMicrosoftSovereignCloudFailed" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often users run into issues with the login flow." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('loginMicrosoftSovereignCloudFailed');
+		this._telemetryReporter.sendTelemetryEvent(
+			"loginMicrosoftSovereignCloudFailed",
+		);
 	}
 	override sendLogoutEvent(): void {
 		/* __GDPR__
 			"logoutMicrosoftSovereignCloud" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often users log out." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('logoutMicrosoftSovereignCloud');
+		this._telemetryReporter.sendTelemetryEvent(
+			"logoutMicrosoftSovereignCloud",
+		);
 	}
 	override sendLogoutFailedEvent(): void {
 		/* __GDPR__
 			"logoutMicrosoftSovereignCloudFailed" : { "owner": "TylerLeonhardt", "comment": "Used to determine how often fail to log out." }
 		*/
-		this._telemetryReporter.sendTelemetryEvent('logoutMicrosoftSovereignCloudFailed');
+		this._telemetryReporter.sendTelemetryEvent(
+			"logoutMicrosoftSovereignCloudFailed",
+		);
 	}
 }

@@ -3,8 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Logger from './logger';
-import { Event, EventEmitter, ExtensionContext, SecretStorage, SecretStorageChangeEvent } from 'vscode';
+import {
+	Event,
+	EventEmitter,
+	ExtensionContext,
+	SecretStorage,
+	SecretStorageChangeEvent,
+} from "vscode";
+
+import Logger from "./logger";
 
 export interface IDidChangeInOtherWindowEvent<T> {
 	added: string[];
@@ -17,22 +24,32 @@ export class BetterTokenStorage<T> {
 	private _operationInProgress = false;
 	// the current state. Don't use this directly and call getTokens() so that you ensure you
 	// have awaited for all operations.
-	private _tokensPromise: Promise<Map<string, T>> = Promise.resolve(new Map());
+	private _tokensPromise: Promise<Map<string, T>> = Promise.resolve(
+		new Map(),
+	);
 
 	// The vscode SecretStorage instance for this extension.
 	private readonly _secretStorage: SecretStorage;
 
-	private _didChangeInOtherWindow = new EventEmitter<IDidChangeInOtherWindowEvent<T>>();
-	public onDidChangeInOtherWindow: Event<IDidChangeInOtherWindowEvent<T>> = this._didChangeInOtherWindow.event;
+	private _didChangeInOtherWindow = new EventEmitter<
+		IDidChangeInOtherWindowEvent<T>
+	>();
+	public onDidChangeInOtherWindow: Event<IDidChangeInOtherWindowEvent<T>> =
+		this._didChangeInOtherWindow.event;
 
 	/**
 	 *
 	 * @param keylistKey The key in the secret storage that will hold the list of keys associated with this instance of BetterTokenStorage
 	 * @param context the vscode Context used to register disposables and retreive the vscode.SecretStorage for this instance of VS Code
 	 */
-	constructor(private keylistKey: string, context: ExtensionContext) {
+	constructor(
+		private keylistKey: string,
+		context: ExtensionContext,
+	) {
 		this._secretStorage = context.secrets;
-		context.subscriptions.push(context.secrets.onDidChange((e) => this.handleSecretChange(e)));
+		context.subscriptions.push(
+			context.secrets.onDidChange((e) => this.handleSecretChange(e)),
+		);
 		this.initialize();
 	}
 
@@ -40,7 +57,7 @@ export class BetterTokenStorage<T> {
 		this._operationInProgress = true;
 		this._tokensPromise = new Promise((resolve, _) => {
 			this._secretStorage.get(this.keylistKey).then(
-				keyListStr => {
+				(keyListStr) => {
 					if (!keyListStr) {
 						resolve(new Map());
 						return;
@@ -48,30 +65,39 @@ export class BetterTokenStorage<T> {
 
 					const keyList: Array<string> = JSON.parse(keyListStr);
 					// Gather promises that contain key value pairs our of secret storage
-					const promises = keyList.map(key => new Promise<{ key: string; value: string | undefined }>((res, rej) => {
-						this._secretStorage.get(key).then((value) => {
-							res({ key, value });
-						}, rej);
-					}));
-					Promise.allSettled(promises).then((results => {
+					const promises = keyList.map(
+						(key) =>
+							new Promise<{
+								key: string;
+								value: string | undefined;
+							}>((res, rej) => {
+								this._secretStorage.get(key).then((value) => {
+									res({ key, value });
+								}, rej);
+							}),
+					);
+					Promise.allSettled(promises).then((results) => {
 						const tokens = new Map<string, T>();
-						results.forEach(p => {
-							if (p.status === 'fulfilled' && p.value.value) {
+						results.forEach((p) => {
+							if (p.status === "fulfilled" && p.value.value) {
 								const secret = this.parseSecret(p.value.value);
 								tokens.set(p.value.key, secret);
-							} else if (p.status === 'rejected') {
+							} else if (p.status === "rejected") {
 								Logger.error(p.reason);
 							} else {
-								Logger.error('Key was not found in SecretStorage.');
+								Logger.error(
+									"Key was not found in SecretStorage.",
+								);
 							}
 						});
 						resolve(tokens);
-					}));
+					});
 				},
-				err => {
+				(err) => {
 					Logger.error(err);
 					resolve(new Map());
-				});
+				},
+			);
 		});
 		this._operationInProgress = false;
 	}
@@ -107,9 +133,9 @@ export class BetterTokenStorage<T> {
 				promises.push(this.updateKeyList(tokens));
 			}
 
-			Promise.allSettled(promises).then(results => {
-				results.forEach(r => {
-					if (r.status === 'rejected') {
+			Promise.allSettled(promises).then((results) => {
+				results.forEach((r) => {
+					if (r.status === "rejected") {
 						Logger.error(r.reason);
 					}
 				});
@@ -130,10 +156,10 @@ export class BetterTokenStorage<T> {
 		this._tokensPromise = new Promise((resolve, _) => {
 			Promise.allSettled([
 				this._secretStorage.delete(key),
-				this.updateKeyList(tokens)
-			]).then(results => {
-				results.forEach(r => {
-					if (r.status === 'rejected') {
+				this.updateKeyList(tokens),
+			]).then((results) => {
+				results.forEach((r) => {
+					if (r.status === "rejected") {
 						Logger.error(r.reason);
 					}
 				});
@@ -203,45 +229,63 @@ export class BetterTokenStorage<T> {
 
 		this._operationInProgress = true;
 		this._tokensPromise = new Promise((resolve, _) => {
-			this._secretStorage.get(key).then(
-				storageSecretStr => {
-					if (!storageSecretStr) {
-						// true -> secret was deleted in another window
-						// false -> secret was deleted in this window
-						if (tokens.has(key)) {
-							const value = tokens.get(key)!;
-							tokens.delete(key);
-							this._didChangeInOtherWindow.fire({ added: [], updated: [], removed: [{ key, value }] });
+			this._secretStorage
+				.get(key)
+				.then(
+					(storageSecretStr) => {
+						if (!storageSecretStr) {
+							// true -> secret was deleted in another window
+							// false -> secret was deleted in this window
+							if (tokens.has(key)) {
+								const value = tokens.get(key)!;
+								tokens.delete(key);
+								this._didChangeInOtherWindow.fire({
+									added: [],
+									updated: [],
+									removed: [{ key, value }],
+								});
+							}
+							return tokens;
 						}
+
+						const storageSecret =
+							this.parseSecret(storageSecretStr);
+						const cachedSecret = tokens.get(key);
+
+						if (!cachedSecret) {
+							// token was added in another window
+							tokens.set(key, storageSecret);
+							this._didChangeInOtherWindow.fire({
+								added: [key],
+								updated: [],
+								removed: [],
+							});
+							return tokens;
+						}
+
+						const cachedSecretStr =
+							this.serializeSecret(cachedSecret);
+						if (storageSecretStr !== cachedSecretStr) {
+							// token was updated in another window
+							tokens.set(key, storageSecret);
+							this._didChangeInOtherWindow.fire({
+								added: [],
+								updated: [key],
+								removed: [],
+							});
+						}
+
+						// what's in our token cache and what's in storage must be the same
+						// which means this should cover the last two scenarios of
+						// Added in this window & Updated in this window.
 						return tokens;
-					}
-
-					const storageSecret = this.parseSecret(storageSecretStr);
-					const cachedSecret = tokens.get(key);
-
-					if (!cachedSecret) {
-						// token was added in another window
-						tokens.set(key, storageSecret);
-						this._didChangeInOtherWindow.fire({ added: [key], updated: [], removed: [] });
+					},
+					(err) => {
+						Logger.error(err);
 						return tokens;
-					}
-
-					const cachedSecretStr = this.serializeSecret(cachedSecret);
-					if (storageSecretStr !== cachedSecretStr) {
-						// token was updated in another window
-						tokens.set(key, storageSecret);
-						this._didChangeInOtherWindow.fire({ added: [], updated: [key], removed: [] });
-					}
-
-					// what's in our token cache and what's in storage must be the same
-					// which means this should cover the last two scenarios of
-					// Added in this window & Updated in this window.
-					return tokens;
-				},
-				err => {
-					Logger.error(err);
-					return tokens;
-				}).then(resolve);
+					},
+				)
+				.then(resolve);
 		});
 		this._operationInProgress = false;
 	}

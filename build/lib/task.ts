@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import fancyLog from 'fancy-log';
-import ansiColors from 'ansi-colors';
+import ansiColors from "ansi-colors";
+import fancyLog from "fancy-log";
 
 export interface BaseTask {
 	displayName?: string;
@@ -23,8 +23,10 @@ export interface CallbackTask extends BaseTask {
 
 export type Task = PromiseTask | StreamTask | CallbackTask;
 
-function _isPromise(p: Promise<void> | NodeJS.ReadWriteStream): p is Promise<void> {
-	if (typeof (<any>p).then === 'function') {
+function _isPromise(
+	p: Promise<void> | NodeJS.ReadWriteStream,
+): p is Promise<void> {
+	if (typeof (<any>p).then === "function") {
 		return true;
 	}
 	return false;
@@ -37,14 +39,19 @@ function _renderTime(time: number): string {
 async function _execute(task: Task): Promise<void> {
 	const name = task.taskName || task.displayName || `<anonymous>`;
 	if (!task._tasks) {
-		fancyLog('Starting', ansiColors.cyan(name), '...');
+		fancyLog("Starting", ansiColors.cyan(name), "...");
 	}
 	const startTime = process.hrtime();
 	await _doExecute(task);
 	const elapsedArr = process.hrtime(startTime);
-	const elapsedNanoseconds = (elapsedArr[0] * 1e9 + elapsedArr[1]);
+	const elapsedNanoseconds = elapsedArr[0] * 1e9 + elapsedArr[1];
 	if (!task._tasks) {
-		fancyLog(`Finished`, ansiColors.cyan(name), 'after', ansiColors.magenta(_renderTime(elapsedNanoseconds / 1e6)));
+		fancyLog(
+			`Finished`,
+			ansiColors.cyan(name),
+			"after",
+			ansiColors.magenta(_renderTime(elapsedNanoseconds / 1e6)),
+		);
 	}
 }
 
@@ -64,7 +71,7 @@ async function _doExecute(task: Task): Promise<void> {
 
 		const taskResult = task();
 
-		if (typeof taskResult === 'undefined') {
+		if (typeof taskResult === "undefined") {
 			// this is a sync task
 			resolve();
 			return;
@@ -77,8 +84,8 @@ async function _doExecute(task: Task): Promise<void> {
 		}
 
 		// this is a stream returning task
-		taskResult.on('end', _ => resolve());
-		taskResult.on('error', err => reject(err));
+		taskResult.on("end", (_) => resolve());
+		taskResult.on("error", (err) => reject(err));
 	});
 }
 
@@ -94,7 +101,7 @@ export function series(...tasks: Task[]): PromiseTask {
 
 export function parallel(...tasks: Task[]): PromiseTask {
 	const result = async () => {
-		await Promise.all(tasks.map(t => _execute(t)));
+		await Promise.all(tasks.map((t) => _execute(t)));
 	};
 	result._tasks = tasks;
 	return result;
@@ -108,7 +115,10 @@ export function define(name: string, task: Task): Task {
 		if (lastTask._tasks || lastTask.taskName) {
 			// This is a composite task without a real task function
 			// => generate a fake task function
-			return define(name, series(task, () => Promise.resolve()));
+			return define(
+				name,
+				series(task, () => Promise.resolve()),
+			);
 		}
 
 		lastTask.taskName = name;

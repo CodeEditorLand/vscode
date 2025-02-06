@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs/promises';
-import * as vscode from 'vscode';
-import { isExecutable } from '../helpers/executable';
-import { osIsWindows } from '../helpers/os';
-import type { ICompletionResource } from '../types';
-import { getFriendlyResourcePath } from '../helpers/uri';
-import { SettingsIds } from '../constants';
+import * as fs from "fs/promises";
+import * as vscode from "vscode";
+
+import { SettingsIds } from "../constants";
+import { isExecutable } from "../helpers/executable";
+import { osIsWindows } from "../helpers/os";
+import { getFriendlyResourcePath } from "../helpers/uri";
+import type { ICompletionResource } from "../types";
 
 const isWindows = osIsWindows();
 
@@ -17,18 +18,37 @@ export class PathExecutableCache implements vscode.Disposable {
 	private _disposables: vscode.Disposable[] = [];
 
 	private _cachedPathValue: string | undefined;
-	private _cachedWindowsExeExtensions: { [key: string]: boolean | undefined } | undefined;
-	private _cachedExes: { completionResources: Set<ICompletionResource> | undefined; labels: Set<string> | undefined } | undefined;
+	private _cachedWindowsExeExtensions:
+		| { [key: string]: boolean | undefined }
+		| undefined;
+	private _cachedExes:
+		| {
+				completionResources: Set<ICompletionResource> | undefined;
+				labels: Set<string> | undefined;
+		  }
+		| undefined;
 
 	constructor() {
 		if (isWindows) {
-			this._cachedWindowsExeExtensions = vscode.workspace.getConfiguration(SettingsIds.SuggestPrefix).get(SettingsIds.CachedWindowsExecutableExtensionsSuffixOnly);
-			this._disposables.push(vscode.workspace.onDidChangeConfiguration(e => {
-				if (e.affectsConfiguration(SettingsIds.CachedWindowsExecutableExtensions)) {
-					this._cachedWindowsExeExtensions = vscode.workspace.getConfiguration(SettingsIds.SuggestPrefix).get(SettingsIds.CachedWindowsExecutableExtensionsSuffixOnly);
-					this._cachedExes = undefined;
-				}
-			}));
+			this._cachedWindowsExeExtensions = vscode.workspace
+				.getConfiguration(SettingsIds.SuggestPrefix)
+				.get(SettingsIds.CachedWindowsExecutableExtensionsSuffixOnly);
+			this._disposables.push(
+				vscode.workspace.onDidChangeConfiguration((e) => {
+					if (
+						e.affectsConfiguration(
+							SettingsIds.CachedWindowsExecutableExtensions,
+						)
+					) {
+						this._cachedWindowsExeExtensions = vscode.workspace
+							.getConfiguration(SettingsIds.SuggestPrefix)
+							.get(
+								SettingsIds.CachedWindowsExecutableExtensionsSuffixOnly,
+							);
+						this._cachedExes = undefined;
+					}
+				}),
+			);
 		}
 	}
 
@@ -38,11 +58,21 @@ export class PathExecutableCache implements vscode.Disposable {
 		}
 	}
 
-	async getExecutablesInPath(env: { [key: string]: string | undefined } = process.env): Promise<{ completionResources: Set<ICompletionResource> | undefined; labels: Set<string> | undefined } | undefined> {
+	async getExecutablesInPath(
+		env: { [key: string]: string | undefined } = process.env,
+	): Promise<
+		| {
+				completionResources: Set<ICompletionResource> | undefined;
+				labels: Set<string> | undefined;
+		  }
+		| undefined
+	> {
 		// Create cache key
 		let pathValue: string | undefined;
 		if (isWindows) {
-			const caseSensitivePathKey = Object.keys(env).find(key => key.toLowerCase() === 'path');
+			const caseSensitivePathKey = Object.keys(env).find(
+				(key) => key.toLowerCase() === "path",
+			);
 			if (caseSensitivePathKey) {
 				pathValue = env[caseSensitivePathKey];
 			}
@@ -59,8 +89,8 @@ export class PathExecutableCache implements vscode.Disposable {
 		}
 
 		// Extract executables from PATH
-		const paths = pathValue.split(isWindows ? ';' : ':');
-		const pathSeparator = isWindows ? '\\' : '/';
+		const paths = pathValue.split(isWindows ? ";" : ":");
+		const pathSeparator = isWindows ? "\\" : "/";
 		const promises: Promise<Set<ICompletionResource> | undefined>[] = [];
 		const labels: Set<string> = new Set<string>();
 		for (const path of paths) {
@@ -84,9 +114,16 @@ export class PathExecutableCache implements vscode.Disposable {
 		return this._cachedExes;
 	}
 
-	private async _getFilesInPath(path: string, pathSeparator: string, labels: Set<string>): Promise<Set<ICompletionResource> | undefined> {
+	private async _getFilesInPath(
+		path: string,
+		pathSeparator: string,
+		labels: Set<string>,
+	): Promise<Set<ICompletionResource> | undefined> {
 		try {
-			const dirExists = await fs.stat(path).then(stat => stat.isDirectory()).catch(() => false);
+			const dirExists = await fs
+				.stat(path)
+				.then((stat) => stat.isDirectory())
+				.catch(() => false);
 			if (!dirExists) {
 				return undefined;
 			}
@@ -94,8 +131,19 @@ export class PathExecutableCache implements vscode.Disposable {
 			const fileResource = vscode.Uri.file(path);
 			const files = await vscode.workspace.fs.readDirectory(fileResource);
 			for (const [file, fileType] of files) {
-				const formattedPath = getFriendlyResourcePath(vscode.Uri.joinPath(fileResource, file), pathSeparator);
-				if (!labels.has(file) && fileType !== vscode.FileType.Unknown && fileType !== vscode.FileType.Directory && await isExecutable(formattedPath, this._cachedWindowsExeExtensions)) {
+				const formattedPath = getFriendlyResourcePath(
+					vscode.Uri.joinPath(fileResource, file),
+					pathSeparator,
+				);
+				if (
+					!labels.has(file) &&
+					fileType !== vscode.FileType.Unknown &&
+					fileType !== vscode.FileType.Directory &&
+					(await isExecutable(
+						formattedPath,
+						this._cachedWindowsExeExtensions,
+					))
+				) {
 					result.add({ label: file, detail: formattedPath });
 					labels.add(file);
 				}

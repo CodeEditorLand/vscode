@@ -3,176 +3,162 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { ExtensionHost, GitHubTarget, IFlowQuery, getFlows } from '../flows';
-import { Config } from '../config';
+import * as assert from "assert";
+
+import { Config } from "../config";
+import { ExtensionHost, getFlows, GitHubTarget, IFlowQuery } from "../flows";
 
 const enum Flows {
-	UrlHandlerFlow = 'url handler',
-	LocalServerFlow = 'local server',
-	DeviceCodeFlow = 'device code',
-	PatFlow = 'personal access token'
+	UrlHandlerFlow = "url handler",
+	LocalServerFlow = "local server",
+	DeviceCodeFlow = "device code",
+	PatFlow = "personal access token",
 }
 
-suite('getFlows', () => {
+suite("getFlows", () => {
 	let lastClientSecret: string | undefined = undefined;
 	suiteSetup(() => {
 		lastClientSecret = Config.gitHubClientSecret;
-		Config.gitHubClientSecret = 'asdf';
+		Config.gitHubClientSecret = "asdf";
 	});
 
 	suiteTeardown(() => {
 		Config.gitHubClientSecret = lastClientSecret;
 	});
 
-	const testCases: Array<{ label: string; query: IFlowQuery; expectedFlows: Flows[] }> = [
+	const testCases: Array<{
+		label: string;
+		query: IFlowQuery;
+		expectedFlows: Flows[];
+	}> = [
 		{
-			label: 'VS Code Desktop. Local filesystem. GitHub.com',
+			label: "VS Code Desktop. Local filesystem. GitHub.com",
 			query: {
 				extensionHost: ExtensionHost.Local,
 				isSupportedClient: true,
-				target: GitHubTarget.DotCom
-			},
-			expectedFlows: [
-				Flows.UrlHandlerFlow,
-				Flows.LocalServerFlow,
-				Flows.DeviceCodeFlow
-			]
-		},
-		{
-			label: 'VS Code Desktop. Local filesystem. GitHub Hosted Enterprise',
-			query: {
-				extensionHost: ExtensionHost.Local,
-				isSupportedClient: true,
-				target: GitHubTarget.HostedEnterprise
+				target: GitHubTarget.DotCom,
 			},
 			expectedFlows: [
 				Flows.UrlHandlerFlow,
 				Flows.LocalServerFlow,
 				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+			],
 		},
 		{
-			label: 'VS Code Desktop. Local filesystem. GitHub Enterprise Server',
+			label: "VS Code Desktop. Local filesystem. GitHub Hosted Enterprise",
 			query: {
 				extensionHost: ExtensionHost.Local,
 				isSupportedClient: true,
-				target: GitHubTarget.Enterprise
+				target: GitHubTarget.HostedEnterprise,
 			},
 			expectedFlows: [
+				Flows.UrlHandlerFlow,
+				Flows.LocalServerFlow,
 				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+				Flows.PatFlow,
+			],
 		},
 		{
-			label: 'vscode.dev. serverful. GitHub.com',
+			label: "VS Code Desktop. Local filesystem. GitHub Enterprise Server",
+			query: {
+				extensionHost: ExtensionHost.Local,
+				isSupportedClient: true,
+				target: GitHubTarget.Enterprise,
+			},
+			expectedFlows: [Flows.DeviceCodeFlow, Flows.PatFlow],
+		},
+		{
+			label: "vscode.dev. serverful. GitHub.com",
 			query: {
 				extensionHost: ExtensionHost.Remote,
 				isSupportedClient: true,
-				target: GitHubTarget.DotCom
+				target: GitHubTarget.DotCom,
 			},
-			expectedFlows: [
-				Flows.UrlHandlerFlow,
-				Flows.DeviceCodeFlow
-			]
+			expectedFlows: [Flows.UrlHandlerFlow, Flows.DeviceCodeFlow],
 		},
 		{
-			label: 'vscode.dev. serverful. GitHub Hosted Enterprise',
+			label: "vscode.dev. serverful. GitHub Hosted Enterprise",
 			query: {
 				extensionHost: ExtensionHost.Remote,
 				isSupportedClient: true,
-				target: GitHubTarget.HostedEnterprise
+				target: GitHubTarget.HostedEnterprise,
 			},
 			expectedFlows: [
 				Flows.UrlHandlerFlow,
 				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+				Flows.PatFlow,
+			],
 		},
 		{
-			label: 'vscode.dev. serverful. GitHub Enterprise',
+			label: "vscode.dev. serverful. GitHub Enterprise",
 			query: {
 				extensionHost: ExtensionHost.Remote,
 				isSupportedClient: true,
-				target: GitHubTarget.Enterprise
+				target: GitHubTarget.Enterprise,
 			},
-			expectedFlows: [
-				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+			expectedFlows: [Flows.DeviceCodeFlow, Flows.PatFlow],
 		},
 		{
-			label: 'vscode.dev. serverless. GitHub.com',
+			label: "vscode.dev. serverless. GitHub.com",
 			query: {
 				extensionHost: ExtensionHost.WebWorker,
 				isSupportedClient: true,
-				target: GitHubTarget.DotCom
+				target: GitHubTarget.DotCom,
 			},
-			expectedFlows: [
-				Flows.UrlHandlerFlow
-			]
+			expectedFlows: [Flows.UrlHandlerFlow],
 		},
 		{
-			label: 'vscode.dev. serverless. GitHub Hosted Enterprise',
+			label: "vscode.dev. serverless. GitHub Hosted Enterprise",
 			query: {
 				extensionHost: ExtensionHost.WebWorker,
 				isSupportedClient: true,
-				target: GitHubTarget.HostedEnterprise
+				target: GitHubTarget.HostedEnterprise,
 			},
-			expectedFlows: [
-				Flows.UrlHandlerFlow,
-				Flows.PatFlow
-			]
+			expectedFlows: [Flows.UrlHandlerFlow, Flows.PatFlow],
 		},
 		{
-			label: 'vscode.dev. serverless. GitHub Enterprise Server',
+			label: "vscode.dev. serverless. GitHub Enterprise Server",
 			query: {
 				extensionHost: ExtensionHost.WebWorker,
 				isSupportedClient: true,
-				target: GitHubTarget.Enterprise
+				target: GitHubTarget.Enterprise,
 			},
-			expectedFlows: [
-				Flows.PatFlow
-			]
+			expectedFlows: [Flows.PatFlow],
 		},
 		{
-			label: 'Code - OSS. Local filesystem. GitHub.com',
+			label: "Code - OSS. Local filesystem. GitHub.com",
 			query: {
 				extensionHost: ExtensionHost.Local,
 				isSupportedClient: false,
-				target: GitHubTarget.DotCom
+				target: GitHubTarget.DotCom,
 			},
 			expectedFlows: [
 				Flows.LocalServerFlow,
 				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+				Flows.PatFlow,
+			],
 		},
 		{
-			label: 'Code - OSS. Local filesystem. GitHub Hosted Enterprise',
+			label: "Code - OSS. Local filesystem. GitHub Hosted Enterprise",
 			query: {
 				extensionHost: ExtensionHost.Local,
 				isSupportedClient: false,
-				target: GitHubTarget.HostedEnterprise
+				target: GitHubTarget.HostedEnterprise,
 			},
 			expectedFlows: [
 				Flows.LocalServerFlow,
 				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+				Flows.PatFlow,
+			],
 		},
 		{
-			label: 'Code - OSS. Local filesystem. GitHub Enterprise Server',
+			label: "Code - OSS. Local filesystem. GitHub Enterprise Server",
 			query: {
 				extensionHost: ExtensionHost.Local,
 				isSupportedClient: false,
-				target: GitHubTarget.Enterprise
+				target: GitHubTarget.Enterprise,
 			},
-			expectedFlows: [
-				Flows.DeviceCodeFlow,
-				Flows.PatFlow
-			]
+			expectedFlows: [Flows.DeviceCodeFlow, Flows.PatFlow],
 		},
 	];
 
@@ -183,7 +169,7 @@ suite('getFlows', () => {
 			assert.strictEqual(
 				flows.length,
 				testCase.expectedFlows.length,
-				`Unexpected number of flows: ${flows.map(f => f.label).join(',')}`
+				`Unexpected number of flows: ${flows.map((f) => f.label).join(",")}`,
 			);
 
 			for (let i = 0; i < flows.length; i++) {

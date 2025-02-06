@@ -5,33 +5,32 @@
 
 //@ts-check
 
-'use strict';
+"use strict";
 
-const withBrowserDefaults = require('../shared.webpack.config').browser;
-const path = require('path');
+const withBrowserDefaults = require("../shared.webpack.config").browser;
+const path = require("path");
 
 const mainConfig = withBrowserDefaults({
 	context: __dirname,
 	entry: {
-		extension: './src/ipynbMain.browser.ts'
+		extension: "./src/ipynbMain.browser.ts",
 	},
 	output: {
-		filename: 'ipynbMain.browser.js',
-		path: path.join(__dirname, 'dist', 'browser')
-	}
+		filename: "ipynbMain.browser.js",
+		path: path.join(__dirname, "dist", "browser"),
+	},
 });
-
 
 const workerConfig = withBrowserDefaults({
 	context: __dirname,
 	entry: {
-		notebookSerializerWorker: './src/notebookSerializerWorker.web.ts',
+		notebookSerializerWorker: "./src/notebookSerializerWorker.web.ts",
 	},
 	output: {
-		filename: 'notebookSerializerWorker.js',
-		path: path.join(__dirname, 'dist', 'browser'),
-		libraryTarget: 'var',
-		library: 'serverExportVar'
+		filename: "notebookSerializerWorker.js",
+		path: path.join(__dirname, "dist", "browser"),
+		libraryTarget: "var",
+		library: "serverExportVar",
 	},
 });
 

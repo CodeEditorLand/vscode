@@ -7,9 +7,7 @@
 			"name": "Gulp Build",
 			"program": "${workspaceFolder}/node_modules/gulp/bin/gulp.js",
 			"stopOnEntry": true,
-			"args": [
-				"hygiene"
-			]
+			"args": ["hygiene"]
 		},
 		{
 			"type": "node",
@@ -30,36 +28,28 @@
 			"name": "Attach to Shared Process",
 			"timeout": 0,
 			"port": 5879,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			]
+			"outFiles": ["${workspaceFolder}/out/**/*.js"]
 		},
 		{
 			"type": "node",
 			"request": "attach",
 			"name": "Attach to Search Process",
 			"port": 5876,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			]
+			"outFiles": ["${workspaceFolder}/out/**/*.js"]
 		},
 		{
 			"type": "node",
 			"request": "attach",
 			"name": "Attach to Pty Host Process",
 			"port": 5877,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			]
+			"outFiles": ["${workspaceFolder}/out/**/*.js"]
 		},
 		{
 			"type": "node",
 			"request": "attach",
 			"name": "Attach to CLI Process",
 			"port": 5874,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			]
+			"outFiles": ["${workspaceFolder}/out/**/*.js"]
 		},
 		{
 			"type": "node",
@@ -68,11 +58,9 @@
 			"timeout": 30000,
 			"port": 5875,
 			"continueOnAttach": true,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
-				"hidden": true,
+				"hidden": true
 			}
 		},
 		{
@@ -85,9 +73,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/emmet",
 				"--extensionTestsPath=${workspaceFolder}/extensions/emmet/out/test"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 6
@@ -102,9 +88,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/configuration-editing",
 				"--extensionTestsPath=${workspaceFolder}/extensions/configuration-editing/out/test"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 6
@@ -120,9 +104,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/git",
 				"--extensionTestsPath=${workspaceFolder}/extensions/git/out/test"
 			],
-			"outFiles": [
-				"${workspaceFolder}/extensions/git/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/extensions/git/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 6
@@ -138,9 +120,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/github",
 				"--extensionTestsPath=${workspaceFolder}/extensions/github/out/test"
 			],
-			"outFiles": [
-				"${workspaceFolder}/extensions/github/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/extensions/github/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 6
@@ -194,9 +174,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/vscode-colorize-tests",
 				"--extensionTestsPath=${workspaceFolder}/extensions/vscode-colorize-tests/out"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 5
@@ -212,9 +190,7 @@
 				"--extensionDevelopmentPath=${workspaceFolder}/extensions/vscode-colorize-perf-tests",
 				"--extensionTestsPath=${workspaceFolder}/extensions/vscode-colorize-perf-tests/out"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 6
@@ -226,12 +202,8 @@
 			"name": "Attach to VS Code",
 			"browserAttachLocation": "workspace",
 			"port": 9222,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
-			"resolveSourceMapLocations": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"resolveSourceMapLocations": ["${workspaceFolder}/out/**/*.js"],
 			"perScriptSourcemaps": "yes"
 		},
 		{
@@ -264,17 +236,13 @@
 			],
 			"userDataDir": "${userHome}/.vscode-oss-dev",
 			"webRoot": "${workspaceFolder}",
-			"cascadeTerminateToConfigurations": [
-				"Attach to Extension Host"
-			],
+			"cascadeTerminateToConfigurations": ["Attach to Extension Host"],
 			"pauseForSourceMap": false,
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"browserLaunchLocation": "workspace",
 			"presentation": {
-				"hidden": true,
-			},
+				"hidden": true
+			}
 		},
 		{
 			"type": "node",
@@ -282,11 +250,9 @@
 			"name": "VS Code Server (Web)",
 			"runtimeExecutable": "${workspaceFolder}/scripts/code-server.sh",
 			"windows": {
-				"runtimeExecutable": "${workspaceFolder}/scripts/code-server.bat",
+				"runtimeExecutable": "${workspaceFolder}/scripts/code-server.bat"
 			},
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "0_vscode",
 				"order": 2
@@ -300,15 +266,10 @@
 			"enableContentValidation": false,
 			"runtimeExecutable": "${workspaceFolder}/scripts/code.sh",
 			"windows": {
-				"runtimeExecutable": "${workspaceFolder}/scripts/code.bat",
+				"runtimeExecutable": "${workspaceFolder}/scripts/code.bat"
 			},
-			"runtimeArgs": [
-				"--inspect-brk=5875",
-				"--no-cached-data",
-			],
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"runtimeArgs": ["--inspect-brk=5875", "--no-cached-data"],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"presentation": {
 				"group": "1_vscode",
 				"order": 1
@@ -375,9 +336,7 @@
 			"program": "${workspaceFolder}/extensions/git/node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
 			"cwd": "${workspaceFolder}/extensions/git",
-			"outFiles": [
-				"${workspaceFolder}/extensions/git/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/extensions/git/out/**/*.js"],
 			"presentation": {
 				"group": "5_tests",
 				"order": 10
@@ -462,16 +421,10 @@
 				"runtimeExecutable": "${workspaceFolder}/.build/electron/code-oss"
 			},
 			"outputCapture": "std",
-			"args": [
-				"--remote-debugging-port=9222"
-			],
+			"args": ["--remote-debugging-port=9222"],
 			"cwd": "${workspaceFolder}",
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
-			"cascadeTerminateToConfigurations": [
-				"Attach to VS Code"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
+			"cascadeTerminateToConfigurations": ["Attach to VS Code"],
 			"env": {
 				"MOCHA_COLORS": "true"
 			},
@@ -491,9 +444,7 @@
 			"linux": {
 				"runtimeExecutable": "${workspaceFolder}/.build/electron/code-oss"
 			},
-			"cascadeTerminateToConfigurations": [
-				"Attach to VS Code"
-			],
+			"cascadeTerminateToConfigurations": ["Attach to VS Code"],
 			"outputCapture": "std",
 			"args": [
 				"--remote-debugging-port=9222",
@@ -501,9 +452,7 @@
 				"${relativeFile}"
 			],
 			"cwd": "${workspaceFolder}",
-			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/out/**/*.js"],
 			"env": {
 				"MOCHA_COLORS": "true"
 			},
@@ -522,9 +471,7 @@
 				"-l",
 				"${workspaceFolder}/.build/electron/Code - OSS.app/Contents/MacOS/Electron"
 			],
-			"outFiles": [
-				"${cwd}/out/**/*.js"
-			],
+			"outFiles": ["${cwd}/out/**/*.js"],
 			"env": {
 				"NODE_ENV": "development",
 				"VSCODE_DEV": "1",
@@ -560,7 +507,7 @@
 				"Launch VS Code Internal",
 				"Attach to Main Process",
 				"Attach to Extension Host",
-				"Attach to Shared Process",
+				"Attach to Shared Process"
 			],
 			"preLaunchTask": "Ensure Prelaunch Dependencies",
 			"presentation": {
@@ -594,10 +541,7 @@
 		},
 		{
 			"name": "Debug Unit Tests",
-			"configurations": [
-				"Attach to VS Code",
-				"Run Unit Tests"
-			],
+			"configurations": ["Attach to VS Code", "Run Unit Tests"],
 			"presentation": {
 				"group": "1_vscode",
 				"order": 2
@@ -622,6 +566,6 @@
 				"Attach to Main Process"
 			],
 			"preLaunchTask": "Ensure Prelaunch Dependencies"
-		},
+		}
 	]
 }

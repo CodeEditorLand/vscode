@@ -3,25 +3,26 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TextDocument } from 'vscode-languageserver-textdocument';
-import * as vscode from 'vscode';
-import { ITextDocument } from '../types/textDocument';
+import * as vscode from "vscode";
+import { TextDocument } from "vscode-languageserver-textdocument";
+
+import { ITextDocument } from "../types/textDocument";
 
 export class InMemoryDocument implements ITextDocument {
-
 	private readonly _doc: TextDocument;
 
 	public readonly uri: vscode.Uri;
 	public readonly version: number;
 
-	constructor(
-		uri: vscode.Uri,
-		contents: string,
-		version: number = 0,
-	) {
+	constructor(uri: vscode.Uri, contents: string, version: number = 0) {
 		this.uri = uri;
 		this.version = version;
-		this._doc = TextDocument.create(this.uri.toString(), 'markdown', 0, contents);
+		this._doc = TextDocument.create(
+			this.uri.toString(),
+			"markdown",
+			0,
+			contents,
+		);
 	}
 
 	getText(range?: vscode.Range): string {

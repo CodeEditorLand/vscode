@@ -28,9 +28,7 @@
 	},
 	{
 		"name": "tunnel-agent",
-		"prependLicenseText": [
-			"Copyright (c) tunnel-agent authors"
-		]
+		"prependLicenseText": ["Copyright (c) tunnel-agent authors"]
 	},
 	{
 		// Reason: The license at https://github.com/rbuckton/reflect-metadata/blob/master/LICENSE
@@ -290,27 +288,33 @@
 			"CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
 		]
 	},
-	{ // Reason: Missing license file
+	{
+		// Reason: Missing license file
 		"name": "const_format_proc_macros",
 		"fullLicenseTextUri": "https://raw.githubusercontent.com/rodrimati1992/const_format_crates/b2207af46bfbd9f1a6bd12dbffd10feeea3d9fd7/LICENSE-ZLIB.md"
 	},
-	{ // Reason: Missing license file
+	{
+		// Reason: Missing license file
 		"name": "const_format",
 		"fullLicenseTextUri": "https://raw.githubusercontent.com/rodrimati1992/const_format_crates/b2207af46bfbd9f1a6bd12dbffd10feeea3d9fd7/LICENSE-ZLIB.md"
 	},
-	{ // License is MIT/Apache and tool doesn't look in subfolders
+	{
+		// License is MIT/Apache and tool doesn't look in subfolders
 		"name": "toml_edit",
 		"fullLicenseTextUri": "https://raw.githubusercontent.com/toml-rs/toml/main/crates/toml_edit/LICENSE-MIT"
 	},
-	{ // License is MIT/Apache and tool doesn't look in subfolders
+	{
+		// License is MIT/Apache and tool doesn't look in subfolders
 		"name": "toml_datetime",
 		"fullLicenseTextUri": "https://raw.githubusercontent.com/toml-rs/toml/main/crates/toml_datetime/LICENSE-MIT"
 	},
-	{ // License is MIT/Apache and tool doesn't look in subfolders
+	{
+		// License is MIT/Apache and tool doesn't look in subfolders
 		"name": "dirs-sys-next",
 		"fullLicenseTextUri": "https://raw.githubusercontent.com/xdg-rs/dirs/master/dirs-sys/LICENSE-MIT"
 	},
-	{ // License is MIT/Apache and gitlab API doesn't find the project
+	{
+		// License is MIT/Apache and gitlab API doesn't find the project
 		"name": "libredox",
 		"fullLicenseTextUri": "https://gitlab.redox-os.org/redox-os/libredox/-/raw/master/LICENSE"
 	},
@@ -504,9 +508,7 @@
 	},
 	{
 		"name": "cacheable-request",
-		"prependLicenseText": [
-			"Copyright (c) cacheable-request authors"
-		]
+		"prependLicenseText": ["Copyright (c) cacheable-request authors"]
 	},
 	{
 		"name": "@vscode/ts-package-manager",
@@ -535,7 +537,7 @@
 		]
 	},
 	{
-		"name":"vscode-markdown-languageserver",
+		"name": "vscode-markdown-languageserver",
 		"fullLicenseText": [
 			"MIT License",
 			"",

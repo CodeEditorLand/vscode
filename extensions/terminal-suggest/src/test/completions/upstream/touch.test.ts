@@ -3,34 +3,42 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'mocha';
-import { testPaths, type ISuiteSpec } from '../../helpers';
-import touchSpec from '../../../completions/upstream/touch';
+import "mocha";
 
-const allOptions = [
-	'-A',
-	'-a',
-	'-c',
-	'-f',
-	'-h',
-	'-m',
-	'-r',
-	'-t',
-];
+import touchSpec from "../../../completions/upstream/touch";
+import { testPaths, type ISuiteSpec } from "../../helpers";
+
+const allOptions = ["-A", "-a", "-c", "-f", "-h", "-m", "-r", "-t"];
 
 export const touchTestSuiteSpec: ISuiteSpec = {
-	name: 'touch',
+	name: "touch",
 	completionSpecs: touchSpec,
-	availableCommands: 'touch',
+	availableCommands: "touch",
 	testSpecs: [
 		// Empty input
-		{ input: '|', expectedCompletions: ['touch'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{
+			input: "|",
+			expectedCompletions: ["touch"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
 
 		// Typing the command
-		{ input: 't|', expectedCompletions: ['touch'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
-		{ input: 'touch|', expectedCompletions: ['touch'], expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{
+			input: "t|",
+			expectedCompletions: ["touch"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
+		{
+			input: "touch|",
+			expectedCompletions: ["touch"],
+			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
+		},
 
 		// Basic options
-		{ input: 'touch |', expectedCompletions: allOptions, expectedResourceRequests: { type: 'folders', cwd: testPaths.cwd } },
-	]
+		{
+			input: "touch |",
+			expectedCompletions: allOptions,
+			expectedResourceRequests: { type: "folders", cwd: testPaths.cwd },
+		},
+	],
 };

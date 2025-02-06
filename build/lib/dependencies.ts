@@ -3,21 +3,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import fs from 'fs';
-import path from 'path';
-import cp from 'child_process';
+import cp from "child_process";
+import fs from "fs";
+import path from "path";
+
 const root = fs.realpathSync(path.dirname(path.dirname(__dirname)));
 
 function getNpmProductionDependencies(folder: string): string[] {
 	let raw: string;
 
 	try {
-		raw = cp.execSync('npm ls --all --omit=dev --parseable', { cwd: folder, encoding: 'utf8', env: { ...process.env, NODE_ENV: 'production' }, stdio: [null, null, null] });
+		raw = cp.execSync("npm ls --all --omit=dev --parseable", {
+			cwd: folder,
+			encoding: "utf8",
+			env: { ...process.env, NODE_ENV: "production" },
+			stdio: [null, null, null],
+		});
 	} catch (err) {
 		const regex = /^npm ERR! .*$/gm;
 		let match: RegExpExecArray | null;
 
-		while (match = regex.exec(err.message)) {
+		while ((match = regex.exec(err.message))) {
 			if (/ELSPROBLEMS/.test(match[0])) {
 				continue;
 			} else if (/invalid: xterm/.test(match[0])) {
@@ -32,8 +38,11 @@ function getNpmProductionDependencies(folder: string): string[] {
 		raw = err.stdout;
 	}
 
-	return raw.split(/\r?\n/).filter(line => {
-		return !!line.trim() && path.relative(root, line) !== path.relative(root, folder);
+	return raw.split(/\r?\n/).filter((line) => {
+		return (
+			!!line.trim() &&
+			path.relative(root, line) !== path.relative(root, folder)
+		);
 	});
 }
 
@@ -52,5 +61,5 @@ export function getProductionDependencies(folderPath: string): string[] {
 }
 
 if (require.main === module) {
-	console.log(JSON.stringify(getProductionDependencies(root), null, '  '));
+	console.log(JSON.stringify(getProductionDependencies(root), null, "  "));
 }

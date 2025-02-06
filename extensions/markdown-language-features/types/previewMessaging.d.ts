@@ -8,33 +8,36 @@ interface BaseMessage {
 }
 
 export namespace FromWebviewMessage {
-
 	export interface CacheImageSizes extends BaseMessage {
-		readonly type: 'cacheImageSizes';
-		readonly imageData: ReadonlyArray<{ id: string; width: number; height: number }>;
+		readonly type: "cacheImageSizes";
+		readonly imageData: ReadonlyArray<{
+			id: string;
+			width: number;
+			height: number;
+		}>;
 	}
 
 	export interface RevealLine extends BaseMessage {
-		readonly type: 'revealLine';
+		readonly type: "revealLine";
 		readonly line: number;
 	}
 
 	export interface DidClick extends BaseMessage {
-		readonly type: 'didClick';
+		readonly type: "didClick";
 		readonly line: number;
 	}
 
 	export interface ClickLink extends BaseMessage {
-		readonly type: 'openLink';
+		readonly type: "openLink";
 		readonly href: string;
 	}
 
 	export interface ShowPreviewSecuritySelector extends BaseMessage {
-		readonly type: 'showPreviewSecuritySelector';
+		readonly type: "showPreviewSecuritySelector";
 	}
 
 	export interface PreviewStyleLoadError extends BaseMessage {
-		readonly type: 'previewStyleLoadError';
+		readonly type: "previewStyleLoadError";
 		readonly unloadedStyles: readonly string[];
 	}
 
@@ -44,35 +47,34 @@ export namespace FromWebviewMessage {
 		| DidClick
 		| ClickLink
 		| ShowPreviewSecuritySelector
-		| PreviewStyleLoadError
-		;
+		| PreviewStyleLoadError;
 }
 
 export namespace ToWebviewMessage {
 	export interface OnDidChangeTextEditorSelection extends BaseMessage {
-		readonly type: 'onDidChangeTextEditorSelection';
+		readonly type: "onDidChangeTextEditorSelection";
 		readonly line: number;
 	}
 
 	export interface UpdateView extends BaseMessage {
-		readonly type: 'updateView';
+		readonly type: "updateView";
 		readonly line: number;
 		readonly source: string;
 	}
 
 	export interface UpdateContent extends BaseMessage {
-		readonly type: 'updateContent';
+		readonly type: "updateContent";
 		readonly content: string;
 	}
 
 	export interface CopyImageContent extends BaseMessage {
-		readonly type: 'copyImage';
+		readonly type: "copyImage";
 		readonly source: string;
 		readonly id: string;
 	}
 
 	export interface OpenImageContent extends BaseMessage {
-		readonly type: 'openImage';
+		readonly type: "openImage";
 		readonly source: string;
 		readonly imageSource: string;
 	}
@@ -82,6 +84,5 @@ export namespace ToWebviewMessage {
 		| UpdateView
 		| UpdateContent
 		| CopyImageContent
-		| OpenImageContent
-		;
+		| OpenImageContent;
 }

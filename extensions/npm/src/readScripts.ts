@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { JSONVisitor, visit } from 'jsonc-parser';
-import { Location, Position, Range, TextDocument } from 'vscode';
+import { JSONVisitor, visit } from "jsonc-parser";
+import { Location, Position, Range, TextDocument } from "vscode";
 
 export interface INpmScriptReference {
 	name: string;
@@ -18,7 +18,10 @@ export interface INpmScriptInfo {
 	scripts: INpmScriptReference[];
 }
 
-export const readScripts = (document: TextDocument, buffer = document.getText()): INpmScriptInfo | undefined => {
+export const readScripts = (
+	document: TextDocument,
+	buffer = document.getText(),
+): INpmScriptInfo | undefined => {
 	let start: Position | undefined;
 	let end: Position | undefined;
 	let inScripts = false;
@@ -41,23 +44,29 @@ export const readScripts = (document: TextDocument, buffer = document.getText())
 			level--;
 		},
 		onLiteralValue(value: unknown, offset: number, length: number) {
-			if (buildingScript && typeof value === 'string') {
+			if (buildingScript && typeof value === "string") {
 				scripts.push({
 					...buildingScript,
 					value,
-					valueRange: new Range(document.positionAt(offset), document.positionAt(offset + length)),
+					valueRange: new Range(
+						document.positionAt(offset),
+						document.positionAt(offset + length),
+					),
 				});
 				buildingScript = undefined;
 			}
 		},
 		onObjectProperty(property: string, offset: number, length: number) {
-			if (level === 1 && property === 'scripts') {
+			if (level === 1 && property === "scripts") {
 				inScripts = true;
 				start = document.positionAt(offset);
 			} else if (inScripts) {
 				buildingScript = {
 					name: property,
-					nameRange: new Range(document.positionAt(offset), document.positionAt(offset + length))
+					nameRange: new Range(
+						document.positionAt(offset),
+						document.positionAt(offset + length),
+					),
 				};
 			}
 		},
@@ -69,5 +78,8 @@ export const readScripts = (document: TextDocument, buffer = document.getText())
 		return undefined;
 	}
 
-	return { location: new Location(document.uri, new Range(start, end ?? start)), scripts };
+	return {
+		location: new Location(document.uri, new Range(start, end ?? start)),
+		scripts,
+	};
 };

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { assertNoRpc, assertNoRpcFromEntry, disposeAll } from '../utils';
+import * as vscode from "vscode";
 
-suite('vscode', function () {
+import { assertNoRpc, assertNoRpcFromEntry, disposeAll } from "../utils";
 
+suite("vscode", function () {
 	const dispo: vscode.Disposable[] = [];
 
 	teardown(() => {
@@ -15,112 +15,125 @@ suite('vscode', function () {
 		disposeAll(dispo);
 	});
 
-	test('no rpc', function () {
+	test("no rpc", function () {
 		assertNoRpc();
 	});
 
-	test('no rpc, createDiagnosticCollection()', function () {
+	test("no rpc, createDiagnosticCollection()", function () {
 		const item = vscode.languages.createDiagnosticCollection();
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'DiagnosticCollection']);
+		assertNoRpcFromEntry([item, "DiagnosticCollection"]);
 	});
 
-	test('no rpc, createTextEditorDecorationType(...)', function () {
+	test("no rpc, createTextEditorDecorationType(...)", function () {
 		const item = vscode.window.createTextEditorDecorationType({});
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'TextEditorDecorationType']);
+		assertNoRpcFromEntry([item, "TextEditorDecorationType"]);
 	});
 
-	test('no rpc, createOutputChannel(...)', function () {
-		const item = vscode.window.createOutputChannel('hello');
+	test("no rpc, createOutputChannel(...)", function () {
+		const item = vscode.window.createOutputChannel("hello");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'OutputChannel']);
+		assertNoRpcFromEntry([item, "OutputChannel"]);
 	});
 
-	test('no rpc, createDiagnosticCollection(...)', function () {
+	test("no rpc, createDiagnosticCollection(...)", function () {
 		const item = vscode.languages.createDiagnosticCollection();
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'DiagnosticCollection']);
+		assertNoRpcFromEntry([item, "DiagnosticCollection"]);
 	});
 
-	test('no rpc, createQuickPick(...)', function () {
+	test("no rpc, createQuickPick(...)", function () {
 		const item = vscode.window.createQuickPick();
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'QuickPick']);
+		assertNoRpcFromEntry([item, "QuickPick"]);
 	});
 
-	test('no rpc, createInputBox(...)', function () {
+	test("no rpc, createInputBox(...)", function () {
 		const item = vscode.window.createInputBox();
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'InputBox']);
+		assertNoRpcFromEntry([item, "InputBox"]);
 	});
 
-	test('no rpc, createStatusBarItem(...)', function () {
+	test("no rpc, createStatusBarItem(...)", function () {
 		const item = vscode.window.createStatusBarItem();
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'StatusBarItem']);
+		assertNoRpcFromEntry([item, "StatusBarItem"]);
 	});
 
-	test('no rpc, createSourceControl(...)', function () {
-		const item = vscode.scm.createSourceControl('foo', 'Hello');
+	test("no rpc, createSourceControl(...)", function () {
+		const item = vscode.scm.createSourceControl("foo", "Hello");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'SourceControl']);
+		assertNoRpcFromEntry([item, "SourceControl"]);
 	});
 
-	test('no rpc, createCommentController(...)', function () {
-		const item = vscode.comments.createCommentController('foo', 'Hello');
+	test("no rpc, createCommentController(...)", function () {
+		const item = vscode.comments.createCommentController("foo", "Hello");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'CommentController']);
+		assertNoRpcFromEntry([item, "CommentController"]);
 	});
 
-	test('no rpc, createWebviewPanel(...)', function () {
-		const item = vscode.window.createWebviewPanel('webview', 'Hello', vscode.ViewColumn.Active);
+	test("no rpc, createWebviewPanel(...)", function () {
+		const item = vscode.window.createWebviewPanel(
+			"webview",
+			"Hello",
+			vscode.ViewColumn.Active,
+		);
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'WebviewPanel']);
+		assertNoRpcFromEntry([item, "WebviewPanel"]);
 	});
 
-	test('no rpc, createTreeView(...)', function () {
-		const treeDataProvider = new class implements vscode.TreeDataProvider<string> {
-			getTreeItem(element: string): vscode.TreeItem | Thenable<vscode.TreeItem> {
+	test("no rpc, createTreeView(...)", function () {
+		const treeDataProvider = new (class
+			implements vscode.TreeDataProvider<string>
+		{
+			getTreeItem(
+				element: string,
+			): vscode.TreeItem | Thenable<vscode.TreeItem> {
 				return new vscode.TreeItem(element);
 			}
 			getChildren(_element?: string): vscode.ProviderResult<string[]> {
-				return ['foo', 'bar'];
+				return ["foo", "bar"];
 			}
-		};
-		const item = vscode.window.createTreeView('test.treeId', { treeDataProvider });
+		})();
+		const item = vscode.window.createTreeView("test.treeId", {
+			treeDataProvider,
+		});
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'TreeView']);
+		assertNoRpcFromEntry([item, "TreeView"]);
 	});
 
-
-	test('no rpc, createNotebookController(...)', function () {
-		const ctrl = vscode.notebooks.createNotebookController('foo', 'bar', '');
+	test("no rpc, createNotebookController(...)", function () {
+		const ctrl = vscode.notebooks.createNotebookController(
+			"foo",
+			"bar",
+			"",
+		);
 		dispo.push(ctrl);
-		assertNoRpcFromEntry([ctrl, 'NotebookController']);
+		assertNoRpcFromEntry([ctrl, "NotebookController"]);
 	});
 
-	test('no rpc, createTerminal(...)', function () {
-		const ctrl = vscode.window.createTerminal({ name: 'termi' });
+	test("no rpc, createTerminal(...)", function () {
+		const ctrl = vscode.window.createTerminal({ name: "termi" });
 		dispo.push(ctrl);
-		assertNoRpcFromEntry([ctrl, 'Terminal']);
+		assertNoRpcFromEntry([ctrl, "Terminal"]);
 	});
 
-	test('no rpc, createFileSystemWatcher(...)', function () {
-		const item = vscode.workspace.createFileSystemWatcher('**/*.ts');
+	test("no rpc, createFileSystemWatcher(...)", function () {
+		const item = vscode.workspace.createFileSystemWatcher("**/*.ts");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'FileSystemWatcher']);
+		assertNoRpcFromEntry([item, "FileSystemWatcher"]);
 	});
 
-	test('no rpc, createTestController(...)', function () {
-		const item = vscode.tests.createTestController('iii', 'lll');
+	test("no rpc, createTestController(...)", function () {
+		const item = vscode.tests.createTestController("iii", "lll");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'TestController']);
+		assertNoRpcFromEntry([item, "TestController"]);
 	});
 
-	test('no rpc, createLanguageStatusItem(...)', function () {
-		const item = vscode.languages.createLanguageStatusItem('i', '*');
+	test("no rpc, createLanguageStatusItem(...)", function () {
+		const item = vscode.languages.createLanguageStatusItem("i", "*");
 		dispo.push(item);
-		assertNoRpcFromEntry([item, 'LanguageStatusItem']);
+		assertNoRpcFromEntry([item, "LanguageStatusItem"]);
 	});
 });

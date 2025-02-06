@@ -4,8 +4,5 @@
 		"outDir": "./out",
 		"types": []
 	},
-	"include": [
-		"src/**/*",
-		"../../src/vscode-dts/vscode.d.ts"
-	]
+	"include": ["src/**/*", "../../src/vscode-dts/vscode.d.ts"]
 }

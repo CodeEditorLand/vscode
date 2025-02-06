@@ -6,14 +6,10 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
-			],
+			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
 			"stopOnEntry": false,
 			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceFolder}/client/out/**/*.js"
-			],
+			"outFiles": ["${workspaceFolder}/client/out/**/*.js"],
 			"smartStep": true
 		},
 		{
@@ -27,9 +23,7 @@
 			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceFolder}/client/out/test/**/*.js"
-			]
+			"outFiles": ["${workspaceFolder}/client/out/test/**/*.js"]
 		},
 		{
 			"name": "Server Unit Tests",
@@ -37,19 +31,13 @@
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
 			"stopOnEntry": false,
-			"args": [
-				"--timeout",
-				"999999",
-				"--colors"
-			],
+			"args": ["--timeout", "999999", "--colors"],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [],
 			"env": {},
 			"sourceMaps": true,
-			"outFiles": [
-				"${workspaceRoot}/server/out/**"
-			]
+			"outFiles": ["${workspaceRoot}/server/out/**"]
 		}
 	]
 }

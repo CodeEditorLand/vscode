@@ -3,23 +3,27 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as os from 'os';
-import { join } from 'path';
+import * as fs from "fs";
+import * as os from "os";
+import { join } from "path";
+import * as vscode from "vscode";
 
 export function rndName() {
-	let name = '';
-	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let name = "";
+	const possible =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	for (let i = 0; i < 10; i++) {
 		name += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
 	return name;
 }
 
-export function createRandomFile(contents = '', fileExtension = 'txt'): Thenable<vscode.Uri> {
+export function createRandomFile(
+	contents = "",
+	fileExtension = "txt",
+): Thenable<vscode.Uri> {
 	return new Promise((resolve, reject) => {
-		const tmpFile = join(os.tmpdir(), rndName() + '.' + fileExtension);
+		const tmpFile = join(os.tmpdir(), rndName() + "." + fileExtension);
 		fs.writeFile(tmpFile, contents, (error) => {
 			if (error) {
 				return reject(error);
@@ -31,7 +35,7 @@ export function createRandomFile(contents = '', fileExtension = 'txt'): Thenable
 }
 
 export function pathEquals(path1: string, path2: string): boolean {
-	if (process.platform !== 'linux') {
+	if (process.platform !== "linux") {
 		path1 = path1.toLowerCase();
 		path2 = path2.toLowerCase();
 	}
@@ -52,14 +56,21 @@ export function deleteFile(file: vscode.Uri): Thenable<boolean> {
 }
 
 export function closeAllEditors(): Thenable<any> {
-	return vscode.commands.executeCommand('workbench.action.closeAllEditors');
+	return vscode.commands.executeCommand("workbench.action.closeAllEditors");
 }
 
-export function withRandomFileEditor(initialContents: string, fileExtension: string = 'txt', run: (editor: vscode.TextEditor, doc: vscode.TextDocument) => Thenable<void>): Thenable<boolean> {
-	return createRandomFile(initialContents, fileExtension).then(file => {
-		return vscode.workspace.openTextDocument(file).then(doc => {
+export function withRandomFileEditor(
+	initialContents: string,
+	fileExtension: string = "txt",
+	run: (
+		editor: vscode.TextEditor,
+		doc: vscode.TextDocument,
+	) => Thenable<void>,
+): Thenable<boolean> {
+	return createRandomFile(initialContents, fileExtension).then((file) => {
+		return vscode.workspace.openTextDocument(file).then((doc) => {
 			return vscode.window.showTextDocument(doc).then((editor) => {
-				return run(editor, doc).then(_ => {
+				return run(editor, doc).then((_) => {
 					if (doc.isDirty) {
 						return doc.save().then(() => {
 							return deleteFile(file);

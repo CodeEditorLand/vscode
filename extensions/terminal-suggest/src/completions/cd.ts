@@ -4,25 +4,25 @@
  *--------------------------------------------------------------------------------------------*/
 
 const cdSpec: Fig.Spec = {
-	name: 'cd',
-	description: 'Change the shell working directory',
+	name: "cd",
+	description: "Change the shell working directory",
 	args: {
-		name: 'folder',
-		template: 'folders',
+		name: "folder",
+		template: "folders",
 
 		suggestions: [
 			{
-				name: '-',
-				description: 'Switch to the last used folder',
+				name: "-",
+				description: "Switch to the last used folder",
 				hidden: true,
 			},
 			{
-				name: '~',
-				description: 'Switch to the home directory',
+				name: "~",
+				description: "Switch to the home directory",
 				hidden: true,
 			},
 		],
-	}
+	},
 };
 
 export default cdSpec;

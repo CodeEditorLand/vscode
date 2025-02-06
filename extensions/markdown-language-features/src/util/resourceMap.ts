@@ -3,15 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 type ResourceToKey = (uri: vscode.Uri) => string;
 
-const defaultResourceToKey = (resource: vscode.Uri): string => resource.toString();
+const defaultResourceToKey = (resource: vscode.Uri): string =>
+	resource.toString();
 
 export class ResourceMap<T> {
-
-	private readonly _map = new Map<string, { readonly uri: vscode.Uri; readonly value: T }>();
+	private readonly _map = new Map<
+		string,
+		{ readonly uri: vscode.Uri; readonly value: T }
+	>();
 
 	private readonly _toKey: ResourceToKey;
 

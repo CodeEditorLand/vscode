@@ -31,12 +31,12 @@ in-memory `MemFs` `FileSystemProvider`.
 
 ### Simulated `node_modules`
 
-For regular `.ts` files, instead of going through Tsserver's type acquisition,
-a separate `AutoInstallerFs` is used to create a "virtual" `node_modules` that
-extracts desired packages on demand, to an underlying `MemFs`. This will
-happen any time a filesystem operation is done inside a `node_modules` folder
-across any project in the workspace, and will use the "real" `package.json`
-(and, if present, `package-lock.json`) to resolve the dependency tree.
+For regular `.ts` files, instead of going through Tsserver's type acquisition, a
+separate `AutoInstallerFs` is used to create a "virtual" `node_modules` that
+extracts desired packages on demand, to an underlying `MemFs`. This will happen
+any time a filesystem operation is done inside a `node_modules` folder across
+any project in the workspace, and will use the "real" `package.json` (and, if
+present, `package-lock.json`) to resolve the dependency tree.
 
 A fallback is then set up such that when a URI like
 `memfs:/path/to/node_modules/lodash/lodash.d.ts` is accessed, that gets

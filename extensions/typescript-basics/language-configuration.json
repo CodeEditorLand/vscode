@@ -2,28 +2,13 @@
 	// Note that this file should stay in sync with 'javascript-language-basics/javascript-language-configuration.json'
 	"comments": {
 		"lineComment": "//",
-		"blockComment": [
-			"/*",
-			"*/"
-		]
+		"blockComment": ["/*", "*/"]
 	},
 	"brackets": [
-		[
-			"${",
-			"}"
-		],
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		]
+		["${", "}"],
+		["{", "}"],
+		["[", "]"],
+		["(", ")"]
 	],
 	"autoClosingPairs": [
 		{
@@ -41,81 +26,38 @@
 		{
 			"open": "'",
 			"close": "'",
-			"notIn": [
-				"string",
-				"comment"
-			]
+			"notIn": ["string", "comment"]
 		},
 		{
 			"open": "\"",
 			"close": "\"",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "`",
 			"close": "`",
-			"notIn": [
-				"string",
-				"comment"
-			]
+			"notIn": ["string", "comment"]
 		},
 		{
 			"open": "/**",
 			"close": " */",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		}
 	],
 	"surroundingPairs": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		],
-		[
-			"'",
-			"'"
-		],
-		[
-			"\"",
-			"\""
-		],
-		[
-			"`",
-			"`"
-		],
-		[
-			"<",
-			">"
-		]
+		["{", "}"],
+		["[", "]"],
+		["(", ")"],
+		["'", "'"],
+		["\"", "\""],
+		["`", "`"],
+		["<", ">"]
 	],
 	"colorizedBracketPairs": [
-		[
-			"(",
-			")"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"{",
-			"}"
-		],
-		[
-			"<",
-			">"
-		]
+		["(", ")"],
+		["[", "]"],
+		["{", "}"],
+		["<", ">"]
 	],
 	"autoCloseBefore": ";:.,=}])>` \n\t",
 	"folding": {
@@ -125,7 +67,7 @@
 		}
 	},
 	"wordPattern": {
-		"pattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\@\\~\\!\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>/\\?\\s]+)",
+		"pattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\@\\~\\!\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>/\\?\\s]+)"
 	},
 	"indentationRules": {
 		"decreaseIndentPattern": {
@@ -187,7 +129,7 @@
 			"action": {
 				"indent": "none",
 				"removeText": 1
-			},
+			}
 		},
 		{
 			// e.g.  *-----*/|
@@ -197,7 +139,7 @@
 			"action": {
 				"indent": "none",
 				"removeText": 1
-			},
+			}
 		},
 		{
 			"beforeText": {
@@ -225,7 +167,7 @@
 			"afterText": "^\\s*\\).*$",
 			"action": {
 				"indent": "indentOutdent",
-				"appendText": "\t",
+				"appendText": "\t"
 			}
 		},
 		// Indent when pressing enter from inside {}
@@ -234,7 +176,7 @@
 			"afterText": "^\\s*\\}.*$",
 			"action": {
 				"indent": "indentOutdent",
-				"appendText": "\t",
+				"appendText": "\t"
 			}
 		},
 		// Indent when pressing enter from inside []
@@ -243,13 +185,13 @@
 			"afterText": "^\\s*\\].*$",
 			"action": {
 				"indent": "indentOutdent",
-				"appendText": "\t",
+				"appendText": "\t"
 			}
 		},
 		// Add // when pressing enter from inside line comment
 		{
 			"beforeText": {
-				"pattern": "(?<!\\w:)\/\/.*"
+				"pattern": "(?<!\\w:)//.*"
 			},
 			"afterText": {
 				"pattern": "^(?!\\s*$).+"
@@ -258,6 +200,6 @@
 				"indent": "none",
 				"appendText": "// "
 			}
-		},
+		}
 	]
 }

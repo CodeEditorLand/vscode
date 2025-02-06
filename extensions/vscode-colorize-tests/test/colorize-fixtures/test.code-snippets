@@ -7,26 +7,22 @@
 	// Example:
 	"MSFT Copyright Header": {
 		"scope": "javascript,typescript,css",
-		"prefix": [
-			"header",
-			"stub",
-			"copyright"
-		],
+		"prefix": ["header", "stub", "copyright"],
 		"body": [
 			"/*---------------------------------------------------------------------------------------------",
 			" *  Copyright (c) Microsoft Corporation. All rights reserved.",
 			" *  Licensed under the MIT License. See License.txt in the project root for license information.",
 			" *--------------------------------------------------------------------------------------------*/",
 			"",
-			"$0"
+			"$0",
 		],
-		"description": "Insert Copyright Statement"
+		"description": "Insert Copyright Statement",
 	},
 	"TS -> Inject Service": {
 		"scope": "typescript",
 		"description": "Constructor Injection Pattern",
 		"prefix": "@inject",
-		"body": "@$1 private readonly _$2: ${1},$0"
+		"body": "@$1 private readonly _$2: ${1},$0",
 	},
 	"TS -> Event & Emitter": {
 		"scope": "typescript",
@@ -34,7 +30,7 @@
 		"description": "Add emitter and event properties",
 		"body": [
 			"private readonly _onDid$1 = new Emitter<$2>();",
-			"readonly onDid$1: Event<$2> = this._onDid$1.event;"
+			"readonly onDid$1: Event<$2> = this._onDid$1.event;",
 		],
-	}
+	},
 }

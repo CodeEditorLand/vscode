@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-html, body {
+html,
+body {
 	width: 100%;
 	height: 100%;
 	text-align: center;
@@ -33,21 +34,49 @@ body img {
 
 .container.image img {
 	padding: 0;
-	background-position: 0 0, 8px 8px;
+	background-position:
+		0 0,
+		8px 8px;
 	background-size: 16px 16px;
 	border: 1px solid var(--vscode-imagePreview-border);
 }
 
 .container.image img {
-	background-image:
-		linear-gradient(45deg, rgb(230, 230, 230) 25%, transparent 25%, transparent 75%, rgb(230, 230, 230) 75%, rgb(230, 230, 230)),
-		linear-gradient(45deg, rgb(230, 230, 230) 25%, transparent 25%, transparent 75%, rgb(230, 230, 230) 75%, rgb(230, 230, 230));
+	background-image: linear-gradient(
+			45deg,
+			rgb(230, 230, 230) 25%,
+			transparent 25%,
+			transparent 75%,
+			rgb(230, 230, 230) 75%,
+			rgb(230, 230, 230)
+		),
+		linear-gradient(
+			45deg,
+			rgb(230, 230, 230) 25%,
+			transparent 25%,
+			transparent 75%,
+			rgb(230, 230, 230) 75%,
+			rgb(230, 230, 230)
+		);
 }
 
 .vscode-dark.container.image img {
-	background-image:
-		linear-gradient(45deg, rgb(20, 20, 20) 25%, transparent 25%, transparent 75%, rgb(20, 20, 20) 75%, rgb(20, 20, 20)),
-		linear-gradient(45deg, rgb(20, 20, 20) 25%, transparent 25%, transparent 75%, rgb(20, 20, 20) 75%, rgb(20, 20, 20));
+	background-image: linear-gradient(
+			45deg,
+			rgb(20, 20, 20) 25%,
+			transparent 25%,
+			transparent 75%,
+			rgb(20, 20, 20) 75%,
+			rgb(20, 20, 20)
+		),
+		linear-gradient(
+			45deg,
+			rgb(20, 20, 20) 25%,
+			transparent 25%,
+			transparent 75%,
+			rgb(20, 20, 20) 75%,
+			rgb(20, 20, 20)
+		);
 }
 
 .container img.pixelated {
@@ -89,7 +118,7 @@ body img {
 .loading-indicator {
 	width: 30px;
 	height: 30px;
-	background-image: url('./loading.svg');
+	background-image: url("./loading.svg");
 	background-size: cover;
 }
 
@@ -108,9 +137,9 @@ body img {
 }
 
 .vscode-dark .loading-indicator {
-	background-image: url('./loading-dark.svg');
+	background-image: url("./loading-dark.svg");
 }
 
 .vscode-high-contrast .loading-indicator {
-	background-image: url('./loading-hc.svg');
+	background-image: url("./loading-hc.svg");
 }

@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { IMdParser } from '../../markdownEngine';
-import { ITextDocument } from '../../types/textDocument';
-import { Schemes } from '../../util/schemes';
+import * as vscode from "vscode";
+
+import { IMdParser } from "../../markdownEngine";
+import { ITextDocument } from "../../types/textDocument";
+import { Schemes } from "../../util/schemes";
 
 const smartPasteLineRegexes = [
 	{ regex: /(\[[^\[\]]*](?:\([^\(\)]*\)|\[[^\[\]]*]))/g }, // In a Markdown link
@@ -22,7 +23,7 @@ export async function shouldInsertMarkdownLinkByDefault(
 	document: ITextDocument,
 	pasteUrlSetting: InsertMarkdownLink,
 	ranges: readonly vscode.Range[],
-	token: vscode.CancellationToken
+	token: vscode.CancellationToken,
 ): Promise<boolean> {
 	switch (pasteUrlSetting) {
 		case InsertMarkdownLink.Always: {
@@ -33,7 +34,11 @@ export async function shouldInsertMarkdownLinkByDefault(
 		}
 		case InsertMarkdownLink.SmartWithSelection: {
 			// At least one range must not be empty
-			if (!ranges.some(range => document.getText(range).trim().length > 0)) {
+			if (
+				!ranges.some(
+					(range) => document.getText(range).trim().length > 0,
+				)
+			) {
 				return false;
 			}
 			// And all ranges must be smart
@@ -45,25 +50,36 @@ export async function shouldInsertMarkdownLinkByDefault(
 	}
 
 	async function checkSmart(): Promise<boolean> {
-		return (await Promise.all(ranges.map(range => shouldSmartPasteForSelection(parser, document, range, token)))).every(x => x);
+		return (
+			await Promise.all(
+				ranges.map((range) =>
+					shouldSmartPasteForSelection(
+						parser,
+						document,
+						range,
+						token,
+					),
+				),
+			)
+		).every((x) => x);
 	}
 }
 
 const textTokenTypes = new Set([
-	'paragraph_open',
-	'inline',
-	'heading_open',
-	'ordered_list_open',
-	'bullet_list_open',
-	'list_item_open',
-	'blockquote_open',
+	"paragraph_open",
+	"inline",
+	"heading_open",
+	"ordered_list_open",
+	"bullet_list_open",
+	"list_item_open",
+	"blockquote_open",
 ]);
 
 async function shouldSmartPasteForSelection(
 	parser: IMdParser,
 	document: ITextDocument,
 	selectedRange: vscode.Range,
-	token: vscode.CancellationToken
+	token: vscode.CancellationToken,
 ): Promise<boolean> {
 	// Disable for multi-line selections
 	if (selectedRange.start.line !== selectedRange.end.line) {
@@ -91,7 +107,10 @@ async function shouldSmartPasteForSelection(
 		if (!token.map) {
 			continue;
 		}
-		if (token.map[0] <= selectedRange.start.line && token.map[1] > selectedRange.start.line) {
+		if (
+			token.map[0] <= selectedRange.start.line &&
+			token.map[1] > selectedRange.start.line
+		) {
 			if (!textTokenTypes.has(token.type)) {
 				return false;
 			}
@@ -104,7 +123,10 @@ async function shouldSmartPasteForSelection(
 		// </b>
 		//
 		// In this case pasting will cause the html block to be created even though the cursor is not currently inside a block
-		if (token.type === 'html_block' && token.map[1] === selectedRange.start.line) {
+		if (
+			token.type === "html_block" &&
+			token.map[1] === selectedRange.start.line
+		) {
 			const nextToken = tokens.at(i + 1);
 			// The next token does not need to be a html_block, but it must be on the next line
 			if (nextToken?.map?.[0] === selectedRange.end.line + 1) {
@@ -114,7 +136,14 @@ async function shouldSmartPasteForSelection(
 	}
 
 	// Run additional regex checks on the current line to check if we are inside an inline element
-	const line = document.getText(new vscode.Range(selectedRange.start.line, 0, selectedRange.start.line, Number.MAX_SAFE_INTEGER));
+	const line = document.getText(
+		new vscode.Range(
+			selectedRange.start.line,
+			0,
+			selectedRange.start.line,
+			Number.MAX_SAFE_INTEGER,
+		),
+	);
 	for (const regex of smartPasteLineRegexes) {
 		for (const match of line.matchAll(regex.regex)) {
 			if (match.index === undefined) {
@@ -125,7 +154,10 @@ async function shouldSmartPasteForSelection(
 				return false;
 			}
 
-			if (selectedRange.start.character > match.index && selectedRange.start.character < match.index + match[0].length) {
+			if (
+				selectedRange.start.character > match.index &&
+				selectedRange.start.character < match.index + match[0].length
+			) {
 				return false;
 			}
 		}
@@ -144,8 +176,9 @@ const externalUriSchemes: ReadonlySet<string> = new Set([
 export function findValidUriInText(text: string): string | undefined {
 	const trimmedUrlList = text.trim();
 
-	if (!/^\S+$/.test(trimmedUrlList) // Uri must consist of a single sequence of characters without spaces
-		|| !trimmedUrlList.includes(':') // And it must have colon somewhere for the scheme. We will verify the schema again later
+	if (
+		!/^\S+$/.test(trimmedUrlList) || // Uri must consist of a single sequence of characters without spaces
+		!trimmedUrlList.includes(":") // And it must have colon somewhere for the scheme. We will verify the schema again later
 	) {
 		return;
 	}
@@ -160,7 +193,9 @@ export function findValidUriInText(text: string): string | undefined {
 
 	// `Uri.parse` is lenient and will return a `file:` uri even for non-uri text such as `abc`
 	// Make sure that the resolved scheme starts the original text
-	if (!trimmedUrlList.toLowerCase().startsWith(uri.scheme.toLowerCase() + ':')) {
+	if (
+		!trimmedUrlList.toLowerCase().startsWith(uri.scheme.toLowerCase() + ":")
+	) {
 		return;
 	}
 
@@ -180,9 +215,8 @@ export function findValidUriInText(text: string): string | undefined {
 }
 
 export enum InsertMarkdownLink {
-	Always = 'always',
-	SmartWithSelection = 'smartWithSelection',
-	Smart = 'smart',
-	Never = 'never'
+	Always = "always",
+	SmartWithSelection = "smartWithSelection",
+	Smart = "smart",
+	Never = "never",
 }
-

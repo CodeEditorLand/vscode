@@ -1,56 +1,58 @@
 {
-  "name": "fsharp",
-  "displayName": "%displayName%",
-  "description": "%description%",
-  "version": "1.0.0",
-  "publisher": "vscode",
-  "license": "MIT",
-  "engines": {
-    "vscode": "*"
-  },
-  "scripts": {
-    "update-grammar": "node ../node_modules/vscode-grammar-updater/bin ionide/ionide-fsgrammar grammars/fsharp.json ./syntaxes/fsharp.tmLanguage.json"
-  },
-  "categories": ["Programming Languages"],
-  "contributes": {
-    "languages": [
-      {
-        "id": "fsharp",
-        "extensions": [
-          ".fs",
-          ".fsi",
-          ".fsx",
-          ".fsscript"
-        ],
-        "aliases": [
-          "F#",
-          "FSharp",
-          "fsharp"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "fsharp",
-        "scopeName": "source.fsharp",
-        "path": "./syntaxes/fsharp.tmLanguage.json"
-      }
-    ],
-    "snippets": [
-      {
-        "language": "fsharp",
-        "path": "./snippets/fsharp.code-snippets"
-      }
-    ],
-    "configurationDefaults": {
-      "[fsharp]": {
-        "diffEditor.ignoreTrimWhitespace": false
-      }
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/microsoft/vscode.git"
-  }
+	"name": "fsharp",
+	"displayName": "%displayName%",
+	"version": "1.0.0",
+	"description": "%description%",
+	"categories": [
+		"Programming Languages"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/microsoft/vscode.git"
+	},
+	"license": "MIT",
+	"publisher": "vscode",
+	"scripts": {
+		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin ionide/ionide-fsgrammar grammars/fsharp.json ./syntaxes/fsharp.tmLanguage.json"
+	},
+	"contributes": {
+		"configurationDefaults": {
+			"[fsharp]": {
+				"diffEditor.ignoreTrimWhitespace": false
+			}
+		},
+		"grammars": [
+			{
+				"language": "fsharp",
+				"scopeName": "source.fsharp",
+				"path": "./syntaxes/fsharp.tmLanguage.json"
+			}
+		],
+		"languages": [
+			{
+				"id": "fsharp",
+				"extensions": [
+					".fs",
+					".fsi",
+					".fsx",
+					".fsscript"
+				],
+				"aliases": [
+					"F#",
+					"FSharp",
+					"fsharp"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"snippets": [
+			{
+				"language": "fsharp",
+				"path": "./snippets/fsharp.code-snippets"
+			}
+		]
+	},
+	"engines": {
+		"vscode": "*"
+	}
 }

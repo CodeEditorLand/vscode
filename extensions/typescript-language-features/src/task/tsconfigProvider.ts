@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface TSConfig {
 	readonly uri: vscode.Uri;
@@ -13,7 +13,9 @@ export interface TSConfig {
 }
 
 export class TsConfigProvider {
-	public async getConfigsForWorkspace(token: vscode.CancellationToken): Promise<Iterable<TSConfig>> {
+	public async getConfigsForWorkspace(
+		token: vscode.CancellationToken,
+	): Promise<Iterable<TSConfig>> {
 		if (!vscode.workspace.workspaceFolders) {
 			return [];
 		}
@@ -26,14 +28,21 @@ export class TsConfigProvider {
 					uri: config,
 					fsPath: config.fsPath,
 					posixPath: config.path,
-					workspaceFolder: root
+					workspaceFolder: root,
 				});
 			}
 		}
 		return configs.values();
 	}
 
-	private async findConfigFiles(token: vscode.CancellationToken): Promise<vscode.Uri[]> {
-		return await vscode.workspace.findFiles('**/tsconfig*.json', '**/{node_modules,.*}/**', undefined, token);
+	private async findConfigFiles(
+		token: vscode.CancellationToken,
+	): Promise<vscode.Uri[]> {
+		return await vscode.workspace.findFiles(
+			"**/tsconfig*.json",
+			"**/{node_modules,.*}/**",
+			undefined,
+			token,
+		);
 	}
 }

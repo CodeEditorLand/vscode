@@ -3,36 +3,79 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import v8 from 'node:v8';
-import fs from 'fs';
-import path from 'path';
-import { argv } from 'process';
-import { Mapping, SourceMapGenerator } from 'source-map';
-import ts from 'typescript';
-import { pathToFileURL } from 'url';
-import workerpool from 'workerpool';
-import { StaticLanguageServiceHost } from './staticLanguageServiceHost';
-const buildfile = require('../../buildfile');
+import fs from "fs";
+import v8 from "node:v8";
+import path from "path";
+import { argv } from "process";
+import { pathToFileURL } from "url";
+import { Mapping, SourceMapGenerator } from "source-map";
+import ts from "typescript";
+import workerpool from "workerpool";
+
+import { StaticLanguageServiceHost } from "./staticLanguageServiceHost";
+
+const buildfile = require("../../buildfile");
 
 class ShortIdent {
+	private static _keywords = new Set([
+		"await",
+		"break",
+		"case",
+		"catch",
+		"class",
+		"const",
+		"continue",
+		"debugger",
+		"default",
+		"delete",
+		"do",
+		"else",
+		"export",
+		"extends",
+		"false",
+		"finally",
+		"for",
+		"function",
+		"if",
+		"import",
+		"in",
+		"instanceof",
+		"let",
+		"new",
+		"null",
+		"return",
+		"static",
+		"super",
+		"switch",
+		"this",
+		"throw",
+		"true",
+		"try",
+		"typeof",
+		"var",
+		"void",
+		"while",
+		"with",
+		"yield",
+	]);
 
-	private static _keywords = new Set(['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger',
-		'default', 'delete', 'do', 'else', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if',
-		'import', 'in', 'instanceof', 'let', 'new', 'null', 'return', 'static', 'super', 'switch', 'this', 'throw',
-		'true', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield']);
-
-	private static _alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_'.split('');
+	private static _alphabet =
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_".split(
+			"",
+		);
 
 	private _value = 0;
 
-	constructor(
-		private readonly prefix: string
-	) { }
+	constructor(private readonly prefix: string) {}
 
 	next(isNameTaken?: (name: string) => boolean): string {
 		const candidate = this.prefix + ShortIdent.convert(this._value);
 		this._value++;
-		if (ShortIdent._keywords.has(candidate) || /^[_0-9]/.test(candidate) || isNameTaken?.(candidate)) {
+		if (
+			ShortIdent._keywords.has(candidate) ||
+			/^[_0-9]/.test(candidate) ||
+			isNameTaken?.(candidate)
+		) {
 			// try again
 			return this.next(isNameTaken);
 		}
@@ -41,7 +84,7 @@ class ShortIdent {
 
 	private static convert(n: number): string {
 		const base = this._alphabet.length;
-		let result = '';
+		let result = "";
 		do {
 			const rest = n % base;
 			result += this._alphabet[rest];
@@ -54,11 +97,10 @@ class ShortIdent {
 const enum FieldType {
 	Public,
 	Protected,
-	Private
+	Private,
 }
 
 class ClassData {
-
 	fields = new Map<string, { type: FieldType; pos: number }>();
 
 	private replacements: Map<string, string> | undefined;
@@ -73,31 +115,28 @@ class ClassData {
 		// analyse all fields (properties and methods). Find usages of all protected and
 		// private ones and keep track of all public ones (to prevent naming collisions)
 
-		const candidates: (ts.NamedDeclaration)[] = [];
+		const candidates: ts.NamedDeclaration[] = [];
 		for (const member of node.members) {
 			if (ts.isMethodDeclaration(member)) {
 				// method `foo() {}`
 				candidates.push(member);
-
 			} else if (ts.isPropertyDeclaration(member)) {
 				// property `foo = 234`
 				candidates.push(member);
-
 			} else if (ts.isGetAccessor(member)) {
 				// getter: `get foo() { ... }`
 				candidates.push(member);
-
 			} else if (ts.isSetAccessor(member)) {
 				// setter: `set foo() { ... }`
 				candidates.push(member);
-
 			} else if (ts.isConstructorDeclaration(member)) {
 				// constructor-prop:`constructor(private foo) {}`
 				for (const param of member.parameters) {
-					if (hasModifier(param, ts.SyntaxKind.PrivateKeyword)
-						|| hasModifier(param, ts.SyntaxKind.ProtectedKeyword)
-						|| hasModifier(param, ts.SyntaxKind.PublicKeyword)
-						|| hasModifier(param, ts.SyntaxKind.ReadonlyKeyword)
+					if (
+						hasModifier(param, ts.SyntaxKind.PrivateKeyword) ||
+						hasModifier(param, ts.SyntaxKind.ProtectedKeyword) ||
+						hasModifier(param, ts.SyntaxKind.PublicKeyword) ||
+						hasModifier(param, ts.SyntaxKind.ReadonlyKeyword)
 					) {
 						candidates.push(param);
 					}
@@ -114,7 +153,9 @@ class ClassData {
 		}
 	}
 
-	private static _getMemberName(node: ts.NamedDeclaration): string | undefined {
+	private static _getMemberName(
+		node: ts.NamedDeclaration,
+	): string | undefined {
 		if (!node.name) {
 			return undefined;
 		}
@@ -143,12 +184,13 @@ class ClassData {
 	}
 
 	static _shouldMangle(type: FieldType): boolean {
-		return type === FieldType.Private
-			|| type === FieldType.Protected
-			;
+		return type === FieldType.Private || type === FieldType.Protected;
 	}
 
-	static makeImplicitPublicActuallyPublic(data: ClassData, reportViolation: (name: string, what: string, why: string) => void): void {
+	static makeImplicitPublicActuallyPublic(
+		data: ClassData,
+		reportViolation: (name: string, what: string, why: string) => void,
+	): void {
 		// TS-HACK
 		// A subtype can make an inherited protected field public. To prevent accidential
 		// mangling of public fields we mark the original (protected) fields as public...
@@ -159,9 +201,19 @@ class ClassData {
 			let parent: ClassData | undefined = data.parent;
 			while (parent) {
 				if (parent.fields.get(name)?.type === FieldType.Protected) {
-					const parentPos = parent.node.getSourceFile().getLineAndCharacterOfPosition(parent.fields.get(name)!.pos);
-					const infoPos = data.node.getSourceFile().getLineAndCharacterOfPosition(info.pos);
-					reportViolation(name, `'${name}' from ${parent.fileName}:${parentPos.line + 1}`, `${data.fileName}:${infoPos.line + 1}`);
+					const parentPos = parent.node
+						.getSourceFile()
+						.getLineAndCharacterOfPosition(
+							parent.fields.get(name)!.pos,
+						);
+					const infoPos = data.node
+						.getSourceFile()
+						.getLineAndCharacterOfPosition(info.pos);
+					reportViolation(
+						name,
+						`'${name}' from ${parent.fileName}:${parentPos.line + 1}`,
+						`${data.fileName}:${infoPos.line + 1}`,
+					);
 
 					parent.fields.get(name)!.type = FieldType.Public;
 				}
@@ -171,7 +223,6 @@ class ClassData {
 	}
 
 	static fillInReplacement(data: ClassData) {
-
 		if (data.replacements) {
 			// already done
 			return;
@@ -215,7 +266,7 @@ class ClassData {
 
 			return false;
 		};
-		const identPool = new ShortIdent('');
+		const identPool = new ShortIdent("");
 
 		for (const [name, info] of data.fields) {
 			if (ClassData._shouldMangle(info.type)) {
@@ -228,7 +279,10 @@ class ClassData {
 	// a name is taken when a field that doesn't get mangled exists or
 	// when the name is already in use for replacement
 	private _isNameTaken(name: string) {
-		if (this.fields.has(name) && !ClassData._shouldMangle(this.fields.get(name)!.type)) {
+		if (
+			this.fields.has(name) &&
+			!ClassData._shouldMangle(this.fields.get(name)!.type)
+		) {
 			// public field
 			return true;
 		}
@@ -252,7 +306,10 @@ class ClassData {
 		let value = this.replacements!.get(name)!;
 		let parent = this.parent;
 		while (parent) {
-			if (parent.replacements!.has(name) && parent.fields.get(name)?.type === FieldType.Protected) {
+			if (
+				parent.replacements!.has(name) &&
+				parent.fields.get(name)?.type === FieldType.Protected
+			) {
 				value = parent.replacements!.get(name)! ?? value;
 			}
 			parent = parent.parent;
@@ -281,21 +338,21 @@ function isNameTakenInFile(node: ts.Node, name: string): boolean {
 
 const skippedExportMangledFiles = [
 	// Build
-	'css.build',
+	"css.build",
 
 	// Monaco
-	'editorCommon',
-	'editorOptions',
-	'editorZoom',
-	'standaloneEditor',
-	'standaloneEnums',
-	'standaloneLanguages',
+	"editorCommon",
+	"editorOptions",
+	"editorZoom",
+	"standaloneEditor",
+	"standaloneEnums",
+	"standaloneLanguages",
 
 	// Generated
-	'extensionsApiProposals',
+	"extensionsApiProposals",
 
 	// Module passed around as type
-	'pfs',
+	"pfs",
 
 	// entry points
 	...[
@@ -310,58 +367,79 @@ const skippedExportMangledFiles = [
 		buildfile.workbenchDesktop,
 		buildfile.workbenchWeb,
 		buildfile.code,
-		buildfile.codeWeb
-	].flat().map(x => x.name),
+		buildfile.codeWeb,
+	]
+		.flat()
+		.map((x) => x.name),
 ];
 
 const skippedExportMangledProjects = [
 	// Test projects
-	'vscode-api-tests',
+	"vscode-api-tests",
 
 	// These projects use webpack to dynamically rewrite imports, which messes up our mangling
-	'configuration-editing',
-	'microsoft-authentication',
-	'github-authentication',
-	'html-language-features/server',
+	"configuration-editing",
+	"microsoft-authentication",
+	"github-authentication",
+	"html-language-features/server",
 ];
 
 const skippedExportMangledSymbols = [
 	// Don't mangle extension entry points
-	'activate',
-	'deactivate',
+	"activate",
+	"deactivate",
 ];
 
 class DeclarationData {
-
 	readonly replacementName: string;
 
 	constructor(
 		readonly fileName: string,
-		readonly node: ts.FunctionDeclaration | ts.ClassDeclaration | ts.EnumDeclaration | ts.VariableDeclaration,
+		readonly node:
+			| ts.FunctionDeclaration
+			| ts.ClassDeclaration
+			| ts.EnumDeclaration
+			| ts.VariableDeclaration,
 		fileIdents: ShortIdent,
 	) {
 		// Todo: generate replacement names based on usage count, with more used names getting shorter identifiers
 		this.replacementName = fileIdents.next();
 	}
 
-	getLocations(service: ts.LanguageService): Iterable<{ fileName: string; offset: number }> {
+	getLocations(
+		service: ts.LanguageService,
+	): Iterable<{ fileName: string; offset: number }> {
 		if (ts.isVariableDeclaration(this.node)) {
 			// If the const aliases any types, we need to rename those too
-			const definitionResult = service.getDefinitionAndBoundSpan(this.fileName, this.node.name.getStart());
-			if (definitionResult?.definitions && definitionResult.definitions.length > 1) {
-				return definitionResult.definitions.map(x => ({ fileName: x.fileName, offset: x.textSpan.start }));
+			const definitionResult = service.getDefinitionAndBoundSpan(
+				this.fileName,
+				this.node.name.getStart(),
+			);
+			if (
+				definitionResult?.definitions &&
+				definitionResult.definitions.length > 1
+			) {
+				return definitionResult.definitions.map((x) => ({
+					fileName: x.fileName,
+					offset: x.textSpan.start,
+				}));
 			}
 		}
 
-		return [{
-			fileName: this.fileName,
-			offset: this.node.name!.getStart()
-		}];
+		return [
+			{
+				fileName: this.fileName,
+				offset: this.node.name!.getStart(),
+			},
+		];
 	}
 
 	shouldMangle(newName: string): boolean {
 		const currentName = this.node.name!.getText();
-		if (currentName.startsWith('$') || skippedExportMangledSymbols.includes(currentName)) {
+		if (
+			currentName.startsWith("$") ||
+			skippedExportMangledSymbols.includes(currentName)
+		) {
 			return false;
 		}
 
@@ -371,7 +449,7 @@ class DeclarationData {
 		}
 
 		// Don't mangle functions we've explicitly opted out
-		if (this.node.getFullText().includes('@skipMangle')) {
+		if (this.node.getFullText().includes("@skipMangle")) {
 			return false;
 		}
 
@@ -394,7 +472,6 @@ export interface MangleOutput {
  * 5. Prepare and apply edits
  */
 export class Mangler {
-
 	private readonly allClassDataByKey = new Map<string, ClassData>();
 	private readonly allExportedSymbols = new Set<DeclarationData>();
 
@@ -402,25 +479,33 @@ export class Mangler {
 
 	constructor(
 		private readonly projectPath: string,
-		private readonly log: typeof console.log = () => { },
-		private readonly config: { readonly manglePrivateFields: boolean; readonly mangleExports: boolean },
+		private readonly log: typeof console.log = () => {},
+		private readonly config: {
+			readonly manglePrivateFields: boolean;
+			readonly mangleExports: boolean;
+		},
 	) {
-
-		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
-			maxWorkers: 1,
-			minWorkers: 'max'
-		});
+		this.renameWorkerPool = workerpool.pool(
+			path.join(__dirname, "renameWorker.js"),
+			{
+				maxWorkers: 1,
+				minWorkers: "max",
+			},
+		);
 	}
 
-	async computeNewFileContents(strictImplicitPublicHandling?: Set<string>): Promise<Map<string, MangleOutput>> {
-
-		const service = ts.createLanguageService(new StaticLanguageServiceHost(this.projectPath));
+	async computeNewFileContents(
+		strictImplicitPublicHandling?: Set<string>,
+	): Promise<Map<string, MangleOutput>> {
+		const service = ts.createLanguageService(
+			new StaticLanguageServiceHost(this.projectPath),
+		);
 
 		// STEP:
 		// - Find all classes and their field info.
 		// - Find exported symbols.
 
-		const fileIdents = new ShortIdent('$');
+		const fileIdents = new ShortIdent("$");
 
 		const visit = (node: ts.Node): void => {
 			if (this.config.manglePrivateFields) {
@@ -428,32 +513,35 @@ export class Mangler {
 					const anchor = node.name ?? node;
 					const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
 					if (this.allClassDataByKey.has(key)) {
-						throw new Error('DUPE?');
+						throw new Error("DUPE?");
 					}
-					this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
+					this.allClassDataByKey.set(
+						key,
+						new ClassData(node.getSourceFile().fileName, node),
+					);
 				}
 			}
 
 			if (this.config.mangleExports) {
 				// Find exported classes, functions, and vars
 				if (
-					(
-						// Exported class
-						ts.isClassDeclaration(node)
-						&& hasModifier(node, ts.SyntaxKind.ExportKeyword)
-						&& node.name
-					) || (
-						// Exported function
-						ts.isFunctionDeclaration(node)
-						&& ts.isSourceFile(node.parent)
-						&& hasModifier(node, ts.SyntaxKind.ExportKeyword)
-						&& node.name && node.body // On named function and not on the overload
-					) || (
-						// Exported variable
-						ts.isVariableDeclaration(node)
-						&& hasModifier(node.parent.parent, ts.SyntaxKind.ExportKeyword) // Variable statement is exported
-						&& ts.isSourceFile(node.parent.parent.parent)
-					)
+					// Exported class
+					(ts.isClassDeclaration(node) &&
+						hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+						node.name) ||
+					// Exported function
+					(ts.isFunctionDeclaration(node) &&
+						ts.isSourceFile(node.parent) &&
+						hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+						node.name &&
+						node.body) || // On named function and not on the overload
+					// Exported variable
+					(ts.isVariableDeclaration(node) &&
+						hasModifier(
+							node.parent.parent,
+							ts.SyntaxKind.ExportKeyword,
+						) && // Variable statement is exported
+						ts.isSourceFile(node.parent.parent.parent))
 
 					// Disabled for now because we need to figure out how to handle
 					// enums that are used in monaco or extHost interfaces.
@@ -470,7 +558,13 @@ export class Mangler {
 						return;
 					}
 
-					this.allExportedSymbols.add(new DeclarationData(node.getSourceFile().fileName, node, fileIdents));
+					this.allExportedSymbols.add(
+						new DeclarationData(
+							node.getSourceFile().fileName,
+							node,
+							fileIdents,
+						),
+					);
 				}
 			}
 
@@ -482,19 +576,25 @@ export class Mangler {
 				ts.forEachChild(file, visit);
 			}
 		}
-		this.log(`Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`);
-
+		this.log(
+			`Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`,
+		);
 
 		//  STEP: connect sub and super-types
 
 		const setupParents = (data: ClassData) => {
-			const extendsClause = data.node.heritageClauses?.find(h => h.token === ts.SyntaxKind.ExtendsKeyword);
+			const extendsClause = data.node.heritageClauses?.find(
+				(h) => h.token === ts.SyntaxKind.ExtendsKeyword,
+			);
 			if (!extendsClause) {
 				// no EXTENDS-clause
 				return;
 			}
 
-			const info = service.getDefinitionAtPosition(data.fileName, extendsClause.types[0].expression.getEnd());
+			const info = service.getDefinitionAtPosition(
+				data.fileName,
+				extendsClause.types[0].expression.getEnd(),
+			);
 			if (!info || info.length === 0) {
 				// throw new Error('SUPER type not found');
 				return;
@@ -522,24 +622,33 @@ export class Mangler {
 		const violations = new Map<string, string[]>();
 		let violationsCauseFailure = false;
 		for (const data of this.allClassDataByKey.values()) {
-			ClassData.makeImplicitPublicActuallyPublic(data, (name: string, what, why) => {
-				const arr = violations.get(what);
-				if (arr) {
-					arr.push(why);
-				} else {
-					violations.set(what, [why]);
-				}
+			ClassData.makeImplicitPublicActuallyPublic(
+				data,
+				(name: string, what, why) => {
+					const arr = violations.get(what);
+					if (arr) {
+						arr.push(why);
+					} else {
+						violations.set(what, [why]);
+					}
 
-				if (strictImplicitPublicHandling && !strictImplicitPublicHandling.has(name)) {
-					violationsCauseFailure = true;
-				}
-			});
+					if (
+						strictImplicitPublicHandling &&
+						!strictImplicitPublicHandling.has(name)
+					) {
+						violationsCauseFailure = true;
+					}
+				},
+			);
 		}
 		for (const [why, whys] of violations) {
-			this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(' , ')}`);
+			this.log(
+				`WARN: ${why} became PUBLIC because of: ${whys.join(" , ")}`,
+			);
 		}
 		if (violationsCauseFailure) {
-			const message = 'Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above';
+			const message =
+				"Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above";
 			this.log(`ERROR: ${message}`);
 			throw new Error(message);
 		}
@@ -566,19 +675,39 @@ export class Mangler {
 		};
 		const appendRename = (newText: string, loc: ts.RenameLocation) => {
 			appendEdit(loc.fileName, {
-				newText: (loc.prefixText || '') + newText + (loc.suffixText || ''),
+				newText:
+					(loc.prefixText || "") + newText + (loc.suffixText || ""),
 				offset: loc.textSpan.start,
-				length: loc.textSpan.length
+				length: loc.textSpan.length,
 			});
 		};
 
-		type RenameFn = (projectName: string, fileName: string, pos: number) => ts.RenameLocation[];
+		type RenameFn = (
+			projectName: string,
+			fileName: string,
+			pos: number,
+		) => ts.RenameLocation[];
 
-		const renameResults: Array<Promise<{ readonly newName: string; readonly locations: readonly ts.RenameLocation[] }>> = [];
+		const renameResults: Array<
+			Promise<{
+				readonly newName: string;
+				readonly locations: readonly ts.RenameLocation[];
+			}>
+		> = [];
 
-		const queueRename = (fileName: string, pos: number, newName: string) => {
-			renameResults.push(Promise.resolve(this.renameWorkerPool.exec<RenameFn>('findRenameLocations', [this.projectPath, fileName, pos]))
-				.then((locations) => ({ newName, locations })));
+		const queueRename = (
+			fileName: string,
+			pos: number,
+			newName: string,
+		) => {
+			renameResults.push(
+				Promise.resolve(
+					this.renameWorkerPool.exec<RenameFn>(
+						"findRenameLocations",
+						[this.projectPath, fileName, pos],
+					),
+				).then((locations) => ({ newName, locations })),
+			);
 		};
 
 		for (const data of this.allClassDataByKey.values()) {
@@ -607,9 +736,14 @@ export class Mangler {
 		}
 
 		for (const data of this.allExportedSymbols.values()) {
-			if (data.fileName.endsWith('.d.ts')
-				|| skippedExportMangledProjects.some(proj => data.fileName.includes(proj))
-				|| skippedExportMangledFiles.some(file => data.fileName.endsWith(file + '.ts'))
+			if (
+				data.fileName.endsWith(".d.ts") ||
+				skippedExportMangledProjects.some((proj) =>
+					data.fileName.includes(proj),
+				) ||
+				skippedExportMangledFiles.some((file) =>
+					data.fileName.endsWith(file + ".ts"),
+				)
 			) {
 				continue;
 			}
@@ -641,10 +775,12 @@ export class Mangler {
 		let savedBytes = 0;
 
 		for (const item of service.getProgram()!.getSourceFiles()) {
-
-			const { mapRoot, sourceRoot } = service.getProgram()!.getCompilerOptions();
+			const { mapRoot, sourceRoot } = service
+				.getProgram()!
+				.getCompilerOptions();
 			const projectDir = path.dirname(this.projectPath);
-			const sourceMapRoot = mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString();
+			const sourceMapRoot =
+				mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString();
 
 			// source maps
 			let generator: SourceMapGenerator | undefined;
@@ -654,76 +790,116 @@ export class Mangler {
 			if (!edits) {
 				// just copy
 				newFullText = item.getFullText();
-
 			} else {
 				// source map generator
-				const relativeFileName = normalize(path.relative(projectDir, item.fileName));
+				const relativeFileName = normalize(
+					path.relative(projectDir, item.fileName),
+				);
 				const mappingsByLine = new Map<number, Mapping[]>();
 
 				// apply renames
 				edits.sort((a, b) => b.offset - a.offset);
-				const characters = item.getFullText().split('');
+				const characters = item.getFullText().split("");
 
 				let lastEdit: Edit | undefined;
 
 				for (const edit of edits) {
 					if (lastEdit && lastEdit.offset === edit.offset) {
 						//
-						if (lastEdit.length !== edit.length || lastEdit.newText !== edit.newText) {
-							this.log('ERROR: Overlapping edit', item.fileName, edit.offset, edits);
-							throw new Error('OVERLAPPING edit');
+						if (
+							lastEdit.length !== edit.length ||
+							lastEdit.newText !== edit.newText
+						) {
+							this.log(
+								"ERROR: Overlapping edit",
+								item.fileName,
+								edit.offset,
+								edits,
+							);
+							throw new Error("OVERLAPPING edit");
 						} else {
 							continue;
 						}
 					}
 					lastEdit = edit;
-					const mangledName = characters.splice(edit.offset, edit.length, edit.newText).join('');
+					const mangledName = characters
+						.splice(edit.offset, edit.length, edit.newText)
+						.join("");
 					savedBytes += mangledName.length - edit.newText.length;
 
 					// source maps
 					const pos = item.getLineAndCharacterOfPosition(edit.offset);
-
 
 					let mappings = mappingsByLine.get(pos.line);
 					if (!mappings) {
 						mappings = [];
 						mappingsByLine.set(pos.line, mappings);
 					}
-					mappings.unshift({
-						source: relativeFileName,
-						original: { line: pos.line + 1, column: pos.character },
-						generated: { line: pos.line + 1, column: pos.character },
-						name: mangledName
-					}, {
-						source: relativeFileName,
-						original: { line: pos.line + 1, column: pos.character + edit.length },
-						generated: { line: pos.line + 1, column: pos.character + edit.newText.length },
-					});
+					mappings.unshift(
+						{
+							source: relativeFileName,
+							original: {
+								line: pos.line + 1,
+								column: pos.character,
+							},
+							generated: {
+								line: pos.line + 1,
+								column: pos.character,
+							},
+							name: mangledName,
+						},
+						{
+							source: relativeFileName,
+							original: {
+								line: pos.line + 1,
+								column: pos.character + edit.length,
+							},
+							generated: {
+								line: pos.line + 1,
+								column: pos.character + edit.newText.length,
+							},
+						},
+					);
 				}
 
 				// source map generation, make sure to get mappings per line correct
-				generator = new SourceMapGenerator({ file: path.basename(item.fileName), sourceRoot: sourceMapRoot });
-				generator.setSourceContent(relativeFileName, item.getFullText());
+				generator = new SourceMapGenerator({
+					file: path.basename(item.fileName),
+					sourceRoot: sourceMapRoot,
+				});
+				generator.setSourceContent(
+					relativeFileName,
+					item.getFullText(),
+				);
 				for (const [, mappings] of mappingsByLine) {
 					let lineDelta = 0;
 					for (const mapping of mappings) {
 						generator.addMapping({
 							...mapping,
-							generated: { line: mapping.generated.line, column: mapping.generated.column - lineDelta }
+							generated: {
+								line: mapping.generated.line,
+								column: mapping.generated.column - lineDelta,
+							},
 						});
-						lineDelta += mapping.original.column - mapping.generated.column;
+						lineDelta +=
+							mapping.original.column - mapping.generated.column;
 					}
 				}
 
-				newFullText = characters.join('');
+				newFullText = characters.join("");
 			}
-			result.set(item.fileName, { out: newFullText, sourceMap: generator?.toString() });
+			result.set(item.fileName, {
+				out: newFullText,
+				sourceMap: generator?.toString(),
+			});
 		}
 
 		service.dispose();
 		this.renameWorkerPool.terminate();
 
-		this.log(`Done: ${savedBytes / 1000}kb saved, memory-usage: ${JSON.stringify(v8.getHeapStatistics())}`);
+		this.log(
+			`Done: ${savedBytes / 1000}kb saved, memory-usage: ${JSON.stringify(v8.getHeapStatistics())}`,
+		);
 		return result;
 	}
 }
@@ -731,8 +907,10 @@ export class Mangler {
 // --- ast utils
 
 function hasModifier(node: ts.Node, kind: ts.SyntaxKind) {
-	const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
-	return Boolean(modifiers?.find(mode => mode.kind === kind));
+	const modifiers = ts.canHaveModifiers(node)
+		? ts.getModifiers(node)
+		: undefined;
+	return Boolean(modifiers?.find((mode) => mode.kind === kind));
 }
 
 function isInAmbientContext(node: ts.Node): boolean {
@@ -745,14 +923,17 @@ function isInAmbientContext(node: ts.Node): boolean {
 }
 
 function normalize(path: string): string {
-	return path.replace(/\\/g, '/');
+	return path.replace(/\\/g, "/");
 }
 
 async function _run() {
-	const root = path.join(__dirname, '..', '..', '..');
-	const projectBase = path.join(root, 'src');
-	const projectPath = path.join(projectBase, 'tsconfig.json');
-	const newProjectBase = path.join(path.dirname(projectBase), path.basename(projectBase) + '2');
+	const root = path.join(__dirname, "..", "..", "..");
+	const projectBase = path.join(root, "src");
+	const projectPath = path.join(projectBase, "tsconfig.json");
+	const newProjectBase = path.join(
+		path.dirname(projectBase),
+		path.basename(projectBase) + "2",
+	);
 
 	fs.cpSync(projectBase, newProjectBase, { recursive: true });
 
@@ -760,12 +941,20 @@ async function _run() {
 		mangleExports: true,
 		manglePrivateFields: true,
 	});
-	for (const [fileName, contents] of await mangler.computeNewFileContents(new Set(['saveState']))) {
-		const newFilePath = path.join(newProjectBase, path.relative(projectBase, fileName));
+	for (const [fileName, contents] of await mangler.computeNewFileContents(
+		new Set(["saveState"]),
+	)) {
+		const newFilePath = path.join(
+			newProjectBase,
+			path.relative(projectBase, fileName),
+		);
 		await fs.promises.mkdir(path.dirname(newFilePath), { recursive: true });
 		await fs.promises.writeFile(newFilePath, contents.out);
 		if (contents.sourceMap) {
-			await fs.promises.writeFile(newFilePath + '.map', contents.sourceMap);
+			await fs.promises.writeFile(
+				newFilePath + ".map",
+				contents.sourceMap,
+			);
 		}
 	}
 }

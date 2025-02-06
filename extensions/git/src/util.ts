@@ -3,17 +3,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event, Disposable, EventEmitter, SourceControlHistoryItemRef, l10n, workspace, Uri } from 'vscode';
-import { dirname, sep, relative } from 'path';
-import { Readable } from 'stream';
-import { promises as fs, createReadStream } from 'fs';
-import byline from 'byline';
+import { createReadStream, promises as fs } from "fs";
+import { dirname, relative, sep } from "path";
+import { Readable } from "stream";
+import byline from "byline";
+import {
+	Disposable,
+	Event,
+	EventEmitter,
+	l10n,
+	SourceControlHistoryItemRef,
+	Uri,
+	workspace,
+} from "vscode";
 
-export const isMacintosh = process.platform === 'darwin';
-export const isWindows = process.platform === 'win32';
+export const isMacintosh = process.platform === "darwin";
+export const isWindows = process.platform === "win32";
 
 export function log(...args: any[]): void {
-	console.log.apply(console, ['git:', ...args]);
+	console.log.apply(console, ["git:", ...args]);
 }
 
 export interface IDisposable {
@@ -21,7 +29,7 @@ export interface IDisposable {
 }
 
 export function dispose<T extends IDisposable>(disposables: T[]): T[] {
-	disposables.forEach(d => d.dispose());
+	disposables.forEach((d) => d.dispose());
 	return [];
 }
 
@@ -36,27 +44,64 @@ export function combinedDisposable(disposables: IDisposable[]): IDisposable {
 export const EmptyDisposable = toDisposable(() => null);
 
 export function fireEvent<T>(event: Event<T>): Event<T> {
-	return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => event(_ => (listener as any).call(thisArgs), null, disposables);
+	return (
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) => event((_) => (listener as any).call(thisArgs), null, disposables);
 }
 
 export function mapEvent<I, O>(event: Event<I>, map: (i: I) => O): Event<O> {
-	return (listener: (e: O) => any, thisArgs?: any, disposables?: Disposable[]) => event(i => listener.call(thisArgs, map(i)), null, disposables);
+	return (
+		listener: (e: O) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) => event((i) => listener.call(thisArgs, map(i)), null, disposables);
 }
 
-export function filterEvent<T>(event: Event<T>, filter: (e: T) => boolean): Event<T> {
-	return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => event(e => filter(e) && listener.call(thisArgs, e), null, disposables);
+export function filterEvent<T>(
+	event: Event<T>,
+	filter: (e: T) => boolean,
+): Event<T> {
+	return (
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) =>
+		event(
+			(e) => filter(e) && listener.call(thisArgs, e),
+			null,
+			disposables,
+		);
 }
 
-export function runAndSubscribeEvent<T>(event: Event<T>, handler: (e: T) => any, initial: T): IDisposable;
-export function runAndSubscribeEvent<T>(event: Event<T>, handler: (e: T | undefined) => any): IDisposable;
-export function runAndSubscribeEvent<T>(event: Event<T>, handler: (e: T | undefined) => any, initial?: T): IDisposable {
+export function runAndSubscribeEvent<T>(
+	event: Event<T>,
+	handler: (e: T) => any,
+	initial: T,
+): IDisposable;
+export function runAndSubscribeEvent<T>(
+	event: Event<T>,
+	handler: (e: T | undefined) => any,
+): IDisposable;
+export function runAndSubscribeEvent<T>(
+	event: Event<T>,
+	handler: (e: T | undefined) => any,
+	initial?: T,
+): IDisposable {
 	handler(initial);
-	return event(e => handler(e));
+	return event((e) => handler(e));
 }
 
 export function anyEvent<T>(...events: Event<T>[]): Event<T> {
-	return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
-		const result = combinedDisposable(events.map(event => event(i => listener.call(thisArgs, i))));
+	return (
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) => {
+		const result = combinedDisposable(
+			events.map((event) => event((i) => listener.call(thisArgs, i))),
+		);
 
 		disposables?.push(result);
 
@@ -69,28 +114,44 @@ export function done<T>(promise: Promise<T>): Promise<void> {
 }
 
 export function onceEvent<T>(event: Event<T>): Event<T> {
-	return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
-		const result = event(e => {
-			result.dispose();
-			return listener.call(thisArgs, e);
-		}, null, disposables);
+	return (
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) => {
+		const result = event(
+			(e) => {
+				result.dispose();
+				return listener.call(thisArgs, e);
+			},
+			null,
+			disposables,
+		);
 
 		return result;
 	};
 }
 
 export function debounceEvent<T>(event: Event<T>, delay: number): Event<T> {
-	return (listener: (e: T) => any, thisArgs?: any, disposables?: Disposable[]) => {
+	return (
+		listener: (e: T) => any,
+		thisArgs?: any,
+		disposables?: Disposable[],
+	) => {
 		let timer: NodeJS.Timeout;
-		return event(e => {
-			clearTimeout(timer);
-			timer = setTimeout(() => listener.call(thisArgs, e), delay);
-		}, null, disposables);
+		return event(
+			(e) => {
+				clearTimeout(timer);
+				timer = setTimeout(() => listener.call(thisArgs, e), delay);
+			},
+			null,
+			disposables,
+		);
 	};
 }
 
 export function eventToPromise<T>(event: Event<T>): Promise<T> {
-	return new Promise<T>(c => onceEvent(event)(c));
+	return new Promise<T>((c) => onceEvent(event)(c));
 }
 
 export function once(fn: (...args: any[]) => any): (...args: any[]) => any {
@@ -107,7 +168,9 @@ export function once(fn: (...args: any[]) => any): (...args: any[]) => any {
 
 export function assign<T>(destination: T, ...sources: any[]): T {
 	for (const source of sources) {
-		Object.keys(source).forEach(key => (destination as any)[key] = source[key]);
+		Object.keys(source).forEach(
+			(key) => ((destination as any)[key] = source[key]),
+		);
 	}
 
 	return destination;
@@ -116,7 +179,7 @@ export function assign<T>(destination: T, ...sources: any[]): T {
 export function uniqBy<T>(arr: T[], fn: (el: T) => string): T[] {
 	const seen = Object.create(null);
 
-	return arr.filter(el => {
+	return arr.filter((el) => {
 		const key = fn(el);
 
 		if (seen[key]) {
@@ -128,7 +191,10 @@ export function uniqBy<T>(arr: T[], fn: (el: T) => string): T[] {
 	});
 }
 
-export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[] } {
+export function groupBy<T>(
+	arr: T[],
+	fn: (el: T) => string,
+): { [key: string]: T[] } {
 	return arr.reduce((result, el) => {
 		const key = fn(el);
 		result[key] = [...(result[key] || []), el];
@@ -136,13 +202,12 @@ export function groupBy<T>(arr: T[], fn: (el: T) => string): { [key: string]: T[
 	}, Object.create(null));
 }
 
-
 export async function mkdirp(path: string, mode?: number): Promise<boolean> {
 	const mkdir = async () => {
 		try {
 			await fs.mkdir(path, mode);
 		} catch (err) {
-			if (err.code === 'EEXIST') {
+			if (err.code === "EEXIST") {
 				const stat = await fs.stat(path);
 
 				if (stat.isDirectory()) {
@@ -164,7 +229,7 @@ export async function mkdirp(path: string, mode?: number): Promise<boolean> {
 	try {
 		await mkdir();
 	} catch (err) {
-		if (err.code !== 'ENOENT') {
+		if (err.code !== "ENOENT") {
 			throw err;
 		}
 
@@ -178,7 +243,7 @@ export async function mkdirp(path: string, mode?: number): Promise<boolean> {
 export function uniqueFilter<T>(keyFn: (t: T) => string): (t: T) => boolean {
 	const seen: { [key: string]: boolean } = Object.create(null);
 
-	return element => {
+	return (element) => {
 		const key = keyFn(element);
 
 		if (seen[key]) {
@@ -193,7 +258,7 @@ export function uniqueFilter<T>(keyFn: (t: T) => string): (t: T) => boolean {
 export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
 	let result: T | undefined = undefined;
 
-	array.some(e => {
+	array.some((e) => {
 		if (fn(e)) {
 			result = e;
 			return true;
@@ -205,19 +270,22 @@ export function find<T>(array: T[], fn: (t: T) => boolean): T | undefined {
 	return result;
 }
 
-export async function grep(filename: string, pattern: RegExp): Promise<boolean> {
+export async function grep(
+	filename: string,
+	pattern: RegExp,
+): Promise<boolean> {
 	return new Promise<boolean>((c, e) => {
-		const fileStream = createReadStream(filename, { encoding: 'utf8' });
+		const fileStream = createReadStream(filename, { encoding: "utf8" });
 		const stream = byline(fileStream);
-		stream.on('data', (line: string) => {
+		stream.on("data", (line: string) => {
 			if (pattern.test(line)) {
 				fileStream.close();
 				c(true);
 			}
 		});
 
-		stream.on('error', e);
-		stream.on('end', () => c(false));
+		stream.on("error", e);
+		stream.on("end", () => c(false));
 	});
 }
 
@@ -227,7 +295,7 @@ export function readBytes(stream: Readable, bytes: number): Promise<Buffer> {
 		const buffer = Buffer.allocUnsafe(bytes);
 		let bytesRead = 0;
 
-		stream.on('data', (data: Buffer) => {
+		stream.on("data", (data: Buffer) => {
 			const bytesToRead = Math.min(bytes - bytesRead, data.length);
 			data.copy(buffer, bytesRead, 0, bytesToRead);
 			bytesRead += bytesToRead;
@@ -237,14 +305,14 @@ export function readBytes(stream: Readable, bytes: number): Promise<Buffer> {
 			}
 		});
 
-		stream.on('error', (e: Error) => {
+		stream.on("error", (e: Error) => {
 			if (!done) {
 				done = true;
 				error(e);
 			}
 		});
 
-		stream.on('close', () => {
+		stream.on("close", () => {
 			if (!done) {
 				done = true;
 				complete(buffer.slice(0, bytesRead));
@@ -254,9 +322,9 @@ export function readBytes(stream: Readable, bytes: number): Promise<Buffer> {
 }
 
 export const enum Encoding {
-	UTF8 = 'utf8',
-	UTF16be = 'utf16be',
-	UTF16le = 'utf16le'
+	UTF8 = "utf8",
+	UTF16be = "utf16be",
+	UTF16le = "utf16le",
 }
 
 export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
@@ -267,11 +335,11 @@ export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
 	const b0 = buffer.readUInt8(0);
 	const b1 = buffer.readUInt8(1);
 
-	if (b0 === 0xFE && b1 === 0xFF) {
+	if (b0 === 0xfe && b1 === 0xff) {
 		return Encoding.UTF16be;
 	}
 
-	if (b0 === 0xFF && b1 === 0xFE) {
+	if (b0 === 0xff && b1 === 0xfe) {
 		return Encoding.UTF16le;
 	}
 
@@ -281,7 +349,7 @@ export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
 
 	const b2 = buffer.readUInt8(2);
 
-	if (b0 === 0xEF && b1 === 0xBB && b2 === 0xBF) {
+	if (b0 === 0xef && b1 === 0xbb && b2 === 0xbf) {
 		return Encoding.UTF8;
 	}
 
@@ -289,7 +357,9 @@ export function detectUnicodeEncoding(buffer: Buffer): Encoding | null {
 }
 
 export function truncate(value: string, maxLength = 20): string {
-	return value.length <= maxLength ? value : `${value.substring(0, maxLength)}\u2026`;
+	return value.length <= maxLength
+		? value
+		: `${value.substring(0, maxLength)}\u2026`;
 }
 
 function normalizePath(path: string): string {
@@ -341,7 +411,10 @@ export function relativePath(from: string, to: string): string {
 	return relative(from, to);
 }
 
-export function* splitInChunks(array: string[], maxChunkLength: number): IterableIterator<string[]> {
+export function* splitInChunks(
+	array: string[],
+	maxChunkLength: number,
+): IterableIterator<string[]> {
 	let current: string[] = [];
 	let length = 0;
 
@@ -374,14 +447,14 @@ export function isDefined<T>(arg: T | null | undefined): arg is T {
  * @returns whether the provided parameter is undefined or null.
  */
 export function isUndefinedOrNull(obj: unknown): obj is undefined | null {
-	return (isUndefined(obj) || obj === null);
+	return isUndefined(obj) || obj === null;
 }
 
 /**
  * @returns whether the provided parameter is undefined.
  */
 export function isUndefined(obj: unknown): obj is undefined {
-	return (typeof obj === 'undefined');
+	return typeof obj === "undefined";
 }
 
 interface ILimitedTaskFactory<T> {
@@ -391,7 +464,6 @@ interface ILimitedTaskFactory<T> {
 }
 
 export class Limiter<T> {
-
 	private runningPromises: number;
 	private maxDegreeOfParalellism: number;
 	private outstandingPromises: ILimitedTaskFactory<T>[];
@@ -410,13 +482,19 @@ export class Limiter<T> {
 	}
 
 	private consume(): void {
-		while (this.outstandingPromises.length && this.runningPromises < this.maxDegreeOfParalellism) {
+		while (
+			this.outstandingPromises.length &&
+			this.runningPromises < this.maxDegreeOfParalellism
+		) {
 			const iLimitedTask = this.outstandingPromises.shift()!;
 			this.runningPromises++;
 
 			const promise = iLimitedTask.factory();
 			promise.then(iLimitedTask.c, iLimitedTask.e);
-			promise.then(() => this.consumed(), () => this.consumed());
+			promise.then(
+				() => this.consumed(),
+				() => this.consumed(),
+			);
 		}
 	}
 
@@ -432,7 +510,6 @@ export class Limiter<T> {
 type Completion<T> = { success: true; value: T } | { success: false; err: any };
 
 export class PromiseSource<T> {
-
 	private _onDidComplete = new EventEmitter<Completion<T>>();
 
 	private _promise: Promise<T> | undefined;
@@ -441,7 +518,7 @@ export class PromiseSource<T> {
 			return this._promise;
 		}
 
-		return eventToPromise(this._onDidComplete.event).then(completion => {
+		return eventToPromise(this._onDidComplete.event).then((completion) => {
 			if (completion.success) {
 				return completion.value;
 			} else {
@@ -475,25 +552,44 @@ export namespace Versions {
 		pre?: string;
 	}
 
-	export function compare(v1: string | Version, v2: string | Version): VersionComparisonResult {
-		if (typeof v1 === 'string') {
+	export function compare(
+		v1: string | Version,
+		v2: string | Version,
+	): VersionComparisonResult {
+		if (typeof v1 === "string") {
 			v1 = fromString(v1);
 		}
-		if (typeof v2 === 'string') {
+		if (typeof v2 === "string") {
 			v2 = fromString(v2);
 		}
 
-		if (v1.major > v2.major) { return 1; }
-		if (v1.major < v2.major) { return -1; }
+		if (v1.major > v2.major) {
+			return 1;
+		}
+		if (v1.major < v2.major) {
+			return -1;
+		}
 
-		if (v1.minor > v2.minor) { return 1; }
-		if (v1.minor < v2.minor) { return -1; }
+		if (v1.minor > v2.minor) {
+			return 1;
+		}
+		if (v1.minor < v2.minor) {
+			return -1;
+		}
 
-		if (v1.patch > v2.patch) { return 1; }
-		if (v1.patch < v2.patch) { return -1; }
+		if (v1.patch > v2.patch) {
+			return 1;
+		}
+		if (v1.patch < v2.patch) {
+			return -1;
+		}
 
-		if (v1.pre === undefined && v2.pre !== undefined) { return 1; }
-		if (v1.pre !== undefined && v2.pre === undefined) { return -1; }
+		if (v1.pre === undefined && v2.pre !== undefined) {
+			return 1;
+		}
+		if (v1.pre !== undefined && v2.pre === undefined) {
+			return -1;
+		}
 
 		if (v1.pre !== undefined && v2.pre !== undefined) {
 			return v1.pre.localeCompare(v2.pre) as VersionComparisonResult;
@@ -502,23 +598,36 @@ export namespace Versions {
 		return 0;
 	}
 
-	export function from(major: string | number, minor: string | number, patch?: string | number, pre?: string): Version {
+	export function from(
+		major: string | number,
+		minor: string | number,
+		patch?: string | number,
+		pre?: string,
+	): Version {
 		return {
-			major: typeof major === 'string' ? parseInt(major, 10) : major,
-			minor: typeof minor === 'string' ? parseInt(minor, 10) : minor,
-			patch: patch === undefined || patch === null ? 0 : typeof patch === 'string' ? parseInt(patch, 10) : patch,
+			major: typeof major === "string" ? parseInt(major, 10) : major,
+			minor: typeof minor === "string" ? parseInt(minor, 10) : minor,
+			patch:
+				patch === undefined || patch === null
+					? 0
+					: typeof patch === "string"
+						? parseInt(patch, 10)
+						: patch,
 			pre: pre,
 		};
 	}
 
 	export function fromString(version: string): Version {
-		const [ver, pre] = version.split('-');
-		const [major, minor, patch] = ver.split('.');
+		const [ver, pre] = version.split("-");
+		const [major, minor, patch] = ver.split(".");
 		return from(major, minor, patch, pre);
 	}
 }
 
-export function deltaHistoryItemRefs(before: SourceControlHistoryItemRef[], after: SourceControlHistoryItemRef[]): {
+export function deltaHistoryItemRefs(
+	before: SourceControlHistoryItemRef[],
+	after: SourceControlHistoryItemRef[],
+): {
 	added: SourceControlHistoryItemRef[];
 	modified: SourceControlHistoryItemRef[];
 	removed: SourceControlHistoryItemRef[];
@@ -589,18 +698,26 @@ const year = day * 365;
  * @param disallowNow Whether to disallow the string "now" when the difference
  * is less than 30 seconds.
  */
-export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTimeWords?: boolean, disallowNow?: boolean): string {
-	if (typeof date !== 'number') {
+export function fromNow(
+	date: number | Date,
+	appendAgoLabel?: boolean,
+	useFullTimeWords?: boolean,
+	disallowNow?: boolean,
+): string {
+	if (typeof date !== "number") {
 		date = date.getTime();
 	}
 
 	const seconds = Math.round((new Date().getTime() - date) / 1000);
 	if (seconds < -30) {
-		return l10n.t('in {0}', fromNow(new Date().getTime() + seconds * 1000, false));
+		return l10n.t(
+			"in {0}",
+			fromNow(new Date().getTime() + seconds * 1000, false),
+		);
 	}
 
 	if (!disallowNow && seconds < 30) {
-		return l10n.t('now');
+		return l10n.t("now");
 	}
 
 	let value: number;
@@ -610,22 +727,22 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} second ago', value)
-					: l10n.t('{0} sec ago', value);
+					? l10n.t("{0} second ago", value)
+					: l10n.t("{0} sec ago", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} seconds ago', value)
-					: l10n.t('{0} secs ago', value);
+					? l10n.t("{0} seconds ago", value)
+					: l10n.t("{0} secs ago", value);
 			}
 		} else {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} second', value)
-					: l10n.t('{0} sec', value);
+					? l10n.t("{0} second", value)
+					: l10n.t("{0} sec", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} seconds', value)
-					: l10n.t('{0} secs', value);
+					? l10n.t("{0} seconds", value)
+					: l10n.t("{0} secs", value);
 			}
 		}
 	}
@@ -635,22 +752,22 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} minute ago', value)
-					: l10n.t('{0} min ago', value);
+					? l10n.t("{0} minute ago", value)
+					: l10n.t("{0} min ago", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} minutes ago', value)
-					: l10n.t('{0} mins ago', value);
+					? l10n.t("{0} minutes ago", value)
+					: l10n.t("{0} mins ago", value);
 			}
 		} else {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} minute', value)
-					: l10n.t('{0} min', value);
+					? l10n.t("{0} minute", value)
+					: l10n.t("{0} min", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} minutes', value)
-					: l10n.t('{0} mins', value);
+					? l10n.t("{0} minutes", value)
+					: l10n.t("{0} mins", value);
 			}
 		}
 	}
@@ -660,22 +777,22 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} hour ago', value)
-					: l10n.t('{0} hr ago', value);
+					? l10n.t("{0} hour ago", value)
+					: l10n.t("{0} hr ago", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} hours ago', value)
-					: l10n.t('{0} hrs ago', value);
+					? l10n.t("{0} hours ago", value)
+					: l10n.t("{0} hrs ago", value);
 			}
 		} else {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} hour', value)
-					: l10n.t('{0} hr', value);
+					? l10n.t("{0} hour", value)
+					: l10n.t("{0} hr", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} hours', value)
-					: l10n.t('{0} hrs', value);
+					? l10n.t("{0} hours", value)
+					: l10n.t("{0} hrs", value);
 			}
 		}
 	}
@@ -684,12 +801,12 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		value = Math.floor(seconds / day);
 		if (appendAgoLabel) {
 			return value === 1
-				? l10n.t('{0} day ago', value)
-				: l10n.t('{0} days ago', value);
+				? l10n.t("{0} day ago", value)
+				: l10n.t("{0} days ago", value);
 		} else {
 			return value === 1
-				? l10n.t('{0} day', value)
-				: l10n.t('{0} days', value);
+				? l10n.t("{0} day", value)
+				: l10n.t("{0} days", value);
 		}
 	}
 
@@ -698,22 +815,22 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} week ago', value)
-					: l10n.t('{0} wk ago', value);
+					? l10n.t("{0} week ago", value)
+					: l10n.t("{0} wk ago", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} weeks ago', value)
-					: l10n.t('{0} wks ago', value);
+					? l10n.t("{0} weeks ago", value)
+					: l10n.t("{0} wks ago", value);
 			}
 		} else {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} week', value)
-					: l10n.t('{0} wk', value);
+					? l10n.t("{0} week", value)
+					: l10n.t("{0} wk", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} weeks', value)
-					: l10n.t('{0} wks', value);
+					? l10n.t("{0} weeks", value)
+					: l10n.t("{0} wks", value);
 			}
 		}
 	}
@@ -723,22 +840,22 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 		if (appendAgoLabel) {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} month ago', value)
-					: l10n.t('{0} mo ago', value);
+					? l10n.t("{0} month ago", value)
+					: l10n.t("{0} mo ago", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} months ago', value)
-					: l10n.t('{0} mos ago', value);
+					? l10n.t("{0} months ago", value)
+					: l10n.t("{0} mos ago", value);
 			}
 		} else {
 			if (value === 1) {
 				return useFullTimeWords
-					? l10n.t('{0} month', value)
-					: l10n.t('{0} mo', value);
+					? l10n.t("{0} month", value)
+					: l10n.t("{0} mo", value);
 			} else {
 				return useFullTimeWords
-					? l10n.t('{0} months', value)
-					: l10n.t('{0} mos', value);
+					? l10n.t("{0} months", value)
+					: l10n.t("{0} mos", value);
 			}
 		}
 	}
@@ -747,28 +864,28 @@ export function fromNow(date: number | Date, appendAgoLabel?: boolean, useFullTi
 	if (appendAgoLabel) {
 		if (value === 1) {
 			return useFullTimeWords
-				? l10n.t('{0} year ago', value)
-				: l10n.t('{0} yr ago', value);
+				? l10n.t("{0} year ago", value)
+				: l10n.t("{0} yr ago", value);
 		} else {
 			return useFullTimeWords
-				? l10n.t('{0} years ago', value)
-				: l10n.t('{0} yrs ago', value);
+				? l10n.t("{0} years ago", value)
+				: l10n.t("{0} yrs ago", value);
 		}
 	} else {
 		if (value === 1) {
 			return useFullTimeWords
-				? l10n.t('{0} year', value)
-				: l10n.t('{0} yr', value);
+				? l10n.t("{0} year", value)
+				: l10n.t("{0} yr", value);
 		} else {
 			return useFullTimeWords
-				? l10n.t('{0} years', value)
-				: l10n.t('{0} yrs', value);
+				? l10n.t("{0} years", value)
+				: l10n.t("{0} yrs", value);
 		}
 	}
 }
 
 export function getCommitShortHash(scope: Uri, hash: string): string {
-	const config = workspace.getConfiguration('git', scope);
-	const shortHashLength = config.get<number>('commitShortHashLength', 7);
+	const config = workspace.getConfiguration("git", scope);
+	const shortHashLength = config.get<number>("commitShortHashLength", 7);
 	return hash.substring(0, shortHashLength);
 }

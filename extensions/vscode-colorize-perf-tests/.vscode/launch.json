@@ -7,7 +7,12 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["${workspaceFolder}/../../", "${workspaceFolder}/test", "--extensionDevelopmentPath=${workspaceFolder}", "--extensionTestsPath=${workspaceFolder}/out" ],
+			"args": [
+				"${workspaceFolder}/../../",
+				"${workspaceFolder}/test",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out"
+			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outDir": "${workspaceFolder}/out",

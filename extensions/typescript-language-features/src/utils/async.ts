@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from 'vscode';
+import { Disposable } from "vscode";
 
 export interface ITask<T> {
 	(): T;
 }
 
 export class Delayer<T> {
-
 	public defaultDelay: number;
 	private timeout: any; // Timer
 	private completionPromise: Promise<T | undefined> | null;
@@ -25,7 +24,10 @@ export class Delayer<T> {
 		this.task = null;
 	}
 
-	public trigger(task: ITask<T>, delay: number = this.defaultDelay): Promise<T | undefined> {
+	public trigger(
+		task: ITask<T>,
+		delay: number = this.defaultDelay,
+	): Promise<T | undefined> {
 		this.task = task;
 		if (delay >= 0) {
 			this.cancelTimeout();
@@ -44,10 +46,13 @@ export class Delayer<T> {
 		}
 
 		if (delay >= 0 || this.timeout === null) {
-			this.timeout = setTimeout(() => {
-				this.timeout = null;
-				this.onSuccess?.(undefined);
-			}, delay >= 0 ? delay : this.defaultDelay);
+			this.timeout = setTimeout(
+				() => {
+					this.timeout = null;
+					this.onSuccess?.(undefined);
+				},
+				delay >= 0 ? delay : this.defaultDelay,
+			);
 		}
 
 		return this.completionPromise;
@@ -61,7 +66,10 @@ export class Delayer<T> {
 	}
 }
 
-export function setImmediate(callback: (...args: any[]) => void, ...args: any[]): Disposable {
+export function setImmediate(
+	callback: (...args: any[]) => void,
+	...args: any[]
+): Disposable {
 	if (global.setImmediate) {
 		const handle = global.setImmediate(callback, ...args);
 		return { dispose: () => global.clearImmediate(handle) };
@@ -70,7 +78,6 @@ export function setImmediate(callback: (...args: any[]) => void, ...args: any[])
 		return { dispose: () => clearTimeout(handle) };
 	}
 }
-
 
 /**
  * A helper to prevent accumulation of sequential async tasks.
@@ -99,7 +106,6 @@ export function setImmediate(callback: (...args: any[]) => void, ...args: any[])
  * 		}
  */
 export class Throttler {
-
 	private activePromise: Promise<any> | null;
 	private queuedPromise: Promise<any> | null;
 	private queuedPromiseFactory: ITask<Promise<any>> | null;
@@ -114,7 +120,7 @@ export class Throttler {
 
 	queue<T>(promiseFactory: ITask<Promise<T>>): Promise<T> {
 		if (this.isDisposed) {
-			return Promise.reject(new Error('Throttler is disposed'));
+			return Promise.reject(new Error("Throttler is disposed"));
 		}
 
 		if (this.activePromise) {
@@ -134,8 +140,10 @@ export class Throttler {
 					return result;
 				};
 
-				this.queuedPromise = new Promise(resolve => {
-					this.activePromise!.then(onComplete, onComplete).then(resolve);
+				this.queuedPromise = new Promise((resolve) => {
+					this.activePromise!.then(onComplete, onComplete).then(
+						resolve,
+					);
 				});
 			}
 
@@ -147,13 +155,16 @@ export class Throttler {
 		this.activePromise = promiseFactory();
 
 		return new Promise((resolve, reject) => {
-			this.activePromise!.then((result: T) => {
-				this.activePromise = null;
-				resolve(result);
-			}, (err: unknown) => {
-				this.activePromise = null;
-				reject(err);
-			});
+			this.activePromise!.then(
+				(result: T) => {
+					this.activePromise = null;
+					resolve(result);
+				},
+				(err: unknown) => {
+					this.activePromise = null;
+					reject(err);
+				},
+			);
 		});
 	}
 

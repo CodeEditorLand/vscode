@@ -3,17 +3,23 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { readFileSync } from 'fs';
-import path from 'path';
+import { readFileSync } from "fs";
+import path from "path";
 
 const RE_VAR_PROP = /var\(\s*(--([\w\-\.]+))/g;
 
 let knownVariables: Set<string> | undefined;
 function getKnownVariableNames() {
 	if (!knownVariables) {
-		const knownVariablesFileContent = readFileSync(path.join(__dirname, './vscode-known-variables.json'), 'utf8').toString();
+		const knownVariablesFileContent = readFileSync(
+			path.join(__dirname, "./vscode-known-variables.json"),
+			"utf8",
+		).toString();
 		const knownVariablesInfo = JSON.parse(knownVariablesFileContent);
-		knownVariables = new Set([...knownVariablesInfo.colors, ...knownVariablesInfo.others] as string[]);
+		knownVariables = new Set([
+			...knownVariablesInfo.colors,
+			...knownVariablesInfo.others,
+		] as string[]);
 	}
 	return knownVariables;
 }
@@ -29,12 +35,15 @@ export function getVariableNameValidator(): IValidator {
 	return (value: string, report: (unknwnVariable: string) => void) => {
 		RE_VAR_PROP.lastIndex = 0; // reset lastIndex just to be sure
 		let match;
-		while (match = RE_VAR_PROP.exec(value)) {
+		while ((match = RE_VAR_PROP.exec(value))) {
 			const variableName = match[1];
-			if (variableName && !allVariables.has(variableName) && !iconVariable.test(variableName)) {
+			if (
+				variableName &&
+				!allVariables.has(variableName) &&
+				!iconVariable.test(variableName)
+			) {
 				report(variableName);
 			}
 		}
 	};
 }
-

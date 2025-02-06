@@ -3,16 +3,23 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export function getWordAtText(text: string, offset: number, wordDefinition: RegExp): { start: number; length: number } {
+export function getWordAtText(
+	text: string,
+	offset: number,
+	wordDefinition: RegExp,
+): { start: number; length: number } {
 	let lineStart = offset;
-	while (lineStart > 0 && !isNewlineCharacter(text.charCodeAt(lineStart - 1))) {
+	while (
+		lineStart > 0 &&
+		!isNewlineCharacter(text.charCodeAt(lineStart - 1))
+	) {
 		lineStart--;
 	}
 	const offsetInLine = offset - lineStart;
 	const lineText = text.substr(lineStart);
 
 	// make a copy of the regex as to not keep the state
-	const flags = wordDefinition.ignoreCase ? 'gi' : 'g';
+	const flags = wordDefinition.ignoreCase ? "gi" : "g";
 	wordDefinition = new RegExp(wordDefinition.source, flags);
 
 	let match = wordDefinition.exec(lineText);
@@ -52,7 +59,7 @@ export function endsWith(haystack: string, needle: string): boolean {
 }
 
 export function repeat(value: string, count: number) {
-	let s = '';
+	let s = "";
 	while (count > 0) {
 		if ((count & 1) === 1) {
 			s += value;
@@ -71,8 +78,8 @@ export function isEOL(content: string, offset: number) {
 	return isNewlineCharacter(content.charCodeAt(offset));
 }
 
-const CR = '\r'.charCodeAt(0);
-const NL = '\n'.charCodeAt(0);
+const CR = "\r".charCodeAt(0);
+const NL = "\n".charCodeAt(0);
 export function isNewlineCharacter(charCode: number) {
 	return charCode === CR || charCode === NL;
 }

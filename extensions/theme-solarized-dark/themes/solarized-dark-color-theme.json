@@ -48,10 +48,7 @@
 		},
 		{
 			"name": "Variable",
-			"scope": [
-				"variable.language",
-				"variable.other"
-			],
+			"scope": ["variable.language", "variable.other"],
 			"settings": {
 				"foreground": "#268BD2"
 			}
@@ -110,30 +107,21 @@
 		},
 		{
 			"name": "Built-in constant",
-			"scope": [
-				"constant.language",
-				"meta.preprocessor"
-			],
+			"scope": ["constant.language", "meta.preprocessor"],
 			"settings": {
 				"foreground": "#B58900"
 			}
 		},
 		{
 			"name": "Support.construct",
-			"scope": [
-				"support.function.construct",
-				"keyword.other.new"
-			],
+			"scope": ["support.function.construct", "keyword.other.new"],
 			"settings": {
 				"foreground": "#CB4B16"
 			}
 		},
 		{
 			"name": "User-defined constant",
-			"scope": [
-				"constant.character",
-				"constant.other"
-			],
+			"scope": ["constant.character", "constant.other"],
 			"settings": {
 				"foreground": "#CB4B16"
 			}
@@ -190,18 +178,12 @@
 		},
 		{
 			"name": "Library constant",
-			"scope": [
-				"support.constant",
-				"support.variable"
-			],
+			"scope": ["support.constant", "support.variable"],
 			"settings": {}
 		},
 		{
 			"name": "Library class/type",
-			"scope": [
-				"support.type",
-				"support.class"
-			],
+			"scope": ["support.type", "support.class"],
 			"settings": {
 				"foreground": "#859900"
 			}
@@ -227,10 +209,7 @@
 		},
 		{
 			"name": "diff: header",
-			"scope": [
-				"meta.diff",
-				"meta.diff.header"
-			],
+			"scope": ["meta.diff", "meta.diff.header"],
 			"settings": {
 				"fontStyle": "italic",
 				"foreground": "#268BD2"
@@ -275,10 +254,7 @@
 		},
 		{
 			"name": "Markup Styling",
-			"scope": [
-				"markup.bold",
-				"markup.italic"
-			],
+			"scope": ["markup.bold", "markup.italic"],
 			"settings": {
 				"foreground": "#D33682"
 			}
@@ -329,7 +305,6 @@
 		}
 	],
 	"colors": {
-
 		// Base
 		// "foreground": "",
 		"focusBorder": "#2AA19899",

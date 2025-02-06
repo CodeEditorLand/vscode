@@ -1,85 +1,40 @@
 {
 	"comments": {
 		"lineComment": "//",
-		"blockComment": [
-			"/*",
-			"*/"
-		]
+		"blockComment": ["/*", "*/"]
 	},
 	"brackets": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		]
+		["{", "}"],
+		["[", "]"],
+		["(", ")"]
 	],
 	"autoClosingPairs": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		],
+		["{", "}"],
+		["[", "]"],
+		["(", ")"],
 		{
 			"open": "\"",
 			"close": "\"",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "'",
 			"close": "'",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "/**",
 			"close": " */",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		}
 	],
 	"surroundingPairs": [
-		[
-			"{",
-			"}"
-		],
-		[
-			"[",
-			"]"
-		],
-		[
-			"(",
-			")"
-		],
-		[
-			"\"",
-			"\""
-		],
-		[
-			"'",
-			"'"
-		],
-		[
-			"<",
-			">"
-		]
+		["{", "}"],
+		["[", "]"],
+		["(", ")"],
+		["\"", "\""],
+		["'", "'"],
+		["<", ">"]
 	],
 	"folding": {
 		"markers": {
@@ -158,7 +113,7 @@
 		// Add // when pressing enter from inside line comment
 		{
 			"beforeText": {
-				"pattern": "\/\/.*"
+				"pattern": "//.*"
 			},
 			"afterText": {
 				"pattern": "^(?!\\s*$).+"
@@ -167,6 +122,6 @@
 				"indent": "none",
 				"appendText": "// "
 			}
-		},
+		}
 	]
 }

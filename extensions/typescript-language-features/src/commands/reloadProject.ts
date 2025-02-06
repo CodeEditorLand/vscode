@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import TypeScriptServiceClientHost from '../typeScriptServiceClientHost';
-import { Lazy } from '../utils/lazy';
-import { Command } from './commandManager';
+import TypeScriptServiceClientHost from "../typeScriptServiceClientHost";
+import { Lazy } from "../utils/lazy";
+import { Command } from "./commandManager";
 
 export class ReloadTypeScriptProjectsCommand implements Command {
-	public readonly id = 'typescript.reloadProjects';
+	public readonly id = "typescript.reloadProjects";
 
 	public constructor(
-		private readonly lazyClientHost: Lazy<TypeScriptServiceClientHost>
-	) { }
+		private readonly lazyClientHost: Lazy<TypeScriptServiceClientHost>,
+	) {}
 
 	public execute() {
 		this.lazyClientHost.value.reloadProjects();
@@ -20,11 +20,11 @@ export class ReloadTypeScriptProjectsCommand implements Command {
 }
 
 export class ReloadJavaScriptProjectsCommand implements Command {
-	public readonly id = 'javascript.reloadProjects';
+	public readonly id = "javascript.reloadProjects";
 
 	public constructor(
-		private readonly lazyClientHost: Lazy<TypeScriptServiceClientHost>
-	) { }
+		private readonly lazyClientHost: Lazy<TypeScriptServiceClientHost>,
+	) {}
 
 	public execute() {
 		this.lazyClientHost.value.reloadProjects();

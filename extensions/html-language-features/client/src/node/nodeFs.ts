@@ -3,14 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from 'fs';
-import { Uri } from 'vscode';
-import { FileSystemProvider, FileType } from '../requests';
+import * as fs from "fs";
+import { Uri } from "vscode";
+
+import { FileSystemProvider, FileType } from "../requests";
 
 export function getNodeFileFS(): FileSystemProvider {
 	function ensureFileUri(location: string) {
-		if (!location.startsWith('file:')) {
-			throw new Error('fileRequestService can only handle file URLs');
+		if (!location.startsWith("file:")) {
+			throw new Error("fileRequestService can only handle file URLs");
 		}
 	}
 	return {
@@ -20,8 +21,13 @@ export function getNodeFileFS(): FileSystemProvider {
 				const uri = Uri.parse(location);
 				fs.stat(uri.fsPath, (err, stats) => {
 					if (err) {
-						if (err.code === 'ENOENT') {
-							return c({ type: FileType.Unknown, ctime: -1, mtime: -1, size: -1 });
+						if (err.code === "ENOENT") {
+							return c({
+								type: FileType.Unknown,
+								ctime: -1,
+								mtime: -1,
+								size: -1,
+							});
 						} else {
 							return e(err);
 						}
@@ -40,7 +46,7 @@ export function getNodeFileFS(): FileSystemProvider {
 						type,
 						ctime: stats.ctime.getTime(),
 						mtime: stats.mtime.getTime(),
-						size: stats.size
+						size: stats.size,
 					});
 				});
 			});
@@ -54,19 +60,21 @@ export function getNodeFileFS(): FileSystemProvider {
 					if (err) {
 						return e(err);
 					}
-					c(children.map(stat => {
-						if (stat.isSymbolicLink()) {
-							return [stat.name, FileType.SymbolicLink];
-						} else if (stat.isDirectory()) {
-							return [stat.name, FileType.Directory];
-						} else if (stat.isFile()) {
-							return [stat.name, FileType.File];
-						} else {
-							return [stat.name, FileType.Unknown];
-						}
-					}));
+					c(
+						children.map((stat) => {
+							if (stat.isSymbolicLink()) {
+								return [stat.name, FileType.SymbolicLink];
+							} else if (stat.isDirectory()) {
+								return [stat.name, FileType.Directory];
+							} else if (stat.isFile()) {
+								return [stat.name, FileType.File];
+							} else {
+								return [stat.name, FileType.Unknown];
+							}
+						}),
+					);
 				});
 			});
-		}
+		},
 	};
 }

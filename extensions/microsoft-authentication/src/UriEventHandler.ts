@@ -3,9 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-export class UriEventHandler extends vscode.EventEmitter<vscode.Uri> implements vscode.UriHandler {
+export class UriEventHandler
+	extends vscode.EventEmitter<vscode.Uri>
+	implements vscode.UriHandler
+{
 	private _disposable = vscode.window.registerUriHandler(this);
 
 	handleUri(uri: vscode.Uri) {

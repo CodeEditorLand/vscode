@@ -3,13 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import es from 'event-stream';
-import fancyLog from 'fancy-log';
-import ansiColors from 'ansi-colors';
-import File from 'vinyl';
+import ansiColors from "ansi-colors";
+import es from "event-stream";
+import fancyLog from "fancy-log";
+import File from "vinyl";
 
 class Entry {
-	constructor(readonly name: string, public totalCount: number, public totalSize: number) { }
+	constructor(
+		readonly name: string,
+		public totalCount: number,
+		public totalSize: number,
+	) {}
 
 	toString(pretty?: boolean): string {
 		if (!pretty) {
@@ -21,11 +25,11 @@ class Entry {
 		} else {
 			if (this.totalCount === 1) {
 				return `Stats for '${ansiColors.grey(this.name)}': ${Math.round(this.totalSize / 1204)}KB`;
-
 			} else {
-				const count = this.totalCount < 100
-					? ansiColors.green(this.totalCount.toString())
-					: ansiColors.red(this.totalCount.toString());
+				const count =
+					this.totalCount < 100
+						? ansiColors.green(this.totalCount.toString())
+						: ansiColors.red(this.totalCount.toString());
 
 				return `Stats for '${ansiColors.grey(this.name)}': ${count} files, ${Math.round(this.totalSize / 1204)}KB`;
 			}
@@ -35,38 +39,47 @@ class Entry {
 
 const _entries = new Map<string, Entry>();
 
-export function createStatsStream(group: string, log?: boolean): es.ThroughStream {
-
+export function createStatsStream(
+	group: string,
+	log?: boolean,
+): es.ThroughStream {
 	const entry = new Entry(group, 0, 0);
 	_entries.set(entry.name, entry);
 
-	return es.through(function (data) {
-		const file = data as File;
-		if (typeof file.path === 'string') {
-			entry.totalCount += 1;
-			if (Buffer.isBuffer(file.contents)) {
-				entry.totalSize += file.contents.length;
-			} else if (file.stat && typeof file.stat.size === 'number') {
-				entry.totalSize += file.stat.size;
-			} else {
-				// funky file...
+	return es.through(
+		function (data) {
+			const file = data as File;
+			if (typeof file.path === "string") {
+				entry.totalCount += 1;
+				if (Buffer.isBuffer(file.contents)) {
+					entry.totalSize += file.contents.length;
+				} else if (file.stat && typeof file.stat.size === "number") {
+					entry.totalSize += file.stat.size;
+				} else {
+					// funky file...
+				}
 			}
-		}
-		this.emit('data', data);
-	}, function () {
-		if (log) {
-			if (entry.totalCount === 1) {
-				fancyLog(`Stats for '${ansiColors.grey(entry.name)}': ${Math.round(entry.totalSize / 1204)}KB`);
+			this.emit("data", data);
+		},
+		function () {
+			if (log) {
+				if (entry.totalCount === 1) {
+					fancyLog(
+						`Stats for '${ansiColors.grey(entry.name)}': ${Math.round(entry.totalSize / 1204)}KB`,
+					);
+				} else {
+					const count =
+						entry.totalCount < 100
+							? ansiColors.green(entry.totalCount.toString())
+							: ansiColors.red(entry.totalCount.toString());
 
-			} else {
-				const count = entry.totalCount < 100
-					? ansiColors.green(entry.totalCount.toString())
-					: ansiColors.red(entry.totalCount.toString());
-
-				fancyLog(`Stats for '${ansiColors.grey(entry.name)}': ${count} files, ${Math.round(entry.totalSize / 1204)}KB`);
+					fancyLog(
+						`Stats for '${ansiColors.grey(entry.name)}': ${count} files, ${Math.round(entry.totalSize / 1204)}KB`,
+					);
+				}
 			}
-		}
 
-		this.emit('end');
-	});
+			this.emit("end");
+		},
+	);
 }

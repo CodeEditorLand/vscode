@@ -3,17 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as http from 'http';
+import * as http from "http";
 
 export class IPCClient {
-
 	private ipcHandlePath: string;
 
 	constructor(private handlerName: string) {
-		const ipcHandlePath = process.env['VSCODE_GIT_IPC_HANDLE'];
+		const ipcHandlePath = process.env["VSCODE_GIT_IPC_HANDLE"];
 
 		if (!ipcHandlePath) {
-			throw new Error('Missing VSCODE_GIT_IPC_HANDLE');
+			throw new Error("Missing VSCODE_GIT_IPC_HANDLE");
 		}
 
 		this.ipcHandlePath = ipcHandlePath;
@@ -23,21 +22,23 @@ export class IPCClient {
 		const opts: http.RequestOptions = {
 			socketPath: this.ipcHandlePath,
 			path: `/${this.handlerName}`,
-			method: 'POST'
+			method: "POST",
 		};
 
 		return new Promise((c, e) => {
-			const req = http.request(opts, res => {
+			const req = http.request(opts, (res) => {
 				if (res.statusCode !== 200) {
 					return e(new Error(`Bad status code: ${res.statusCode}`));
 				}
 
 				const chunks: Buffer[] = [];
-				res.on('data', d => chunks.push(d));
-				res.on('end', () => c(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+				res.on("data", (d) => chunks.push(d));
+				res.on("end", () =>
+					c(JSON.parse(Buffer.concat(chunks).toString("utf8"))),
+				);
 			});
 
-			req.on('error', err => e(err));
+			req.on("error", (err) => e(err));
 			req.write(JSON.stringify(request));
 			req.end();
 		});

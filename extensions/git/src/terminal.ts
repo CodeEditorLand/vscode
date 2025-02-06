@@ -3,9 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, l10n, LogOutputChannel, TerminalShellExecutionEndEvent, window, workspace } from 'vscode';
-import { dispose, filterEvent, IDisposable } from './util';
-import { Model } from './model';
+import {
+	ExtensionContext,
+	l10n,
+	LogOutputChannel,
+	TerminalShellExecutionEndEvent,
+	window,
+	workspace,
+} from "vscode";
+
+import { Model } from "./model";
+import { dispose, filterEvent, IDisposable } from "./util";
 
 export interface ITerminalEnvironmentProvider {
 	featureDescription?: string;
@@ -13,21 +21,27 @@ export interface ITerminalEnvironmentProvider {
 }
 
 export class TerminalEnvironmentManager {
-
 	private readonly disposable: IDisposable;
 
-	constructor(private readonly context: ExtensionContext, private readonly envProviders: (ITerminalEnvironmentProvider | undefined)[]) {
-		this.disposable = filterEvent(workspace.onDidChangeConfiguration, e => e.affectsConfiguration('git'))
-			(this.refresh, this);
+	constructor(
+		private readonly context: ExtensionContext,
+		private readonly envProviders: (
+			| ITerminalEnvironmentProvider
+			| undefined
+		)[],
+	) {
+		this.disposable = filterEvent(workspace.onDidChangeConfiguration, (e) =>
+			e.affectsConfiguration("git"),
+		)(this.refresh, this);
 
 		this.refresh();
 	}
 
 	private refresh(): void {
-		const config = workspace.getConfiguration('git', null);
+		const config = workspace.getConfiguration("git", null);
 		this.context.environmentVariableCollection.clear();
 
-		if (!config.get<boolean>('enabled', true)) {
+		if (!config.get<boolean>("enabled", true)) {
 			return;
 		}
 
@@ -36,14 +50,23 @@ export class TerminalEnvironmentManager {
 			const terminalEnv = envProvider?.getTerminalEnv() ?? {};
 
 			for (const name of Object.keys(terminalEnv)) {
-				this.context.environmentVariableCollection.replace(name, terminalEnv[name]);
+				this.context.environmentVariableCollection.replace(
+					name,
+					terminalEnv[name],
+				);
 			}
-			if (envProvider?.featureDescription && Object.keys(terminalEnv).length > 0) {
+			if (
+				envProvider?.featureDescription &&
+				Object.keys(terminalEnv).length > 0
+			) {
 				features.push(envProvider.featureDescription);
 			}
 		}
 		if (features.length) {
-			this.context.environmentVariableCollection.description = l10n.t('Enables the following features: {0}', features.join(', '));
+			this.context.environmentVariableCollection.description = l10n.t(
+				"Enables the following features: {0}",
+				features.join(", "),
+			);
 		}
 	}
 
@@ -54,32 +77,65 @@ export class TerminalEnvironmentManager {
 
 export class TerminalShellExecutionManager {
 	private readonly subcommands = new Set<string>([
-		'add', 'branch', 'checkout', 'cherry-pick', 'clean', 'commit', 'fetch', 'merge',
-		'mv', 'rebase', 'reset', 'restore', 'revert', 'rm', 'pull', 'push', 'stash', 'switch']);
+		"add",
+		"branch",
+		"checkout",
+		"cherry-pick",
+		"clean",
+		"commit",
+		"fetch",
+		"merge",
+		"mv",
+		"rebase",
+		"reset",
+		"restore",
+		"revert",
+		"rm",
+		"pull",
+		"push",
+		"stash",
+		"switch",
+	]);
 
 	private readonly disposables: IDisposable[] = [];
 
 	constructor(
 		private readonly model: Model,
-		private readonly logger: LogOutputChannel
+		private readonly logger: LogOutputChannel,
 	) {
-		window.onDidEndTerminalShellExecution(this.onDidEndTerminalShellExecution, this, this.disposables);
+		window.onDidEndTerminalShellExecution(
+			this.onDidEndTerminalShellExecution,
+			this,
+			this.disposables,
+		);
 	}
 
-	private onDidEndTerminalShellExecution(e: TerminalShellExecutionEndEvent): void {
+	private onDidEndTerminalShellExecution(
+		e: TerminalShellExecutionEndEvent,
+	): void {
 		const { execution, exitCode, shellIntegration } = e;
-		const [executable, subcommand] = execution.commandLine.value.split(/\s+/);
+		const [executable, subcommand] =
+			execution.commandLine.value.split(/\s+/);
 		const cwd = execution.cwd ?? shellIntegration.cwd;
 
-		if (executable.toLowerCase() !== 'git' || !this.subcommands.has(subcommand?.toLowerCase()) || !cwd || exitCode !== 0) {
+		if (
+			executable.toLowerCase() !== "git" ||
+			!this.subcommands.has(subcommand?.toLowerCase()) ||
+			!cwd ||
+			exitCode !== 0
+		) {
 			return;
 		}
 
-		this.logger.trace(`[TerminalShellExecutionManager][onDidEndTerminalShellExecution] Matched git subcommand: ${subcommand}`);
+		this.logger.trace(
+			`[TerminalShellExecutionManager][onDidEndTerminalShellExecution] Matched git subcommand: ${subcommand}`,
+		);
 
 		const repository = this.model.getRepository(cwd);
 		if (!repository) {
-			this.logger.trace(`[TerminalShellExecutionManager][onDidEndTerminalShellExecution] Unable to find repository for current working directory: ${cwd.toString()}`);
+			this.logger.trace(
+				`[TerminalShellExecutionManager][onDidEndTerminalShellExecution] Unable to find repository for current working directory: ${cwd.toString()}`,
+			);
 			return;
 		}
 

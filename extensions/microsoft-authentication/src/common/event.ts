@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { Event } from 'vscode';
+import { Event } from "vscode";
 
 /**
  * The EventBufferer is useful in situations in which you want
@@ -25,62 +25,87 @@ import { Event } from 'vscode';
  * ```
  */
 export class EventBufferer {
-
 	private data: { buffers: Function[] }[] = [];
 
 	wrapEvent<T>(event: Event<T>): Event<T>;
-	wrapEvent<T>(event: Event<T>, reduce: (last: T | undefined, event: T) => T): Event<T>;
-	wrapEvent<T, O>(event: Event<T>, reduce: (last: O | undefined, event: T) => O, initial: O): Event<O>;
-	wrapEvent<T, O>(event: Event<T>, reduce?: (last: T | O | undefined, event: T) => T | O, initial?: O): Event<O | T> {
+	wrapEvent<T>(
+		event: Event<T>,
+		reduce: (last: T | undefined, event: T) => T,
+	): Event<T>;
+	wrapEvent<T, O>(
+		event: Event<T>,
+		reduce: (last: O | undefined, event: T) => O,
+		initial: O,
+	): Event<O>;
+	wrapEvent<T, O>(
+		event: Event<T>,
+		reduce?: (last: T | O | undefined, event: T) => T | O,
+		initial?: O,
+	): Event<O | T> {
 		return (listener, thisArgs?, disposables?) => {
-			return event(i => {
-				const data = this.data[this.data.length - 1];
+			return event(
+				(i) => {
+					const data = this.data[this.data.length - 1];
 
-				// Non-reduce scenario
-				if (!reduce) {
-					// Buffering case
-					if (data) {
-						data.buffers.push(() => listener.call(thisArgs, i));
-					} else {
-						// Not buffering case
-						listener.call(thisArgs, i);
+					// Non-reduce scenario
+					if (!reduce) {
+						// Buffering case
+						if (data) {
+							data.buffers.push(() => listener.call(thisArgs, i));
+						} else {
+							// Not buffering case
+							listener.call(thisArgs, i);
+						}
+						return;
 					}
-					return;
-				}
 
-				// Reduce scenario
-				const reduceData = data as typeof data & {
-					/**
-					 * The accumulated items that will be reduced.
-					 */
-					items?: T[];
-					/**
-					 * The reduced result cached to be shared with other listeners.
-					 */
-					reducedResult?: T | O;
-				};
+					// Reduce scenario
+					const reduceData = data as typeof data & {
+						/**
+						 * The accumulated items that will be reduced.
+						 */
+						items?: T[];
+						/**
+						 * The reduced result cached to be shared with other listeners.
+						 */
+						reducedResult?: T | O;
+					};
 
-				// Not buffering case
-				if (!reduceData) {
-					// TODO: Is there a way to cache this reduce call for all listeners?
-					listener.call(thisArgs, reduce(initial, i));
-					return;
-				}
+					// Not buffering case
+					if (!reduceData) {
+						// TODO: Is there a way to cache this reduce call for all listeners?
+						listener.call(thisArgs, reduce(initial, i));
+						return;
+					}
 
-				// Buffering case
-				reduceData.items ??= [];
-				reduceData.items.push(i);
-				if (reduceData.buffers.length === 0) {
-					// Include a single buffered function that will reduce all events when we're done buffering events
-					data.buffers.push(() => {
-						// cache the reduced result so that the value can be shared across all listeners
-						reduceData.reducedResult ??= initial
-							? reduceData.items!.reduce(reduce as (last: O | undefined, event: T) => O, initial)
-							: reduceData.items!.reduce(reduce as (last: T | undefined, event: T) => T);
-						listener.call(thisArgs, reduceData.reducedResult);
-					});
-				}
-			}, undefined, disposables);
+					// Buffering case
+					reduceData.items ??= [];
+					reduceData.items.push(i);
+					if (reduceData.buffers.length === 0) {
+						// Include a single buffered function that will reduce all events when we're done buffering events
+						data.buffers.push(() => {
+							// cache the reduced result so that the value can be shared across all listeners
+							reduceData.reducedResult ??= initial
+								? reduceData.items!.reduce(
+										reduce as (
+											last: O | undefined,
+											event: T,
+										) => O,
+										initial,
+									)
+								: reduceData.items!.reduce(
+										reduce as (
+											last: T | undefined,
+											event: T,
+										) => T,
+									);
+							listener.call(thisArgs, reduceData.reducedResult);
+						});
+					}
+				},
+				undefined,
+				disposables,
+			);
 		};
 	}
 
@@ -89,7 +114,7 @@ export class EventBufferer {
 		this.data.push(data);
 		const r = fn();
 		this.data.pop();
-		data.buffers.forEach(flush => flush());
+		data.buffers.forEach((flush) => flush());
 		return r;
 	}
 
@@ -101,7 +126,7 @@ export class EventBufferer {
 			return r;
 		} finally {
 			this.data.pop();
-			data.buffers.forEach(flush => flush());
+			data.buffers.forEach((flush) => flush());
 		}
 	}
 }

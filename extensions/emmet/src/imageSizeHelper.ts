@@ -5,12 +5,12 @@
 
 // Based on @sergeche's work on the emmet plugin for atom
 
-import * as path from 'path';
-import * as http from 'http';
-import * as https from 'https';
-import { URL } from 'url';
-import { imageSize } from 'image-size';
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
+import * as http from "http";
+import * as https from "https";
+import * as path from "path";
+import { URL } from "url";
+import { imageSize } from "image-size";
+import { ISizeCalculationResult } from "image-size/dist/types/interface";
 
 const reUrl = /^https?:/;
 export type ImageInfoWithScale = {
@@ -24,23 +24,32 @@ export type ImageInfoWithScale = {
  * Get size of given image file. Supports files from local filesystem,
  * as well as URLs
  */
-export function getImageSize(file: string): Promise<ImageInfoWithScale | undefined> {
-	file = file.replace(/^file:\/\//, '');
-	return reUrl.test(file) ? getImageSizeFromURL(file) : getImageSizeFromFile(file);
+export function getImageSize(
+	file: string,
+): Promise<ImageInfoWithScale | undefined> {
+	file = file.replace(/^file:\/\//, "");
+	return reUrl.test(file)
+		? getImageSizeFromURL(file)
+		: getImageSizeFromFile(file);
 }
 
 /**
  * Get image size from file on local file system
  */
-function getImageSizeFromFile(file: string): Promise<ImageInfoWithScale | undefined> {
+function getImageSizeFromFile(
+	file: string,
+): Promise<ImageInfoWithScale | undefined> {
 	return new Promise((resolve, reject) => {
 		const isDataUrl = file.match(/^data:.+?;base64,/);
 
 		if (isDataUrl) {
 			// NB should use sync version of `sizeOf()` for buffers
 			try {
-				const data = Buffer.from(file.slice(isDataUrl[0].length), 'base64');
-				return resolve(sizeForFileName('', imageSize(data)));
+				const data = Buffer.from(
+					file.slice(isDataUrl[0].length),
+					"base64",
+				);
+				return resolve(sizeForFileName("", imageSize(data)));
 			} catch (err) {
 				return reject(err);
 			}
@@ -59,24 +68,28 @@ function getImageSizeFromFile(file: string): Promise<ImageInfoWithScale | undefi
 /**
  * Get image size from given remove URL
  */
-function getImageSizeFromURL(urlStr: string): Promise<ImageInfoWithScale | undefined> {
+function getImageSizeFromURL(
+	urlStr: string,
+): Promise<ImageInfoWithScale | undefined> {
 	return new Promise((resolve, reject) => {
 		const url = new URL(urlStr);
-		const getTransport = url.protocol === 'https:' ? https.get : http.get;
+		const getTransport = url.protocol === "https:" ? https.get : http.get;
 
 		if (!url.pathname) {
-			return reject('Given url doesnt have pathname property');
+			return reject("Given url doesnt have pathname property");
 		}
 		const urlPath: string = url.pathname;
 
-		getTransport(url, resp => {
+		getTransport(url, (resp) => {
 			const chunks: Buffer[] = [];
 			let bufSize = 0;
 
 			const trySize = (chunks: Buffer[]) => {
 				try {
-					const size: ISizeCalculationResult = imageSize(Buffer.concat(chunks, bufSize));
-					resp.removeListener('data', onData);
+					const size: ISizeCalculationResult = imageSize(
+						Buffer.concat(chunks, bufSize),
+					);
+					resp.removeListener("data", onData);
 					resp.destroy(); // no need to read further
 					resolve(sizeForFileName(path.basename(urlPath), size));
 				} catch (err) {
@@ -90,14 +103,13 @@ function getImageSizeFromURL(urlStr: string): Promise<ImageInfoWithScale | undef
 				trySize(chunks);
 			};
 
-			resp
-				.on('data', onData)
-				.on('end', () => trySize(chunks))
-				.once('error', err => {
-					resp.removeListener('data', onData);
+			resp.on("data", onData)
+				.on("end", () => trySize(chunks))
+				.once("error", (err) => {
+					resp.removeListener("data", onData);
 					reject(err);
 				});
-		}).once('error', reject);
+		}).once("error", reject);
 	});
 }
 
@@ -105,7 +117,10 @@ function getImageSizeFromURL(urlStr: string): Promise<ImageInfoWithScale | undef
  * Returns size object for given file name. If file name contains `@Nx` token,
  * the final dimentions will be downscaled by N
  */
-function sizeForFileName(fileName: string, size?: ISizeCalculationResult): ImageInfoWithScale | undefined {
+function sizeForFileName(
+	fileName: string,
+	size?: ISizeCalculationResult,
+): ImageInfoWithScale | undefined {
 	const m = fileName.match(/@(\d+)x\./);
 	const scale = m ? +m[1] : 1;
 
@@ -117,6 +132,6 @@ function sizeForFileName(fileName: string, size?: ISizeCalculationResult): Image
 		realWidth: size.width,
 		realHeight: size.height,
 		width: Math.floor(size.width / scale),
-		height: Math.floor(size.height / scale)
+		height: Math.floor(size.height / scale),
 	};
 }
