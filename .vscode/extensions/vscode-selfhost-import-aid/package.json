@@ -21,7 +21,7 @@
 		"onLanguage:typescript"
 	],
 	"dependencies": {
-		"typescript": "5.5.4"
+		"typescript": "5.7.3"
 	},
 	"engines": {
 		"vscode": "^1.88.0"

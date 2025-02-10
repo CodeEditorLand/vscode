@@ -98,7 +98,7 @@
 		"*"
 	],
 	"devDependencies": {
-		"@types/node": "20.x"
+		"@types/node": "22.x"
 	},
 	"engines": {
 		"vscode": "0.10.x"

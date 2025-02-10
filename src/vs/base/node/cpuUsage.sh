@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function get_total_cpu_time() {
   # Read the first line of /proc/stat and remove the cpu prefix

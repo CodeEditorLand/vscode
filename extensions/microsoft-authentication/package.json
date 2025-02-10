@@ -134,18 +134,18 @@
 	"activationEvents": [],
 	"dependencies": {
 		"@azure/ms-rest-azure-env": "^2.0.0",
-		"@azure/msal-node": "^2.16.2",
-		"@azure/msal-node-extensions": "^1.5.0",
+		"@azure/msal-node": "^3.2.1",
+		"@azure/msal-node-extensions": "^1.5.4",
 		"@vscode/extension-telemetry": "^0.9.8",
 		"keytar": "file:./packageMocks/keytar",
 		"vscode-tas-client": "^0.1.84"
 	},
 	"devDependencies": {
-		"@types/node": "20.x",
-		"@types/node-fetch": "^2.5.7",
-		"@types/randombytes": "^2.0.0",
-		"@types/sha.js": "^2.4.0",
-		"@types/uuid": "8.0.0"
+		"@types/node": "22.x",
+		"@types/node-fetch": "^2.6.12",
+		"@types/randombytes": "^2.0.3",
+		"@types/sha.js": "^2.4.4",
+		"@types/uuid": "10.0.0"
 	},
 	"engines": {
 		"vscode": "^1.42.0"

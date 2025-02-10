@@ -107,8 +107,8 @@
 		"@vscode/markdown-it-katex": "^1.1.1"
 	},
 	"devDependencies": {
-		"@types/markdown-it": "^0.0.0",
-		"@types/vscode-notebook-renderer": "^1.60.0"
+		"@types/markdown-it": "^14.1.2",
+		"@types/vscode-notebook-renderer": "^1.72.3"
 	},
 	"engines": {
 		"vscode": "^1.54.0"
