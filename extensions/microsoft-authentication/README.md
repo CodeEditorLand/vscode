@@ -3,7 +3,7 @@
 **Notice:** This extension is bundled with Visual Studio Code. It can be
 disabled but not uninstalled.
 
-## Features
+## Feature
 
 This extension provides support for authenticating to Microsoft. It registers
 the `microsoft` Authentication Provider that can be leveraged by other

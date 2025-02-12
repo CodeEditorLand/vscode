@@ -327,19 +327,19 @@
 		"workspaceContains:package.json"
 	],
 	"dependencies": {
-		"find-up": "^7.0.0",
-		"find-yarn-workspace-root": "^2.0.0",
-		"jsonc-parser": "^3.3.1",
-		"minimatch": "^10.0.1",
-		"request-light": "^0.8.0",
-		"vscode-uri": "^3.1.0",
-		"which": "^5.0.0",
-		"which-pm": "^3.0.1"
+		"find-up": "7.0.0",
+		"find-yarn-workspace-root": "2.0.0",
+		"jsonc-parser": "3.3.1",
+		"minimatch": "10.0.1",
+		"request-light": "0.8.0",
+		"vscode-uri": "3.1.0",
+		"which": "5.0.0",
+		"which-pm": "3.0.1"
 	},
 	"devDependencies": {
-		"@types/minimatch": "^5.1.2",
+		"@types/minimatch": "5.1.2",
 		"@types/node": "22.x",
-		"@types/which": "^3.0.4"
+		"@types/which": "3.0.4"
 	},
 	"engines": {
 		"vscode": "0.10.x"

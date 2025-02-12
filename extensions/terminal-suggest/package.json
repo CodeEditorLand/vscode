@@ -22,7 +22,7 @@
 		"onTerminalCompletionsRequested"
 	],
 	"engines": {
-		"vscode": "^1.95.0"
+		"vscode": "1.95.0"
 	},
 	"icon": "./src/media/icon.png",
 	"enabledApiProposals": [

@@ -4,6 +4,6 @@
 disabled but not uninstalled. To enable the completions from this extension, set
 `terminal.integrated.suggest.enabled` to `true`.
 
-## Features
+## Feature
 
 Provides terminal suggestions for zsh, bash, fish, and pwsh.

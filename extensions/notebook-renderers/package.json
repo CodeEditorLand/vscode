@@ -42,12 +42,12 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
-		"@types/jsdom": "^21.1.7",
-		"@types/vscode-notebook-renderer": "^1.72.3",
-		"jsdom": "^26.0.0"
+		"@types/jsdom": "21.1.7",
+		"@types/vscode-notebook-renderer": "1.72.3",
+		"jsdom": "26.0.0"
 	},
 	"engines": {
-		"vscode": "^1.57.0"
+		"vscode": "1.57.0"
 	},
 	"icon": "media/icon.png",
 	"capabilities": {

@@ -44,7 +44,7 @@
 		"onLanguage:search-result"
 	],
 	"engines": {
-		"vscode": "^1.39.0"
+		"vscode": "1.39.0"
 	},
 	"icon": "images/icon.png",
 	"capabilities": {

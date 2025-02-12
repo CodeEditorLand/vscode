@@ -3,7 +3,7 @@
 **Notice:** This extension is bundled with Visual Studio Code. It can be
 disabled but not uninstalled.
 
-## Features
+## Feature
 
 This extension provides basic preview for images, audio and video files.
 

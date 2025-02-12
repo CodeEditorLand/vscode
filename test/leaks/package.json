@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "koa": "^2.15.3",
-    "koa-mount": "^4.0.0",
-    "koa-static": "^5.0.0"
+    "koa": "2.15.4",
+    "koa-mount": "4.0.0",
+    "koa-static": "5.0.0"
   }
 }

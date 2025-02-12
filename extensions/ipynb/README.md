@@ -3,7 +3,7 @@
 **Notice:** This extension is bundled with Visual Studio Code. It can be
 disabled but not uninstalled.
 
-## Features
+## Feature
 
 This extension provides the following Jupyter-related features for VS Code:
 

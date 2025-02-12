@@ -151,14 +151,14 @@
 	],
 	"dependencies": {
 		"@octokit/rest": "21.1.0",
-		"jsonc-parser": "^3.3.1",
-		"tunnel": "^0.0.6"
+		"jsonc-parser": "3.3.1",
+		"tunnel": "0.0.6"
 	},
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
 	"engines": {
-		"vscode": "^1.0.0"
+		"vscode": "1.0.0"
 	},
 	"icon": "images/icon.png",
 	"capabilities": {

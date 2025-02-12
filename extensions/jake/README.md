@@ -3,7 +3,7 @@
 **Notice:** This extension is bundled with Visual Studio Code. It can be
 disabled but not uninstalled.
 
-## Features
+## Feature
 
 This extension supports running [Jake](http://jakejs.com/) tasks defined in a
 `Jakefile.js` file as

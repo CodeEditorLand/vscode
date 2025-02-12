@@ -24,6 +24,6 @@
 		"typescript": "5.7.3"
 	},
 	"engines": {
-		"vscode": "^1.88.0"
+		"vscode": "1.88.0"
 	}
 }

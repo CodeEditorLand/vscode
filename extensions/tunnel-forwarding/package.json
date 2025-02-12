@@ -43,7 +43,7 @@
 		"@types/node": "22.x"
 	},
 	"engines": {
-		"vscode": "^1.82.0"
+		"vscode": "1.82.0"
 	},
 	"icon": "media/icon.png",
 	"capabilities": {
