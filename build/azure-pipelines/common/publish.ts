@@ -1,3 +1,4 @@
+// TODO: Error: Cannot process file ./Dependency/Microsoft/Dependency/Editor/build/azure-pipelines/common/publish.ts / @playform/eliminate
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.

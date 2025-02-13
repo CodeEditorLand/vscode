@@ -5,35 +5,27 @@
 import es from "event-stream";
 import postcss from "postcss";
 import File from "vinyl";
-
-export function gulpPostcss(
-	plugins: postcss.AcceptedPlugin[],
-	handleError?: (err: Error) => void,
-) {
-	const instance = postcss(plugins);
-
-	return es.map((file: File, callback: (error?: any, file?: any) => void) => {
-		if (file.isNull()) {
-			return callback(null, file);
-		}
-
-		if (file.isStream()) {
-			return callback(new Error("Streaming not supported"));
-		}
-
-		instance
-			.process(file.contents.toString(), { from: file.path })
-			.then((result) => {
-				file.contents = Buffer.from(result.css);
-				callback(null, file);
-			})
-			.catch((error) => {
-				if (handleError) {
-					handleError(error);
-					callback();
-				} else {
-					callback(error);
-				}
-			});
-	});
+export function gulpPostcss(plugins: postcss.AcceptedPlugin[], handleError?: (err: Error) => void) {
+    return es.map((file: File, callback: (error?: any, file?: any) => void) => {
+        if (file.isNull()) {
+            return callback(null, file);
+        }
+        if (file.isStream()) {
+            return callback(new Error("Streaming not supported"));
+        }
+        postcss(plugins).process(file.contents.toString(), { from: file.path })
+            .then((result) => {
+            file.contents = Buffer.from(result.css);
+            callback(null, file);
+        })
+            .catch((error) => {
+            if (handleError) {
+                handleError(error);
+                callback();
+            }
+            else {
+                callback(error);
+            }
+        });
+    });
 }
