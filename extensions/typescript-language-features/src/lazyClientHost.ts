@@ -3,26 +3,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode";
-
-import { CommandManager } from "./commands/commandManager";
-import { ServiceConfigurationProvider } from "./configuration/configuration";
-import * as fileSchemes from "./configuration/fileSchemes";
-import {
-	isJsConfigOrTsConfigFileName,
-	standardLanguageDescriptions,
-} from "./configuration/languageDescription";
-import { IExperimentationTelemetryReporter } from "./experimentTelemetryReporter";
-import { Logger } from "./logging/logger";
-import { OngoingRequestCancellerFactory } from "./tsServer/cancellation";
-import { ILogDirectoryProvider } from "./tsServer/logDirectoryProvider";
-import { PluginManager } from "./tsServer/plugins";
-import { TsServerProcessFactory } from "./tsServer/server";
-import { ITypeScriptVersionProvider } from "./tsServer/versionProvider";
-import TypeScriptServiceClientHost from "./typeScriptServiceClientHost";
-import { ActiveJsTsEditorTracker } from "./ui/activeJsTsEditorTracker";
-import ManagedFileContextManager from "./ui/managedFileContext";
-import { Lazy, lazy } from "./utils/lazy";
+import * as vscode from 'vscode';
+import { CommandManager } from './commands/commandManager';
+import { IExperimentationTelemetryReporter } from './experimentTelemetryReporter';
+import { OngoingRequestCancellerFactory } from './tsServer/cancellation';
+import { ILogDirectoryProvider } from './tsServer/logDirectoryProvider';
+import { TsServerProcessFactory } from './tsServer/server';
+import { ITypeScriptVersionProvider } from './tsServer/versionProvider';
+import TypeScriptServiceClientHost from './typeScriptServiceClientHost';
+import { ActiveJsTsEditorTracker } from './ui/activeJsTsEditorTracker';
+import ManagedFileContextManager from './ui/managedFileContext';
+import { ServiceConfigurationProvider } from './configuration/configuration';
+import * as fileSchemes from './configuration/fileSchemes';
+import { standardLanguageDescriptions, isJsConfigOrTsConfigFileName } from './configuration/languageDescription';
+import { Lazy } from './utils/lazy';
+import { Logger } from './logging/logger';
+import { PluginManager } from './tsServer/plugins';
 
 export function createLazyClientHost(
 	context: vscode.ExtensionContext,
@@ -43,7 +39,7 @@ export function createLazyClientHost(
 	},
 	onCompletionAccepted: (item: vscode.CompletionItem) => void,
 ): Lazy<TypeScriptServiceClientHost> {
-	return lazy(() => {
+	return new Lazy(() => {
 		const clientHost = new TypeScriptServiceClientHost(
 			standardLanguageDescriptions,
 			context,

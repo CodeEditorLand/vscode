@@ -524,6 +524,8 @@
 		"--vscode-panelTitle-activeForeground",
 		"--vscode-panelTitle-border",
 		"--vscode-panelTitle-inactiveForeground",
+		"--vscode-panelTitleBadge-background",
+		"--vscode-panelTitleBadge-foreground",
 		"--vscode-peekView-border",
 		"--vscode-peekViewEditor-background",
 		"--vscode-peekViewEditor-matchHighlightBackground",
@@ -913,6 +915,8 @@
 		"--test-bar-width",
 		"--widget-color",
 		"--text-link-decoration",
-		"--vscode-action-item-auto-timeout"
+		"--vscode-action-item-auto-timeout",
+		"--monaco-editor-warning-decoration",
+		"--animation-opacity"
 	]
 }

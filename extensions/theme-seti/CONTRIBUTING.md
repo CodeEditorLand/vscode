@@ -13,10 +13,8 @@ be hosted by a web server. The easiest way is to open the file with the
 
 ## Updating icons
 
--   Make a PR against https://github.com/jesseweed/seti-ui` with your icon
-    changes.
--   Once accepted there, ping us or make a PR yourself that updates the theme
-    and font here
+- Make a PR against https://github.com/jesseweed/seti-ui with your icon changes.
+- Once accepted there, ping us or make a PR yourself that updates the theme and font here
 
 To adopt the latest changes from https://github.com/jesseweed/seti-ui:
 

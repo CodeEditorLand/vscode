@@ -2,17 +2,366 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { spawn } from "child_process";
-import { promises as fs } from "fs";
-import path from "path";
-import { rgPath } from "@vscode/ripgrep";
-import byline from "byline";
-import Parser from "tree-sitter";
-const { typescript } = require("tree-sitter-typescript");
-const product = require("../../product.json");
-type NlsString = {
-    value: string;
-    nlsKey: string;
+
+import { spawn } from 'child_process';
+import { promises as fs } from 'fs';
+import path from 'path';
+import byline from 'byline';
+import { rgPath } from '@vscode/ripgrep';
+import Parser from 'tree-sitter';
+const { typescript } = require('tree-sitter-typescript');
+const product = require('../../product.json');
+const packageJson = require('../../package.json');
+
+type NlsString = { value: string; nlsKey: string };
+
+function isNlsString(value: string | NlsString | undefined): value is NlsString {
+	return value ? typeof value !== 'string' : false;
+}
+
+function isStringArray(value: (string | NlsString)[]): value is string[] {
+	return !value.some(s => isNlsString(s));
+}
+
+function isNlsStringArray(value: (string | NlsString)[]): value is NlsString[] {
+	return value.every(s => isNlsString(s));
+}
+
+interface Category {
+	readonly moduleName: string;
+	readonly name: NlsString;
+}
+
+enum PolicyType {
+	StringEnum
+}
+
+interface Policy {
+	readonly category: Category;
+	readonly minimumVersion: string;
+	renderADMX(regKey: string): string[];
+	renderADMLStrings(translations?: LanguageTranslations): string[];
+	renderADMLPresentation(): string;
+}
+
+function renderADMLString(prefix: string, moduleName: string, nlsString: NlsString, translations?: LanguageTranslations): string {
+	let value: string | undefined;
+
+	if (translations) {
+		const moduleTranslations = translations[moduleName];
+
+		if (moduleTranslations) {
+			value = moduleTranslations[nlsString.nlsKey];
+		}
+	}
+
+	if (!value) {
+		value = nlsString.value;
+	}
+
+	return `<string id="${prefix}_${nlsString.nlsKey.replace(/\./g, '_')}">${value}</string>`;
+}
+
+abstract class BasePolicy implements Policy {
+	constructor(
+		protected policyType: PolicyType,
+		protected name: string,
+		readonly category: Category,
+		readonly minimumVersion: string,
+		protected description: NlsString,
+		protected moduleName: string,
+	) { }
+
+	protected renderADMLString(nlsString: NlsString, translations?: LanguageTranslations): string {
+		return renderADMLString(this.name, this.moduleName, nlsString, translations);
+	}
+
+	renderADMX(regKey: string) {
+		return [
+			`<policy name="${this.name}" class="Both" displayName="$(string.${this.name})" explainText="$(string.${this.name}_${this.description.nlsKey.replace(/\./g, '_')})" key="Software\\Policies\\Microsoft\\${regKey}" presentation="$(presentation.${this.name})">`,
+			`	<parentCategory ref="${this.category.name.nlsKey}" />`,
+			`	<supportedOn ref="Supported_${this.minimumVersion.replace(/\./g, '_')}" />`,
+			`	<elements>`,
+			...this.renderADMXElements(),
+			`	</elements>`,
+			`</policy>`
+		];
+	}
+
+	protected abstract renderADMXElements(): string[];
+
+	renderADMLStrings(translations?: LanguageTranslations) {
+		return [
+			`<string id="${this.name}">${this.name}</string>`,
+			this.renderADMLString(this.description, translations)
+		];
+	}
+
+	renderADMLPresentation(): string {
+		return `<presentation id="${this.name}">${this.renderADMLPresentationContents()}</presentation>`;
+	}
+
+	protected abstract renderADMLPresentationContents(): string;
+}
+
+class BooleanPolicy extends BasePolicy {
+
+	static from(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		settingNode: Parser.SyntaxNode
+	): BooleanPolicy | undefined {
+		const type = getStringProperty(settingNode, 'type');
+
+		if (type !== 'boolean') {
+			return undefined;
+		}
+
+		return new BooleanPolicy(name, category, minimumVersion, description, moduleName);
+	}
+
+	private constructor(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+	) {
+		super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+	}
+
+	protected renderADMXElements(): string[] {
+		return [
+			`<boolean id="${this.name}" valueName="${this.name}">`,
+			`	<trueValue><decimal value="1" /></trueValue><falseValue><decimal value="0" /></falseValue>`,
+			`</boolean>`
+		];
+	}
+
+	renderADMLPresentationContents() {
+		return `<checkBox refId="${this.name}">${this.name}</checkBox>`;
+	}
+}
+
+class IntPolicy extends BasePolicy {
+
+	static from(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		settingNode: Parser.SyntaxNode
+	): IntPolicy | undefined {
+		const type = getStringProperty(settingNode, 'type');
+
+		if (type !== 'number') {
+			return undefined;
+		}
+
+		const defaultValue = getIntProperty(settingNode, 'default');
+
+		if (typeof defaultValue === 'undefined') {
+			throw new Error(`Missing required 'default' property.`);
+		}
+
+		return new IntPolicy(name, category, minimumVersion, description, moduleName, defaultValue);
+	}
+
+	private constructor(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		protected readonly defaultValue: number,
+	) {
+		super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+	}
+
+	protected renderADMXElements(): string[] {
+		return [
+			`<decimal id="${this.name}" valueName="${this.name}" />`
+			// `<decimal id="Quarantine_PurgeItemsAfterDelay" valueName="PurgeItemsAfterDelay" minValue="0" maxValue="10000000" />`
+		];
+	}
+
+	renderADMLPresentationContents() {
+		return `<decimalTextBox refId="${this.name}" defaultValue="${this.defaultValue}">${this.name}</decimalTextBox>`;
+	}
+}
+
+class StringPolicy extends BasePolicy {
+
+	static from(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		settingNode: Parser.SyntaxNode
+	): StringPolicy | undefined {
+		const type = getStringProperty(settingNode, 'type');
+
+		if (type !== 'string') {
+			return undefined;
+		}
+
+		return new StringPolicy(name, category, minimumVersion, description, moduleName);
+	}
+
+	private constructor(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+	) {
+		super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+	}
+
+	protected renderADMXElements(): string[] {
+		return [`<text id="${this.name}" valueName="${this.name}" required="true" />`];
+	}
+
+	renderADMLPresentationContents() {
+		return `<textBox refId="${this.name}"><label>${this.name}:</label></textBox>`;
+	}
+}
+
+class ObjectPolicy extends BasePolicy {
+
+	static from(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		settingNode: Parser.SyntaxNode
+	): ObjectPolicy | undefined {
+		const type = getStringProperty(settingNode, 'type');
+
+		if (type !== 'object' && type !== 'array') {
+			return undefined;
+		}
+
+		return new ObjectPolicy(name, category, minimumVersion, description, moduleName);
+	}
+
+	private constructor(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+	) {
+		super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+	}
+
+	protected renderADMXElements(): string[] {
+		return [`<multiText id="${this.name}" valueName="${this.name}" required="true" />`];
+	}
+
+	renderADMLPresentationContents() {
+		return `<multiTextBox refId="${this.name}" />`;
+	}
+}
+
+class StringEnumPolicy extends BasePolicy {
+
+	static from(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		settingNode: Parser.SyntaxNode
+	): StringEnumPolicy | undefined {
+		const type = getStringProperty(settingNode, 'type');
+
+		if (type !== 'string') {
+			return undefined;
+		}
+
+		const enum_ = getStringArrayProperty(settingNode, 'enum');
+
+		if (!enum_) {
+			return undefined;
+		}
+
+		if (!isStringArray(enum_)) {
+			throw new Error(`Property 'enum' should not be localized.`);
+		}
+
+		const enumDescriptions = getStringArrayProperty(settingNode, 'enumDescriptions');
+
+		if (!enumDescriptions) {
+			throw new Error(`Missing required 'enumDescriptions' property.`);
+		} else if (!isNlsStringArray(enumDescriptions)) {
+			throw new Error(`Property 'enumDescriptions' should be localized.`);
+		}
+
+		return new StringEnumPolicy(name, category, minimumVersion, description, moduleName, enum_, enumDescriptions);
+	}
+
+	private constructor(
+		name: string,
+		category: Category,
+		minimumVersion: string,
+		description: NlsString,
+		moduleName: string,
+		protected enum_: string[],
+		protected enumDescriptions: NlsString[],
+	) {
+		super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+	}
+
+	protected renderADMXElements(): string[] {
+		return [
+			`<enum id="${this.name}" valueName="${this.name}">`,
+			...this.enum_.map((value, index) => `	<item displayName="$(string.${this.name}_${this.enumDescriptions[index].nlsKey})"><value><string>${value}</string></value></item>`),
+			`</enum>`
+		];
+	}
+
+	renderADMLStrings(translations?: LanguageTranslations) {
+		return [
+			...super.renderADMLStrings(translations),
+			...this.enumDescriptions.map(e => this.renderADMLString(e, translations))
+		];
+	}
+
+	renderADMLPresentationContents() {
+		return `<dropdownList refId="${this.name}" />`;
+	}
+}
+
+interface QType<T> {
+	Q: string;
+	value(matches: Parser.QueryMatch[]): T | undefined;
+}
+
+const IntQ: QType<number> = {
+	Q: `(number) @value`,
+
+	value(matches: Parser.QueryMatch[]): number | undefined {
+		const match = matches[0];
+
+		if (!match) {
+			return undefined;
+		}
+
+		const value = match.captures.filter(c => c.name === 'value')[0]?.node.text;
+
+		if (!value) {
+			throw new Error(`Missing required 'value' property.`);
+		}
+
+		return parseInt(value);
+	}
 };
 function isNlsString(value: string | NlsString | undefined): value is NlsString {
     return value ? typeof value !== "string" : false;

@@ -3,61 +3,20 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as cp from "child_process";
-import { EventEmitter } from "events";
-import { exists, promises as fs, realpath } from "fs";
-import * as os from "os";
-import * as path from "path";
-import { StringDecoder } from "string_decoder";
-import { fileURLToPath } from "url";
-import * as iconv from "@vscode/iconv-lite-umd";
-import * as byline from "byline";
-import * as filetype from "file-type";
-import {
-	CancellationError,
-	CancellationToken,
-	ConfigurationChangeEvent,
-	LogOutputChannel,
-	Progress,
-	Uri,
-	workspace,
-} from "vscode";
-import which from "which";
-
-import {
-	Branch,
-	Change,
-	CommitOptions,
-	ForcePushMode,
-	GitErrorCodes,
-	InitOptions,
-	LogOptions,
-	Ref,
-	RefQuery,
-	RefType,
-	Remote,
-	Status,
-} from "./api/git";
-import { detectEncoding } from "./encoding";
-import {
-	assign,
-	detectUnicodeEncoding,
-	dispose,
-	Encoding,
-	groupBy,
-	IDisposable,
-	isDescendant,
-	isMacintosh,
-	isWindows,
-	Limiter,
-	mkdirp,
-	onceEvent,
-	pathEquals,
-	readBytes,
-	splitInChunks,
-	toDisposable,
-	Versions,
-} from "./util";
+import { promises as fs, exists, realpath } from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import * as cp from 'child_process';
+import { fileURLToPath } from 'url';
+import which from 'which';
+import { EventEmitter } from 'events';
+import * as iconv from '@vscode/iconv-lite-umd';
+import * as filetype from 'file-type';
+import { assign, groupBy, IDisposable, toDisposable, dispose, mkdirp, readBytes, detectUnicodeEncoding, Encoding, onceEvent, splitInChunks, Limiter, Versions, isWindows, pathEquals, isMacintosh, isDescendant } from './util';
+import { CancellationError, CancellationToken, ConfigurationChangeEvent, LogOutputChannel, Progress, Uri, workspace } from 'vscode';
+import { Ref, RefType, Branch, Remote, ForcePushMode, GitErrorCodes, LogOptions, Change, Status, CommitOptions, RefQuery, InitOptions } from './api/git';
+import * as byline from 'byline';
+import { StringDecoder } from 'string_decoder';
 
 // https://github.com/microsoft/vscode/issues/65693
 const MAX_CLI_LENGTH = 30000;
@@ -1681,24 +1640,6 @@ export class Repository {
 		return result.stdout.split("\n").filter((entry) => !!entry);
 	}
 
-	async bufferString(
-		object: string,
-		encoding: string = "utf8",
-		autoGuessEncoding = false,
-		candidateGuessEncodings: string[] = [],
-	): Promise<string> {
-		const stdout = await this.buffer(object);
-
-		if (autoGuessEncoding) {
-			encoding =
-				detectEncoding(stdout, candidateGuessEncodings) || encoding;
-		}
-
-		encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
-
-		return iconv.decode(stdout, encoding);
-	}
-
 	async buffer(object: string): Promise<Buffer> {
 		const child = this.stream(["show", "--textconv", object]);
 
@@ -1766,7 +1707,7 @@ export class Repository {
 		}
 
 		const { mode, object, size } = elements[0];
-		return { mode, object, size: parseInt(size) };
+		return { mode, object, size: parseInt(size) || 0 };
 	}
 
 	async lstree(treeish: string, path?: string): Promise<LsTreeElement[]> {
@@ -2356,22 +2297,8 @@ export class Repository {
 		await this.exec(["merge", "--abort"]);
 	}
 
-	async mergeContinue(): Promise<void> {
-		const args = ["merge", "--continue"];
-
-		try {
-			await this.exec(args, { env: { GIT_EDITOR: "true" } });
-		} catch (commitErr) {
-			await this.handleCommitError(commitErr);
-		}
-	}
-
-	async tag(options: {
-		name: string;
-		message?: string;
-		ref?: string;
-	}): Promise<void> {
-		let args = ["tag"];
+	async tag(options: { name: string; message?: string; ref?: string }): Promise<void> {
+		let args = ['tag'];
 
 		if (options.message) {
 			args = [...args, "-a", options.name, "-m", options.message];

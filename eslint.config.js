@@ -232,17 +232,16 @@ export default tseslint.config(
 					"message": "Use Array<...> for arrays of union types.",
 				},
 			],
-			"local/vscode-dts-create-func": "warn",
-			"local/vscode-dts-literal-or-types": "warn",
-			"local/vscode-dts-string-type-literals": "warn",
-			"local/vscode-dts-interface-naming": "warn",
-			"local/vscode-dts-cancellation": "warn",
-			"local/vscode-dts-use-export": "warn",
-			"local/vscode-dts-use-thenable": "warn",
-			"local/vscode-dts-region-comments": "warn",
-			"local/vscode-dts-vscode-in-comments": "warn",
-			"local/vscode-dts-provider-naming": [
-				"warn",
+			'local/vscode-dts-create-func': 'warn',
+			'local/vscode-dts-literal-or-types': 'warn',
+			'local/vscode-dts-string-type-literals': 'warn',
+			'local/vscode-dts-interface-naming': 'warn',
+			'local/vscode-dts-cancellation': 'warn',
+			'local/vscode-dts-use-export': 'warn',
+			'local/vscode-dts-use-thenable': 'warn',
+			'local/vscode-dts-vscode-in-comments': 'warn',
+			'local/vscode-dts-provider-naming': [
+				'warn',
 				{
 					"allowed": [
 						"FileSystemProvider",

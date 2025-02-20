@@ -67,43 +67,57 @@ function wait(stream: es.ThroughStream): Promise<void> {
         stream.on("error", (err: any) => e(err));
     });
 }
-(async (): Promise<void> => {
-    const files: string[] = [];
-    const options = (compressed: boolean) => ({
-        account: process.env.AZURE_STORAGE_ACCOUNT,
-        credential,
-        container: process.env.VSCODE_QUALITY,
-        prefix: process.env["BUILD_SOURCEVERSION"]
-            + "/",
-        contentSettings: {
-            contentEncoding: compressed ? "gzip" : undefined,
-            cacheControl: "max-age=31536000, public",
-        },
-    });
-    const all = vfs
-        .src("**", { cwd: "../vscode-web", base: "../vscode-web", dot: true })
-        .pipe(filter((f) => !f.isDirectory()));
-    console.log(`Uploading files to CDN...`); // debug
-    await wait(es.merge(all
-        .pipe(filter((f) => MimeTypesToCompress.has(mime.lookup(f.path))))
-        .pipe(gzip({ append: false }))
-        .pipe(azure.upload(options(true))), all
-        .pipe(filter((f) => !MimeTypesToCompress.has(mime.lookup(f.path))))
-        .pipe(azure.upload(options(false)))).pipe(es.through(function (f) {
-        console.log("Uploaded:", f.relative);
-        files.push(f.relative);
-        this.emit("data", f);
-    })));
-    console.log(`Uploading: files.txt (${files.length} files)`); // debug
-    await wait(es
-        .readArray([new Vinyl({
-            path: "files.txt",
-            contents: Buffer.from(files.join("\n")),
-            stat: { mode: 0o666 } as any,
-        })])
-        .pipe(gzip({ append: false }))
-        .pipe(azure.upload(options(true))));
-})().catch((err) => {
-    console.error(err);
-    process.exit(1);
+
+async function main(): Promise<void> {
+	const files: string[] = [];
+	const options = (compressed: boolean) => ({
+		account: process.env.AZURE_STORAGE_ACCOUNT,
+		credential,
+		container: '$web',
+		prefix: `${process.env.VSCODE_QUALITY}/${commit}/`,
+		contentSettings: {
+			contentEncoding: compressed ? 'gzip' : undefined,
+			cacheControl: 'max-age=31536000, public'
+		}
+	});
+
+	const all = vfs.src('**', { cwd: '../vscode-web', base: '../vscode-web', dot: true })
+		.pipe(filter(f => !f.isDirectory()));
+
+	const compressed = all
+		.pipe(filter(f => MimeTypesToCompress.has(mime.lookup(f.path))))
+		.pipe(gzip({ append: false }))
+		.pipe(azure.upload(options(true)));
+
+	const uncompressed = all
+		.pipe(filter(f => !MimeTypesToCompress.has(mime.lookup(f.path))))
+		.pipe(azure.upload(options(false)));
+
+	const out = es.merge(compressed, uncompressed)
+		.pipe(es.through(function (f) {
+			console.log('Uploaded:', f.relative);
+			files.push(f.relative);
+			this.emit('data', f);
+		}));
+
+	console.log(`Uploading files to CDN...`); // debug
+	await wait(out);
+
+	const listing = new Vinyl({
+		path: 'files.txt',
+		contents: Buffer.from(files.join('\n')),
+		stat: { mode: 0o666 } as any
+	});
+
+	const filesOut = es.readArray([listing])
+		.pipe(gzip({ append: false }))
+		.pipe(azure.upload(options(true)));
+
+	console.log(`Uploading: files.txt (${files.length} files)`); // debug
+	await wait(filesOut);
+}
+
+main().catch(err => {
+	console.error(err);
+	process.exit(1);
 });

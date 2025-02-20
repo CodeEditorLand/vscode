@@ -167,7 +167,7 @@ export class ChatSetupContribution extends Disposable implements IWorkbenchContr
 					f1: true,
 					precondition: chatSetupTriggerContext,
 					menu: {
-						id: MenuId.ChatCommandCenter,
+						id: MenuId.ChatTitleBarMenu,
 						group: 'a_last',
 						order: 1,
 						when: chatSetupTriggerContext
@@ -203,7 +203,7 @@ export class ChatSetupContribution extends Disposable implements IWorkbenchContr
 					category: CHAT_CATEGORY,
 					precondition: ChatContextKeys.Setup.installed.negate(),
 					menu: {
-						id: MenuId.ChatCommandCenter,
+						id: MenuId.ChatTitleBarMenu,
 						group: 'z_hide',
 						order: 1,
 						when: ChatContextKeys.Setup.installed.negate()
@@ -246,7 +246,7 @@ export class ChatSetupContribution extends Disposable implements IWorkbenchContr
 						ChatContextKeys.Setup.limited,
 					),
 					menu: {
-						id: MenuId.ChatCommandCenter,
+						id: MenuId.ChatTitleBarMenu,
 						group: 'a_first',
 						order: 1,
 						when: ContextKeyExpr.or(
@@ -338,7 +338,7 @@ export class ChatSetupContribution extends Disposable implements IWorkbenchContr
 					properties: {
 						'chat.agent.maxRequests': {
 							type: 'number',
-							description: localize('chat.agent.maxRequests', "The maximum number of requests to allow Copilot Edits to use in agent mode."),
+							markdownDescription: localize('chat.agent.maxRequests', "The maximum number of requests to allow Copilot Edits to use per-turn in agent mode. When the limit is reached, Copilot will ask the user to confirm that it should keep working. \n\n> **Note**: For users on the Copilot Free plan, note that each agent mode request currently uses one chat request."),
 							default: defaultValue,
 							tags: ['experimental']
 						},
@@ -1158,11 +1158,11 @@ class ChatSetupWelcomeContent extends Disposable {
 		});
 
 		if (useEnterpriseProvider) {
-			await this.configurationService.updateValue(defaultChat.providerSetting, defaultChat.enterpriseProviderId, ConfigurationTarget.USER);
 			const success = await this.handleEnterpriseInstance();
 			if (!success) {
 				return; // not properly configured, abort
 			}
+			await this.configurationService.updateValue(defaultChat.providerSetting, defaultChat.enterpriseProviderId, ConfigurationTarget.USER);
 		} else {
 			await this.configurationService.updateValue(defaultChat.providerSetting, undefined, ConfigurationTarget.USER);
 			await this.configurationService.updateValue(defaultChat.providerUriSetting, undefined, ConfigurationTarget.USER);

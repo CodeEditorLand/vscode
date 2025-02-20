@@ -441,82 +441,58 @@ class DeclarationData {
  * 5. Prepare and apply edits
  */
 class Mangler {
-	projectPath;
-	log;
-	config;
-	allClassDataByKey = new Map();
-	allExportedSymbols = new Set();
-	renameWorkerPool;
-	constructor(projectPath, log = () => {}, config) {
-		this.projectPath = projectPath;
-		this.log = log;
-		this.config = config;
-		this.renameWorkerPool = workerpool_1.default.pool(
-			path_1.default.join(__dirname, "renameWorker.js"),
-			{
-				maxWorkers: 1,
-				minWorkers: "max",
-			},
-		);
-	}
-	async computeNewFileContents(strictImplicitPublicHandling) {
-		const service = typescript_1.default.createLanguageService(
-			new staticLanguageServiceHost_1.StaticLanguageServiceHost(
-				this.projectPath,
-			),
-		);
-		// STEP:
-		// - Find all classes and their field info.
-		// - Find exported symbols.
-		const fileIdents = new ShortIdent("$");
-		const visit = (node) => {
-			if (this.config.manglePrivateFields) {
-				if (
-					typescript_1.default.isClassDeclaration(node) ||
-					typescript_1.default.isClassExpression(node)
-				) {
-					const anchor = node.name ?? node;
-					const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
-					if (this.allClassDataByKey.has(key)) {
-						throw new Error("DUPE?");
-					}
-					this.allClassDataByKey.set(
-						key,
-						new ClassData(node.getSourceFile().fileName, node),
-					);
-				}
-			}
-			if (this.config.mangleExports) {
-				// Find exported classes, functions, and vars
-				if (
-					// Exported class
-					(typescript_1.default.isClassDeclaration(node) &&
-						hasModifier(
-							node,
-							typescript_1.default.SyntaxKind.ExportKeyword,
-						) &&
-						node.name) ||
-					// Exported function
-					(typescript_1.default.isFunctionDeclaration(node) &&
-						typescript_1.default.isSourceFile(node.parent) &&
-						hasModifier(
-							node,
-							typescript_1.default.SyntaxKind.ExportKeyword,
-						) &&
-						node.name &&
-						node.body) || // On named function and not on the overload
-					// Exported variable
-					(typescript_1.default.isVariableDeclaration(node) &&
-						hasModifier(
-							node.parent.parent,
-							typescript_1.default.SyntaxKind.ExportKeyword,
-						) && // Variable statement is exported
-						typescript_1.default.isSourceFile(
-							node.parent.parent.parent,
-						))
-					// Disabled for now because we need to figure out how to handle
-					// enums that are used in monaco or extHost interfaces.
-					/* || (
+    projectPath;
+    log;
+    config;
+    allClassDataByKey = new Map();
+    allExportedSymbols = new Set();
+    renameWorkerPool;
+    constructor(projectPath, log = () => { }, config) {
+        this.projectPath = projectPath;
+        this.log = log;
+        this.config = config;
+        this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
+            maxWorkers: 4,
+            minWorkers: 'max'
+        });
+    }
+    async computeNewFileContents(strictImplicitPublicHandling) {
+        const service = typescript_1.default.createLanguageService(new staticLanguageServiceHost_1.StaticLanguageServiceHost(this.projectPath));
+        // STEP:
+        // - Find all classes and their field info.
+        // - Find exported symbols.
+        const fileIdents = new ShortIdent('$');
+        const visit = (node) => {
+            if (this.config.manglePrivateFields) {
+                if (typescript_1.default.isClassDeclaration(node) || typescript_1.default.isClassExpression(node)) {
+                    const anchor = node.name ?? node;
+                    const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
+                    if (this.allClassDataByKey.has(key)) {
+                        throw new Error('DUPE?');
+                    }
+                    this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
+                }
+            }
+            if (this.config.mangleExports) {
+                // Find exported classes, functions, and vars
+                if ((
+                // Exported class
+                typescript_1.default.isClassDeclaration(node)
+                    && hasModifier(node, typescript_1.default.SyntaxKind.ExportKeyword)
+                    && node.name) || (
+                // Exported function
+                typescript_1.default.isFunctionDeclaration(node)
+                    && typescript_1.default.isSourceFile(node.parent)
+                    && hasModifier(node, typescript_1.default.SyntaxKind.ExportKeyword)
+                    && node.name && node.body // On named function and not on the overload
+                ) || (
+                // Exported variable
+                typescript_1.default.isVariableDeclaration(node)
+                    && hasModifier(node.parent.parent, typescript_1.default.SyntaxKind.ExportKeyword) // Variable statement is exported
+                    && typescript_1.default.isSourceFile(node.parent.parent.parent))
+                // Disabled for now because we need to figure out how to handle
+                // enums that are used in monaco or extHost interfaces.
+                /* || (
                     // Exported enum
                     ts.isEnumDeclaration(node)
                     && ts.isSourceFile(node.parent)

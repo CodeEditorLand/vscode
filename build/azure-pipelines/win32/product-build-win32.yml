@@ -108,10 +108,14 @@ steps:
       condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
     - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
-          - powershell: node build/azure-pipelines/distro/mixin-npm
-            condition:
-                and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
-            displayName: Mixin distro node modules
+      - powershell: |
+          . build/azure-pipelines/win32/exec.ps1
+          $ErrorActionPreference = "Stop"
+          $PackageJson = Get-Content -Raw -Path ..\VSCode-win32-$(VSCODE_ARCH)\resources\app\package.json | ConvertFrom-Json
+          $Version = $PackageJson.version
+          echo "##vso[task.setvariable variable=VSCODE_VERSION]$Version"
+        condition: succeededOrFailed()
+        displayName: Get product version
 
     - powershell: |
           . build/azure-pipelines/win32/exec.ps1

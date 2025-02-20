@@ -96,63 +96,39 @@ function src(base, maps = `${base}/**/*.map`) {
 	);
 }
 function main() {
-	const sources = [];
-	// vscode client maps (default)
-	if (!base) {
-		const vs = src("out-vscode-min"); // client source-maps only
-		sources.push(vs);
-		const productionDependencies = (0,
-		dependencies_1.getProductionDependencies)(root);
-		const productionDependenciesSrc = productionDependencies
-			.map((d) => path_1.default.relative(root, d))
-			.map((d) => `./${d}/**/*.map`);
-		const nodeModules = vinyl_fs_1.default
-			.src(productionDependenciesSrc, { base: "." })
-			.pipe(
-				util.cleanNodeModules(
-					path_1.default.join(root, "build", ".moduleignore"),
-				),
-			)
-			.pipe(
-				util.cleanNodeModules(
-					path_1.default.join(
-						root,
-						"build",
-						`.moduleignore.${process.platform}`,
-					),
-				),
-			);
-		sources.push(nodeModules);
-		const extensionsOut = vinyl_fs_1.default.src(
-			[".build/extensions/**/*.js.map", "!**/node_modules/**"],
-			{ base: ".build" },
-		);
-		sources.push(extensionsOut);
-	}
-	// specific client base/maps
-	else {
-		sources.push(src(base, maps));
-	}
-	return new Promise((c, e) => {
-		event_stream_1.default
-			.merge(...sources)
-			.pipe(
-				event_stream_1.default.through(function (data) {
-					console.log("Uploading Sourcemap", data.relative); // debug
-					this.emit("data", data);
-				}),
-			)
-			.pipe(
-				azure.upload({
-					account: process.env.AZURE_STORAGE_ACCOUNT,
-					credential,
-					container: "sourcemaps",
-					prefix: commit + "/",
-				}),
-			)
-			.on("end", () => c())
-			.on("error", (err) => e(err));
-	});
+    const sources = [];
+    // vscode client maps (default)
+    if (!base) {
+        const vs = src('out-vscode-min'); // client source-maps only
+        sources.push(vs);
+        const productionDependencies = (0, dependencies_1.getProductionDependencies)(root);
+        const productionDependenciesSrc = productionDependencies.map((d) => path_1.default.relative(root, d)).map((d) => `./${d}/**/*.map`);
+        const nodeModules = vinyl_fs_1.default.src(productionDependenciesSrc, { base: '.' })
+            .pipe(util.cleanNodeModules(path_1.default.join(root, 'build', '.moduleignore')))
+            .pipe(util.cleanNodeModules(path_1.default.join(root, 'build', `.moduleignore.${process.platform}`)));
+        sources.push(nodeModules);
+        const extensionsOut = vinyl_fs_1.default.src(['.build/extensions/**/*.js.map', '!**/node_modules/**'], { base: '.build' });
+        sources.push(extensionsOut);
+    }
+    // specific client base/maps
+    else {
+        sources.push(src(base, maps));
+    }
+    return new Promise((c, e) => {
+        event_stream_1.default.merge(...sources)
+            .pipe(event_stream_1.default.through(function (data) {
+            console.log('Uploading Sourcemap', data.relative); // debug
+            this.emit('data', data);
+        }))
+            .pipe(azure.upload({
+            account: process.env.AZURE_STORAGE_ACCOUNT,
+            credential,
+            container: '$web',
+            prefix: `sourcemaps/${commit}/`
+        }))
+            .on('end', () => c())
+            .on('error', (err) => e(err));
+    });
 }
 main().catch((err) => {
 	console.error(err);

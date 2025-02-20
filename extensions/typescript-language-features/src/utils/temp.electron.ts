@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
-
-import { lazy } from "./lazy";
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { Lazy } from './lazy';
 
 function makeRandomHexString(length: number): string {
 	const chars = [
@@ -36,12 +35,12 @@ function makeRandomHexString(length: number): string {
 	return result;
 }
 
-const rootTempDir = lazy(() => {
-	const filename = `vscode-typescript${process.platform !== "win32" && process.getuid ? process.getuid() : ""}`;
+const rootTempDir = new Lazy(() => {
+	const filename = `vscode-typescript${process.platform !== 'win32' && process.getuid ? process.getuid() : ''}`;
 	return path.join(os.tmpdir(), filename);
 });
 
-export const instanceTempDir = lazy(() => {
+export const instanceTempDir = new Lazy(() => {
 	const dir = path.join(rootTempDir.value, makeRandomHexString(20));
 	fs.mkdirSync(dir, { recursive: true });
 	return dir;

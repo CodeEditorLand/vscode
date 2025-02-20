@@ -613,231 +613,196 @@ class VinylScriptSnapshot extends ScriptSnapshot {
 	}
 }
 class LanguageServiceHost {
-	_cmdLine;
-	_projectPath;
-	_log;
-	_snapshots;
-	_filesInProject;
-	_filesAdded;
-	_dependencies;
-	_dependenciesRecomputeList;
-	_fileNameToDeclaredModule;
-	_projectVersion;
-	constructor(_cmdLine, _projectPath, _log) {
-		this._cmdLine = _cmdLine;
-		this._projectPath = _projectPath;
-		this._log = _log;
-		this._snapshots = Object.create(null);
-		this._filesInProject = new Set(_cmdLine.fileNames);
-		this._filesAdded = new Set();
-		this._dependencies = new utils.graph.Graph();
-		this._dependenciesRecomputeList = [];
-		this._fileNameToDeclaredModule = Object.create(null);
-		this._projectVersion = 1;
-	}
-	log(_s) {
-		// console.log(s);
-	}
-	trace(_s) {
-		// console.log(s);
-	}
-	error(s) {
-		console.error(s);
-	}
-	getCompilationSettings() {
-		return this._cmdLine.options;
-	}
-	getProjectVersion() {
-		return String(this._projectVersion);
-	}
-	getScriptFileNames() {
-		const res = Object.keys(this._snapshots).filter(
-			(path) =>
-				this._filesInProject.has(path) || this._filesAdded.has(path),
-		);
-		return res;
-	}
-	getScriptVersion(filename) {
-		filename = normalize(filename);
-		const result = this._snapshots[filename];
-		if (result) {
-			return result.getVersion();
-		}
-		return "UNKNWON_FILE_" + Math.random().toString(16).slice(2);
-	}
-	getScriptSnapshot(filename, resolve = true) {
-		filename = normalize(filename);
-		let result = this._snapshots[filename];
-		if (!result && resolve) {
-			try {
-				result = new VinylScriptSnapshot(
-					new vinyl_1.default({
-						path: filename,
-						contents: fs_1.default.readFileSync(filename),
-						base: this.getCompilationSettings().outDir,
-						stat: fs_1.default.statSync(filename),
-					}),
-				);
-				this.addScriptSnapshot(filename, result);
-			} catch (e) {
-				// ignore
-			}
-		}
-		return result;
-	}
-	static _declareModule = /declare\s+module\s+('|")(.+)\1/g;
-	addScriptSnapshot(filename, snapshot) {
-		this._projectVersion++;
-		filename = normalize(filename);
-		const old = this._snapshots[filename];
-		if (
-			!old &&
-			!this._filesInProject.has(filename) &&
-			!filename.endsWith(".d.ts")
-		) {
-			//                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-			//                                              not very proper!
-			this._filesAdded.add(filename);
-		}
-		if (!old || old.getVersion() !== snapshot.getVersion()) {
-			this._dependenciesRecomputeList.push(filename);
-			// (cheap) check for declare module
-			LanguageServiceHost._declareModule.lastIndex = 0;
-			let match;
-			while (
-				(match = LanguageServiceHost._declareModule.exec(
-					snapshot.getText(0, snapshot.getLength()),
-				))
-			) {
-				let declaredModules = this._fileNameToDeclaredModule[filename];
-				if (!declaredModules) {
-					this._fileNameToDeclaredModule[filename] = declaredModules =
-						[];
-				}
-				declaredModules.push(match[2]);
-			}
-		}
-		this._snapshots[filename] = snapshot;
-		return old;
-	}
-	removeScriptSnapshot(filename) {
-		this._filesInProject.delete(filename);
-		this._filesAdded.delete(filename);
-		this._projectVersion++;
-		filename = normalize(filename);
-		delete this._fileNameToDeclaredModule[filename];
-		return delete this._snapshots[filename];
-	}
-	getCurrentDirectory() {
-		return path_1.default.dirname(this._projectPath);
-	}
-	getDefaultLibFileName(options) {
-		return typescript_1.default.getDefaultLibFilePath(options);
-	}
-	directoryExists = typescript_1.default.sys.directoryExists;
-	getDirectories = typescript_1.default.sys.getDirectories;
-	fileExists = typescript_1.default.sys.fileExists;
-	readFile = typescript_1.default.sys.readFile;
-	readDirectory = typescript_1.default.sys.readDirectory;
-	// ---- dependency management
-	collectDependents(filename, target) {
-		while (this._dependenciesRecomputeList.length) {
-			this._processFile(this._dependenciesRecomputeList.pop());
-		}
-		filename = normalize(filename);
-		const node = this._dependencies.lookup(filename);
-		if (node) {
-			node.incoming.forEach((entry) => target.push(entry.data));
-		}
-	}
-	hasCyclicDependency() {
-		// Ensure dependencies are up to date
-		while (this._dependenciesRecomputeList.length) {
-			this._processFile(this._dependenciesRecomputeList.pop());
-		}
-		const cycle = this._dependencies.findCycle();
-		return cycle ? cycle.join(" -> ") : undefined;
-	}
-	_processFile(filename) {
-		if (filename.match(/.*\.d\.ts$/)) {
-			return;
-		}
-		filename = normalize(filename);
-		const snapshot = this.getScriptSnapshot(filename);
-		if (!snapshot) {
-			this._log("processFile", `Missing snapshot for: ${filename}`);
-			return;
-		}
-		const info = typescript_1.default.preProcessFile(
-			snapshot.getText(0, snapshot.getLength()),
-			true,
-		);
-		// (0) clear out old dependencies
-		this._dependencies.resetNode(filename);
-		// (1) ///-references
-		info.referencedFiles.forEach((ref) => {
-			const resolvedPath = path_1.default.resolve(
-				path_1.default.dirname(filename),
-				ref.fileName,
-			);
-			const normalizedPath = normalize(resolvedPath);
-			this._dependencies.inertEdge(filename, normalizedPath);
-		});
-		// (2) import-require statements
-		info.importedFiles.forEach((ref) => {
-			if (
-				!ref.fileName.startsWith(".") ||
-				path_1.default.extname(ref.fileName) === ""
-			) {
-				// node module?
-				return;
-			}
-			const stopDirname = normalize(this.getCurrentDirectory());
-			let dirname = filename;
-			let found = false;
-			while (!found && dirname.indexOf(stopDirname) === 0) {
-				dirname = path_1.default.dirname(dirname);
-				let resolvedPath = path_1.default.resolve(
-					dirname,
-					ref.fileName,
-				);
-				if (resolvedPath.endsWith(".js")) {
-					resolvedPath = resolvedPath.slice(0, -3);
-				}
-				const normalizedPath = normalize(resolvedPath);
-				if (this.getScriptSnapshot(normalizedPath + ".ts")) {
-					this._dependencies.inertEdge(
-						filename,
-						normalizedPath + ".ts",
-					);
-					found = true;
-				} else if (this.getScriptSnapshot(normalizedPath + ".d.ts")) {
-					this._dependencies.inertEdge(
-						filename,
-						normalizedPath + ".d.ts",
-					);
-					found = true;
-				} else if (this.getScriptSnapshot(normalizedPath + ".js")) {
-					this._dependencies.inertEdge(
-						filename,
-						normalizedPath + ".js",
-					);
-					found = true;
-				}
-			}
-			if (!found) {
-				for (const key in this._fileNameToDeclaredModule) {
-					if (
-						this._fileNameToDeclaredModule[key] &&
-						~this._fileNameToDeclaredModule[key].indexOf(
-							ref.fileName,
-						)
-					) {
-						this._dependencies.inertEdge(filename, key);
-					}
-				}
-			}
-		});
-	}
+    _cmdLine;
+    _projectPath;
+    _log;
+    _snapshots;
+    _filesInProject;
+    _filesAdded;
+    _dependencies;
+    _dependenciesRecomputeList;
+    _fileNameToDeclaredModule;
+    _projectVersion;
+    constructor(_cmdLine, _projectPath, _log) {
+        this._cmdLine = _cmdLine;
+        this._projectPath = _projectPath;
+        this._log = _log;
+        this._snapshots = Object.create(null);
+        this._filesInProject = new Set(_cmdLine.fileNames);
+        this._filesAdded = new Set();
+        this._dependencies = new utils.graph.Graph();
+        this._dependenciesRecomputeList = [];
+        this._fileNameToDeclaredModule = Object.create(null);
+        this._projectVersion = 1;
+    }
+    log(_s) {
+        // console.log(s);
+    }
+    trace(_s) {
+        // console.log(s);
+    }
+    error(s) {
+        console.error(s);
+    }
+    getCompilationSettings() {
+        return this._cmdLine.options;
+    }
+    getProjectVersion() {
+        return String(this._projectVersion);
+    }
+    getScriptFileNames() {
+        const res = Object.keys(this._snapshots).filter(path => this._filesInProject.has(path) || this._filesAdded.has(path));
+        return res;
+    }
+    getScriptVersion(filename) {
+        filename = normalize(filename);
+        const result = this._snapshots[filename];
+        if (result) {
+            return result.getVersion();
+        }
+        return 'UNKNWON_FILE_' + Math.random().toString(16).slice(2);
+    }
+    getScriptSnapshot(filename, resolve = true) {
+        filename = normalize(filename);
+        let result = this._snapshots[filename];
+        if (!result && resolve) {
+            try {
+                result = new VinylScriptSnapshot(new vinyl_1.default({
+                    path: filename,
+                    contents: fs_1.default.readFileSync(filename),
+                    base: this.getCompilationSettings().outDir,
+                    stat: fs_1.default.statSync(filename)
+                }));
+                this.addScriptSnapshot(filename, result);
+            }
+            catch (e) {
+                // ignore
+            }
+        }
+        return result;
+    }
+    static _declareModule = /declare\s+module\s+('|")(.+)\1/g;
+    addScriptSnapshot(filename, snapshot) {
+        this._projectVersion++;
+        filename = normalize(filename);
+        const old = this._snapshots[filename];
+        if (!old && !this._filesInProject.has(filename) && !filename.endsWith('.d.ts')) {
+            //                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+            //                                              not very proper!
+            this._filesAdded.add(filename);
+        }
+        if (!old || old.getVersion() !== snapshot.getVersion()) {
+            this._dependenciesRecomputeList.push(filename);
+            // (cheap) check for declare module
+            LanguageServiceHost._declareModule.lastIndex = 0;
+            let match;
+            while ((match = LanguageServiceHost._declareModule.exec(snapshot.getText(0, snapshot.getLength())))) {
+                let declaredModules = this._fileNameToDeclaredModule[filename];
+                if (!declaredModules) {
+                    this._fileNameToDeclaredModule[filename] = declaredModules = [];
+                }
+                declaredModules.push(match[2]);
+            }
+        }
+        this._snapshots[filename] = snapshot;
+        return old;
+    }
+    removeScriptSnapshot(filename) {
+        this._filesInProject.delete(filename);
+        this._filesAdded.delete(filename);
+        this._projectVersion++;
+        filename = normalize(filename);
+        delete this._fileNameToDeclaredModule[filename];
+        return delete this._snapshots[filename];
+    }
+    getCurrentDirectory() {
+        return path_1.default.dirname(this._projectPath);
+    }
+    getDefaultLibFileName(options) {
+        return typescript_1.default.getDefaultLibFilePath(options);
+    }
+    directoryExists = typescript_1.default.sys.directoryExists;
+    getDirectories = typescript_1.default.sys.getDirectories;
+    fileExists = typescript_1.default.sys.fileExists;
+    readFile = typescript_1.default.sys.readFile;
+    readDirectory = typescript_1.default.sys.readDirectory;
+    // ---- dependency management
+    collectDependents(filename, target) {
+        while (this._dependenciesRecomputeList.length) {
+            this._processFile(this._dependenciesRecomputeList.pop());
+        }
+        filename = normalize(filename);
+        const node = this._dependencies.lookup(filename);
+        if (node) {
+            node.incoming.forEach(entry => target.push(entry.data));
+        }
+    }
+    hasCyclicDependency() {
+        // Ensure dependencies are up to date
+        while (this._dependenciesRecomputeList.length) {
+            this._processFile(this._dependenciesRecomputeList.pop());
+        }
+        const cycle = this._dependencies.findCycle();
+        return cycle
+            ? cycle.join(' -> ')
+            : undefined;
+    }
+    _processFile(filename) {
+        if (filename.match(/.*\.d\.ts$/)) {
+            return;
+        }
+        filename = normalize(filename);
+        const snapshot = this.getScriptSnapshot(filename);
+        if (!snapshot) {
+            this._log('processFile', `Missing snapshot for: ${filename}`);
+            return;
+        }
+        const info = typescript_1.default.preProcessFile(snapshot.getText(0, snapshot.getLength()), true);
+        // (0) clear out old dependencies
+        this._dependencies.resetNode(filename);
+        // (1) ///-references
+        info.referencedFiles.forEach(ref => {
+            const resolvedPath = path_1.default.resolve(path_1.default.dirname(filename), ref.fileName);
+            const normalizedPath = normalize(resolvedPath);
+            this._dependencies.inertEdge(filename, normalizedPath);
+        });
+        // (2) import-require statements
+        info.importedFiles.forEach(ref => {
+            if (!ref.fileName.startsWith('.')) {
+                // node module?
+                return;
+            }
+            const stopDirname = normalize(this.getCurrentDirectory());
+            let dirname = filename;
+            let found = false;
+            while (!found && dirname.indexOf(stopDirname) === 0) {
+                dirname = path_1.default.dirname(dirname);
+                let resolvedPath = path_1.default.resolve(dirname, ref.fileName);
+                if (resolvedPath.endsWith('.js')) {
+                    resolvedPath = resolvedPath.slice(0, -3);
+                }
+                const normalizedPath = normalize(resolvedPath);
+                if (this.getScriptSnapshot(normalizedPath + '.ts')) {
+                    this._dependencies.inertEdge(filename, normalizedPath + '.ts');
+                    found = true;
+                }
+                else if (this.getScriptSnapshot(normalizedPath + '.d.ts')) {
+                    this._dependencies.inertEdge(filename, normalizedPath + '.d.ts');
+                    found = true;
+                }
+                else if (this.getScriptSnapshot(normalizedPath + '.js')) {
+                    this._dependencies.inertEdge(filename, normalizedPath + '.js');
+                    found = true;
+                }
+            }
+            if (!found) {
+                for (const key in this._fileNameToDeclaredModule) {
+                    if (this._fileNameToDeclaredModule[key] && ~this._fileNameToDeclaredModule[key].indexOf(ref.fileName)) {
+                        this._dependencies.inertEdge(filename, key);
+                    }
+                }
+            }
+        });
+    }
 }
 //# sourceMappingURL=builder.js.map

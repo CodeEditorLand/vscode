@@ -3,27 +3,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { deepStrictEqual, strictEqual } from "assert";
-
-import "mocha";
-
-import { basename } from "path";
-
-import codeCompletionSpec from "../completions/code";
-import { osIsWindows } from "../helpers/os";
-import { asArray, getCompletionItemsFromSpecs } from "../terminalSuggestMain";
-import { getTokenType } from "../tokens";
-import { cdTestSuiteSpec as cdTestSuite } from "./completions/cd.test";
-import { codeInsidersTestSuite } from "./completions/code-insiders.test";
-import { codeSpecOptions, codeTestSuite } from "./completions/code.test";
-import { echoTestSuiteSpec } from "./completions/upstream/echo.test";
-import { lsTestSuiteSpec } from "./completions/upstream/ls.test";
-import { mkdirTestSuiteSpec } from "./completions/upstream/mkdir.test";
-import { rmTestSuiteSpec } from "./completions/upstream/rm.test";
-import { rmdirTestSuiteSpec } from "./completions/upstream/rmdir.test";
-import { touchTestSuiteSpec } from "./completions/upstream/touch.test";
-import { figGenericTestSuites } from "./fig.test";
-import { testPaths, type ISuiteSpec } from "./helpers";
+import { deepStrictEqual, strictEqual } from 'assert';
+import 'mocha';
+import { basename } from 'path';
+import { asArray, getCompletionItemsFromSpecs } from '../terminalSuggestMain';
+import { getTokenType } from '../tokens';
+import { cdTestSuiteSpec as cdTestSuite } from './completions/cd.test';
+import { codeSpecOptions, codeTestSuite } from './completions/code.test';
+import { testPaths, type ISuiteSpec } from './helpers';
+import { codeInsidersTestSuite } from './completions/code-insiders.test';
+import { lsTestSuiteSpec } from './completions/upstream/ls.test';
+import { echoTestSuiteSpec } from './completions/upstream/echo.test';
+import { mkdirTestSuiteSpec } from './completions/upstream/mkdir.test';
+import { rmTestSuiteSpec } from './completions/upstream/rm.test';
+import { rmdirTestSuiteSpec } from './completions/upstream/rmdir.test';
+import { touchTestSuiteSpec } from './completions/upstream/touch.test';
+import { gitTestSuiteSpec } from './completions/upstream/git.test';
+import { osIsWindows } from '../helpers/os';
+import codeCompletionSpec from '../completions/code';
+import { figGenericTestSuites } from './fig.test';
 
 const testSpecs2: ISuiteSpec[] = [
 	{
@@ -68,6 +66,7 @@ const testSpecs2: ISuiteSpec[] = [
 	rmTestSuiteSpec,
 	rmdirTestSuiteSpec,
 	touchTestSuiteSpec,
+	gitTestSuiteSpec,
 ];
 
 if (osIsWindows()) {
@@ -129,20 +128,12 @@ suite("Terminal Suggest", () => {
 					}
 				}
 				test(`'${testSpec.input}' -> ${expectedString}`, async () => {
-					const commandLine = testSpec.input.split("|")[0];
-					const cursorPosition = testSpec.input.indexOf("|");
-					const prefix =
-						commandLine
-							.slice(0, cursorPosition)
-							.split(" ")
-							.at(-1) || "";
-					const filesRequested =
-						testSpec.expectedResourceRequests?.type === "files" ||
-						testSpec.expectedResourceRequests?.type === "both";
-					const foldersRequested =
-						testSpec.expectedResourceRequests?.type === "folders" ||
-						testSpec.expectedResourceRequests?.type === "both";
-					const terminalContext = { commandLine, cursorPosition };
+					const commandLine = testSpec.input.split('|')[0];
+					const cursorPosition = testSpec.input.indexOf('|');
+					const prefix = commandLine.slice(0, cursorPosition).split(' ').at(-1) || '';
+					const filesRequested = testSpec.expectedResourceRequests?.type === 'files' || testSpec.expectedResourceRequests?.type === 'both';
+					const foldersRequested = testSpec.expectedResourceRequests?.type === 'folders' || testSpec.expectedResourceRequests?.type === 'both';
+					const terminalContext = { commandLine, cursorPosition, allowFallbackCompletions: true };
 					const result = await getCompletionItemsFromSpecs(
 						completionSpecs,
 						terminalContext,
@@ -152,18 +143,14 @@ suite("Terminal Suggest", () => {
 						prefix,
 						getTokenType(terminalContext, undefined),
 						testPaths.cwd,
+						{},
+						'testName'
 					);
-					deepStrictEqual(
-						result.items.map((i) => i.label).sort(),
-						(testSpec.expectedCompletions ?? []).sort(),
-					);
-					strictEqual(result.filesRequested, filesRequested);
-					strictEqual(result.foldersRequested, foldersRequested);
+					deepStrictEqual(result.items.map(i => i.label).sort(), (testSpec.expectedCompletions ?? []).sort());
+					strictEqual(result.filesRequested, filesRequested, 'Files requested different than expected, got: ' + result.filesRequested);
+					strictEqual(result.foldersRequested, foldersRequested, 'Folders requested different than expected, got: ' + result.foldersRequested);
 					if (testSpec.expectedResourceRequests?.cwd) {
-						strictEqual(
-							result.cwd?.fsPath,
-							testSpec.expectedResourceRequests.cwd.fsPath,
-						);
+						strictEqual(result.cwd?.fsPath, testSpec.expectedResourceRequests.cwd.fsPath, 'Non matching cwd');
 					}
 				});
 			}

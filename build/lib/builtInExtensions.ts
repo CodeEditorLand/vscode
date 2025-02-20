@@ -14,21 +14,22 @@ import rimraf from "rimraf";
 import vfs from "vinyl-fs";
 import * as ext from "./extensions";
 export interface IExtensionDefinition {
-    name: string;
-    version: string;
-    sha256: string;
-    repo: string;
-    platforms?: string[];
-    metadata: {
-        id: string;
-        publisherId: {
-            publisherId: string;
-            publisherName: string;
-            displayName: string;
-            flags: string;
-        };
-        publisherDisplayName: string;
-    };
+	name: string;
+	version: string;
+	sha256: string;
+	repo: string;
+	platforms?: string[];
+	vsix?: string;
+	metadata: {
+		id: string;
+		publisherId: {
+			publisherId: string;
+			publisherName: string;
+			displayName: string;
+			flags: string;
+		};
+		publisherDisplayName: string;
+	};
 }
 const productjson = JSON.parse(fs.readFileSync(path.join(__dirname, "../../product.json"), "utf8"));
 const controlFilePath = path.join(os.homedir(), ".vscode-oss-dev", "extensions", "control.json");
@@ -54,10 +55,17 @@ function isUpToDate(extension: IExtensionDefinition): boolean {
     }
 }
 function getExtensionDownloadStream(extension: IExtensionDefinition) {
-    const galleryServiceUrl = productjson.extensionsGallery?.serviceUrl;
-    return (galleryServiceUrl
-        ? ext.fromMarketplace(galleryServiceUrl, extension)
-        : ext.fromGithub(extension)).pipe(rename((p) => (p.dirname = `${extension.name}/${p.dirname}`)));
+	let input: Stream;
+
+	if (extension.vsix) {
+		input = ext.fromVsix(path.join(root, extension.vsix), extension);
+	} else if (productjson.extensionsGallery?.serviceUrl) {
+		input = ext.fromMarketplace(productjson.extensionsGallery.serviceUrl, extension);
+	} else {
+		input = ext.fromGithub(extension);
+	}
+
+	return input.pipe(rename(p => p.dirname = `${extension.name}/${p.dirname}`));
 }
 export function getExtensionStream(extension: IExtensionDefinition) {
     // if the extension exists on disk, use those files instead of downloading anew

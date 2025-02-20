@@ -340,344 +340,338 @@ export interface MangleOutput {
  * 5. Prepare and apply edits
  */
 export class Mangler {
-    private readonly allClassDataByKey = new Map<string, ClassData>();
-    private readonly allExportedSymbols = new Set<DeclarationData>();
-    private readonly renameWorkerPool: workerpool.WorkerPool;
-    constructor(private readonly projectPath: string, private readonly log: typeof console.log = () => { }, private readonly config: {
-        readonly manglePrivateFields: boolean;
-        readonly mangleExports: boolean;
-    }) {
-        this.renameWorkerPool = workerpool.pool(path.join(__dirname, "renameWorker.js"), {
-            maxWorkers: 1,
-            minWorkers: "max",
-        });
-    }
-    async computeNewFileContents(strictImplicitPublicHandling?: Set<string>): Promise<Map<string, MangleOutput>> {
-        const service = ts.createLanguageService(new StaticLanguageServiceHost(this.projectPath));
-        const visit = (node: ts.Node): void => {
-            if (this.config.manglePrivateFields) {
-                if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
-                    const key = `${node.getSourceFile().fileName}|${(node.name ?? node).getStart()}`;
-                    if (this.allClassDataByKey.has(key)) {
-                        throw new Error("DUPE?");
-                    }
-                    this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
-                }
-            }
-            if (this.config.mangleExports) {
-                // Find exported classes, functions, and vars
-                if (
-                // Exported class
-                (ts.isClassDeclaration(node) &&
-                    hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
-                    node.name) ||
-                    // Exported function
-                    (ts.isFunctionDeclaration(node) &&
-                        ts.isSourceFile(node.parent) &&
-                        hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
-                        node.name &&
-                        node.body) || // On named function and not on the overload
-                    // Exported variable
-                    (ts.isVariableDeclaration(node) &&
-                        hasModifier(node.parent.parent, ts.SyntaxKind.ExportKeyword) && // Variable statement is exported
-                        ts.isSourceFile(node.parent.parent.parent))
-                // Disabled for now because we need to figure out how to handle
-                // enums that are used in monaco or extHost interfaces.
-                /* || (
-                    // Exported enum
-                    ts.isEnumDeclaration(node)
-                    && ts.isSourceFile(node.parent)
-                    && hasModifier(node, ts.SyntaxKind.ExportKeyword)
-                    && !hasModifier(node, ts.SyntaxKind.ConstKeyword) // Don't bother mangling const enums because these are inlined
-                    && node.name
-                */
-                ) {
-                    if (isInAmbientContext(node)) {
-                        return;
-                    }
-                    this.allExportedSymbols.add(new DeclarationData(node.getSourceFile().fileName, node, new ShortIdent("$")));
-                }
-            }
-            ts.forEachChild(node, visit);
-        };
-        for (const file of service.getProgram()!.getSourceFiles()) {
-            if (!file.isDeclarationFile) {
-                ts.forEachChild(file, visit);
-            }
-        }
-        this.log(`Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`);
-        //  STEP: connect sub and super-types
-        const setupParents = (data: ClassData) => {
-            const extendsClause = data.node.heritageClauses?.find((h) => h.token === ts.SyntaxKind.ExtendsKeyword);
-            if (!extendsClause) {
-                // no EXTENDS-clause
-                return;
-            }
-            const info = service.getDefinitionAtPosition(data.fileName, extendsClause.types[0].expression.getEnd());
-            if (!info || info.length === 0) {
-                // throw new Error('SUPER type not found');
-                return;
-            }
-            if (info.length !== 1) {
-                // inherits from declared/library type
-                return;
-            }
-            const [definition] = info;
-            const parent = this.allClassDataByKey.get(`${definition.fileName}|${definition.textSpan.start}`);
-            if (!parent) {
-                // throw new Error(`SUPER type not found: ${key}`);
-                return;
-            }
-            parent.addChild(data);
-        };
-        for (const data of this.allClassDataByKey.values()) {
-            setupParents(data);
-        }
-        //  STEP: make implicit public (actually protected) field really public
-        const violations = new Map<string, string[]>();
-        let violationsCauseFailure = false;
-        for (const data of this.allClassDataByKey.values()) {
-            ClassData.makeImplicitPublicActuallyPublic(data, (name: string, what, why) => {
-                const arr = violations.get(what);
-                if (arr) {
-                    arr.push(why);
-                }
-                else {
-                    violations.set(what, [why]);
-                }
-                if (strictImplicitPublicHandling &&
-                    !strictImplicitPublicHandling.has(name)) {
-                    violationsCauseFailure = true;
-                }
-            });
-        }
-        for (const [why, whys] of violations) {
-            this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(" , ")}`);
-        }
-        if (violationsCauseFailure) {
-            const message = "Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above";
-            this.log(`ERROR: ${message}`);
-            throw new Error(message);
-        }
-        // STEP: compute replacement names for each class
-        for (const data of this.allClassDataByKey.values()) {
-            ClassData.fillInReplacement(data);
-        }
-        this.log(`Done creating class replacements`);
-        // STEP: prepare rename edits
-        this.log(`Starting prepare rename edits`);
-        type Edit = {
-            newText: string;
-            offset: number;
-            length: number;
-        };
-        const editsByFile = new Map<string, Edit[]>();
-        type RenameFn = (projectName: string, fileName: string, pos: number) => ts.RenameLocation[];
-        const renameResults: Array<Promise<{
-            readonly newName: string;
-            readonly locations: readonly ts.RenameLocation[];
-        }>> = [];
-        const queueRename = (fileName: string, pos: number, newName: string) => {
-            renameResults.push(Promise.resolve(this.renameWorkerPool.exec<RenameFn>("findRenameLocations", [this.projectPath, fileName, pos])).then((locations) => ({ newName, locations })));
-        };
-        for (const data of this.allClassDataByKey.values()) {
-            if (hasModifier(data.node, ts.SyntaxKind.DeclareKeyword)) {
-                continue;
-            }
-            fields: for (const [name, info] of data.fields) {
-                if (!ClassData._shouldMangle(info.type)) {
-                    continue fields;
-                }
-                // TS-HACK: protected became public via 'some' child
-                // and because of that we might need to ignore this now
-                let parent = data.parent;
-                while (parent) {
-                    if (parent.fields.get(name)?.type === FieldType.Public) {
-                        continue fields;
-                    }
-                    parent = parent.parent;
-                }
-                queueRename(data.fileName, info.pos, data.lookupShortName(name));
-            }
-        }
-        for (const data of this.allExportedSymbols.values()) {
-            if (data.fileName.endsWith(".d.ts") ||
-                [
-                    // Test projects
-                    "vscode-api-tests",
-                    // These projects use webpack to dynamically rewrite imports, which messes up our mangling
-                    "configuration-editing",
-                    "microsoft-authentication",
-                    "github-authentication",
-                    "html-language-features/server",
-                ].some((proj) => data.fileName.includes(proj)) ||
-                [
-                    // Build
-                    "css.build",
-                    // Monaco
-                    "editorCommon",
-                    "editorOptions",
-                    "editorZoom",
-                    "standaloneEditor",
-                    "standaloneEnums",
-                    "standaloneLanguages",
-                    // Generated
-                    "extensionsApiProposals",
-                    // Module passed around as type
-                    "pfs",
-                    // entry points
-                    ...[
-                        buildfile.workerEditor,
-                        buildfile.workerExtensionHost,
-                        buildfile.workerNotebook,
-                        buildfile.workerLanguageDetection,
-                        buildfile.workerLocalFileSearch,
-                        buildfile.workerProfileAnalysis,
-                        buildfile.workerOutputLinks,
-                        buildfile.workerBackgroundTokenization,
-                        buildfile.workbenchDesktop,
-                        buildfile.workbenchWeb,
-                        buildfile.code,
-                        buildfile.codeWeb,
-                    ]
-                        .flat()
-                        .map((x) => x.name),
-                ].some((file) => data.fileName.endsWith(file + ".ts"))) {
-                continue;
-            }
-            if (!data.shouldMangle(data.replacementName)) {
-                continue;
-            }
-            for (const { fileName, offset } of data.getLocations(service)) {
-                queueRename(fileName, offset, data.replacementName);
-            }
-        }
-        await Promise.all(renameResults).then((result) => {
-            for (const { newName, locations } of result) {
-                for (const loc of locations) {
-                    ((newText: string, loc: ts.RenameLocation) => {
-                        ((fileName: string, edit: Edit) => {
-                            const edits = editsByFile.get(fileName);
-                            if (!edits) {
-                                editsByFile.set(fileName, [edit]);
-                            }
-                            else {
-                                edits.push(edit);
-                            }
-                        })(loc.fileName, {
-                            newText: (loc.prefixText || "") + newText + (loc.suffixText || ""),
-                            offset: loc.textSpan.start,
-                            length: loc.textSpan.length,
-                        });
-                    })(newName, loc);
-                }
-            }
-        });
-        await this.renameWorkerPool.terminate();
-        this.log(`Done preparing edits: ${editsByFile.size} files`);
-        // STEP: apply all rename edits (per file)
-        const result = new Map<string, MangleOutput>();
-        let savedBytes = 0;
-        for (const item of service.getProgram()!.getSourceFiles()) {
-            const { mapRoot, sourceRoot } = service
-                .getProgram()!
-                .getCompilerOptions();
-            const projectDir = path.dirname(this.projectPath);
-            // source maps
-            let generator: SourceMapGenerator | undefined;
-            let newFullText: string;
-            const edits = editsByFile.get(item.fileName);
-            if (!edits) {
-                // just copy
-                newFullText = item.getFullText();
-            }
-            else {
-                // source map generator
-                const relativeFileName = normalize(path.relative(projectDir, item.fileName));
-                const mappingsByLine = new Map<number, Mapping[]>();
-                // apply renames
-                edits.sort((a, b) => b.offset - a.offset);
-                const characters = item.getFullText().split("");
-                let lastEdit: Edit | undefined;
-                for (const edit of edits) {
-                    if (lastEdit && lastEdit.offset === edit.offset) {
-                        //
-                        if (lastEdit.length !== edit.length ||
-                            lastEdit.newText !== edit.newText) {
-                            this.log("ERROR: Overlapping edit", item.fileName, edit.offset, edits);
-                            throw new Error("OVERLAPPING edit");
-                        }
-                        else {
-                            continue;
-                        }
-                    }
-                    lastEdit = edit;
-                    const mangledName = characters
-                        .splice(edit.offset, edit.length, edit.newText)
-                        .join("");
-                    savedBytes += mangledName.length - edit.newText.length;
-                    // source maps
-                    const pos = item.getLineAndCharacterOfPosition(edit.offset);
-                    let mappings = mappingsByLine.get(pos.line);
-                    if (!mappings) {
-                        mappings = [];
-                        mappingsByLine.set(pos.line, mappings);
-                    }
-                    mappings.unshift({
-                        source: relativeFileName,
-                        original: {
-                            line: pos.line + 1,
-                            column: pos.character,
-                        },
-                        generated: {
-                            line: pos.line + 1,
-                            column: pos.character,
-                        },
-                        name: mangledName,
-                    }, {
-                        source: relativeFileName,
-                        original: {
-                            line: pos.line + 1,
-                            column: pos.character + edit.length,
-                        },
-                        generated: {
-                            line: pos.line + 1,
-                            column: pos.character + edit.newText.length,
-                        },
-                    });
-                }
-                // source map generation, make sure to get mappings per line correct
-                generator = new SourceMapGenerator({
-                    file: path.basename(item.fileName),
-                    sourceRoot: (mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString()),
-                });
-                generator.setSourceContent(relativeFileName, item.getFullText());
-                for (const [, mappings] of mappingsByLine) {
-                    let lineDelta = 0;
-                    for (const mapping of mappings) {
-                        generator.addMapping({
-                            ...mapping,
-                            generated: {
-                                line: mapping.generated.line,
-                                column: mapping.generated.column - lineDelta,
-                            },
-                        });
-                        lineDelta +=
-                            mapping.original.column - mapping.generated.column;
-                    }
-                }
-                newFullText = characters.join("");
-            }
-            result.set(item.fileName, {
-                out: newFullText,
-                sourceMap: generator?.toString(),
-            });
-        }
-        service.dispose();
-        this.renameWorkerPool.terminate();
-        this.log(`Done: ${savedBytes / 1000}kb saved, memory-usage: ${JSON.stringify(v8.getHeapStatistics())}`);
-        return result;
-    }
+
+	private readonly allClassDataByKey = new Map<string, ClassData>();
+	private readonly allExportedSymbols = new Set<DeclarationData>();
+
+	private readonly renameWorkerPool: workerpool.WorkerPool;
+
+	constructor(
+		private readonly projectPath: string,
+		private readonly log: typeof console.log = () => { },
+		private readonly config: { readonly manglePrivateFields: boolean; readonly mangleExports: boolean },
+	) {
+
+		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+			maxWorkers: 4,
+			minWorkers: 'max'
+		});
+	}
+
+	async computeNewFileContents(strictImplicitPublicHandling?: Set<string>): Promise<Map<string, MangleOutput>> {
+
+		const service = ts.createLanguageService(new StaticLanguageServiceHost(this.projectPath));
+
+		// STEP:
+		// - Find all classes and their field info.
+		// - Find exported symbols.
+
+		const fileIdents = new ShortIdent('$');
+
+		const visit = (node: ts.Node): void => {
+			if (this.config.manglePrivateFields) {
+				if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
+					const anchor = node.name ?? node;
+					const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
+					if (this.allClassDataByKey.has(key)) {
+						throw new Error('DUPE?');
+					}
+					this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
+				}
+			}
+
+			if (this.config.mangleExports) {
+				// Find exported classes, functions, and vars
+				if (
+					(
+						// Exported class
+						ts.isClassDeclaration(node)
+						&& hasModifier(node, ts.SyntaxKind.ExportKeyword)
+						&& node.name
+					) || (
+						// Exported function
+						ts.isFunctionDeclaration(node)
+						&& ts.isSourceFile(node.parent)
+						&& hasModifier(node, ts.SyntaxKind.ExportKeyword)
+						&& node.name && node.body // On named function and not on the overload
+					) || (
+						// Exported variable
+						ts.isVariableDeclaration(node)
+						&& hasModifier(node.parent.parent, ts.SyntaxKind.ExportKeyword) // Variable statement is exported
+						&& ts.isSourceFile(node.parent.parent.parent)
+					)
+
+					// Disabled for now because we need to figure out how to handle
+					// enums that are used in monaco or extHost interfaces.
+					/* || (
+						// Exported enum
+						ts.isEnumDeclaration(node)
+						&& ts.isSourceFile(node.parent)
+						&& hasModifier(node, ts.SyntaxKind.ExportKeyword)
+						&& !hasModifier(node, ts.SyntaxKind.ConstKeyword) // Don't bother mangling const enums because these are inlined
+						&& node.name
+					*/
+				) {
+					if (isInAmbientContext(node)) {
+						return;
+					}
+
+					this.allExportedSymbols.add(new DeclarationData(node.getSourceFile().fileName, node, fileIdents));
+				}
+			}
+
+			ts.forEachChild(node, visit);
+		};
+
+		for (const file of service.getProgram()!.getSourceFiles()) {
+			if (!file.isDeclarationFile) {
+				ts.forEachChild(file, visit);
+			}
+		}
+		this.log(`Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`);
+
+
+		//  STEP: connect sub and super-types
+
+		const setupParents = (data: ClassData) => {
+			const extendsClause = data.node.heritageClauses?.find(h => h.token === ts.SyntaxKind.ExtendsKeyword);
+			if (!extendsClause) {
+				// no EXTENDS-clause
+				return;
+			}
+
+			const info = service.getDefinitionAtPosition(data.fileName, extendsClause.types[0].expression.getEnd());
+			if (!info || info.length === 0) {
+				// throw new Error('SUPER type not found');
+				return;
+			}
+
+			if (info.length !== 1) {
+				// inherits from declared/library type
+				return;
+			}
+
+			const [definition] = info;
+			const key = `${definition.fileName}|${definition.textSpan.start}`;
+			const parent = this.allClassDataByKey.get(key);
+			if (!parent) {
+				// throw new Error(`SUPER type not found: ${key}`);
+				return;
+			}
+			parent.addChild(data);
+		};
+		for (const data of this.allClassDataByKey.values()) {
+			setupParents(data);
+		}
+
+		//  STEP: make implicit public (actually protected) field really public
+		const violations = new Map<string, string[]>();
+		let violationsCauseFailure = false;
+		for (const data of this.allClassDataByKey.values()) {
+			ClassData.makeImplicitPublicActuallyPublic(data, (name: string, what, why) => {
+				const arr = violations.get(what);
+				if (arr) {
+					arr.push(why);
+				} else {
+					violations.set(what, [why]);
+				}
+
+				if (strictImplicitPublicHandling && !strictImplicitPublicHandling.has(name)) {
+					violationsCauseFailure = true;
+				}
+			});
+		}
+		for (const [why, whys] of violations) {
+			this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(' , ')}`);
+		}
+		if (violationsCauseFailure) {
+			const message = 'Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above';
+			this.log(`ERROR: ${message}`);
+			throw new Error(message);
+		}
+
+		// STEP: compute replacement names for each class
+		for (const data of this.allClassDataByKey.values()) {
+			ClassData.fillInReplacement(data);
+		}
+		this.log(`Done creating class replacements`);
+
+		// STEP: prepare rename edits
+		this.log(`Starting prepare rename edits`);
+
+		type Edit = { newText: string; offset: number; length: number };
+		const editsByFile = new Map<string, Edit[]>();
+
+		const appendEdit = (fileName: string, edit: Edit) => {
+			const edits = editsByFile.get(fileName);
+			if (!edits) {
+				editsByFile.set(fileName, [edit]);
+			} else {
+				edits.push(edit);
+			}
+		};
+		const appendRename = (newText: string, loc: ts.RenameLocation) => {
+			appendEdit(loc.fileName, {
+				newText: (loc.prefixText || '') + newText + (loc.suffixText || ''),
+				offset: loc.textSpan.start,
+				length: loc.textSpan.length
+			});
+		};
+
+		type RenameFn = (projectName: string, fileName: string, pos: number) => ts.RenameLocation[];
+
+		const renameResults: Array<Promise<{ readonly newName: string; readonly locations: readonly ts.RenameLocation[] }>> = [];
+
+		const queueRename = (fileName: string, pos: number, newName: string) => {
+			renameResults.push(Promise.resolve(this.renameWorkerPool.exec<RenameFn>('findRenameLocations', [this.projectPath, fileName, pos]))
+				.then((locations) => ({ newName, locations })));
+		};
+
+		for (const data of this.allClassDataByKey.values()) {
+			if (hasModifier(data.node, ts.SyntaxKind.DeclareKeyword)) {
+				continue;
+			}
+
+			fields: for (const [name, info] of data.fields) {
+				if (!ClassData._shouldMangle(info.type)) {
+					continue fields;
+				}
+
+				// TS-HACK: protected became public via 'some' child
+				// and because of that we might need to ignore this now
+				let parent = data.parent;
+				while (parent) {
+					if (parent.fields.get(name)?.type === FieldType.Public) {
+						continue fields;
+					}
+					parent = parent.parent;
+				}
+
+				const newName = data.lookupShortName(name);
+				queueRename(data.fileName, info.pos, newName);
+			}
+		}
+
+		for (const data of this.allExportedSymbols.values()) {
+			if (data.fileName.endsWith('.d.ts')
+				|| skippedExportMangledProjects.some(proj => data.fileName.includes(proj))
+				|| skippedExportMangledFiles.some(file => data.fileName.endsWith(file + '.ts'))
+			) {
+				continue;
+			}
+
+			if (!data.shouldMangle(data.replacementName)) {
+				continue;
+			}
+
+			const newText = data.replacementName;
+			for (const { fileName, offset } of data.getLocations(service)) {
+				queueRename(fileName, offset, newText);
+			}
+		}
+
+		await Promise.all(renameResults).then((result) => {
+			for (const { newName, locations } of result) {
+				for (const loc of locations) {
+					appendRename(newName, loc);
+				}
+			}
+		});
+
+		await this.renameWorkerPool.terminate();
+
+		this.log(`Done preparing edits: ${editsByFile.size} files`);
+
+		// STEP: apply all rename edits (per file)
+		const result = new Map<string, MangleOutput>();
+		let savedBytes = 0;
+
+		for (const item of service.getProgram()!.getSourceFiles()) {
+
+			const { mapRoot, sourceRoot } = service.getProgram()!.getCompilerOptions();
+			const projectDir = path.dirname(this.projectPath);
+			const sourceMapRoot = mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString();
+
+			// source maps
+			let generator: SourceMapGenerator | undefined;
+
+			let newFullText: string;
+			const edits = editsByFile.get(item.fileName);
+			if (!edits) {
+				// just copy
+				newFullText = item.getFullText();
+
+			} else {
+				// source map generator
+				const relativeFileName = normalize(path.relative(projectDir, item.fileName));
+				const mappingsByLine = new Map<number, Mapping[]>();
+
+				// apply renames
+				edits.sort((a, b) => b.offset - a.offset);
+				const characters = item.getFullText().split('');
+
+				let lastEdit: Edit | undefined;
+
+				for (const edit of edits) {
+					if (lastEdit && lastEdit.offset === edit.offset) {
+						//
+						if (lastEdit.length !== edit.length || lastEdit.newText !== edit.newText) {
+							this.log('ERROR: Overlapping edit', item.fileName, edit.offset, edits);
+							throw new Error('OVERLAPPING edit');
+						} else {
+							continue;
+						}
+					}
+					lastEdit = edit;
+					const mangledName = characters.splice(edit.offset, edit.length, edit.newText).join('');
+					savedBytes += mangledName.length - edit.newText.length;
+
+					// source maps
+					const pos = item.getLineAndCharacterOfPosition(edit.offset);
+
+
+					let mappings = mappingsByLine.get(pos.line);
+					if (!mappings) {
+						mappings = [];
+						mappingsByLine.set(pos.line, mappings);
+					}
+					mappings.unshift({
+						source: relativeFileName,
+						original: { line: pos.line + 1, column: pos.character },
+						generated: { line: pos.line + 1, column: pos.character },
+						name: mangledName
+					}, {
+						source: relativeFileName,
+						original: { line: pos.line + 1, column: pos.character + edit.length },
+						generated: { line: pos.line + 1, column: pos.character + edit.newText.length },
+					});
+				}
+
+				// source map generation, make sure to get mappings per line correct
+				generator = new SourceMapGenerator({ file: path.basename(item.fileName), sourceRoot: sourceMapRoot });
+				generator.setSourceContent(relativeFileName, item.getFullText());
+				for (const [, mappings] of mappingsByLine) {
+					let lineDelta = 0;
+					for (const mapping of mappings) {
+						generator.addMapping({
+							...mapping,
+							generated: { line: mapping.generated.line, column: mapping.generated.column - lineDelta }
+						});
+						lineDelta += mapping.original.column - mapping.generated.column;
+					}
+				}
+
+				newFullText = characters.join('');
+			}
+			result.set(item.fileName, { out: newFullText, sourceMap: generator?.toString() });
+		}
+
+		service.dispose();
+		this.renameWorkerPool.terminate();
+
+		this.log(`Done: ${savedBytes / 1000}kb saved, memory-usage: ${JSON.stringify(v8.getHeapStatistics())}`);
+		return result;
+	}
 }
 // --- ast utils
 function hasModifier(node: ts.Node, kind: ts.SyntaxKind) {

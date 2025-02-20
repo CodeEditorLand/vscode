@@ -8,8 +8,9 @@ schedules:
               - main
 
 trigger:
-    branches:
-        include: ["main", "release/*"]
+  batch: true
+  branches:
+    include: ["main", "release/*"]
 
 parameters:
     - name: VSCODE_QUALITY
@@ -197,50 +198,44 @@ resources:
           ref: refs/tags/release
 
 extends:
-    template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
-    parameters:
-        sdl:
-            tsa:
-                enabled: true
-                configFile: $(Build.SourcesDirectory)/build/azure-pipelines/config/tsaoptions.json
-            codeql:
-                runSourceLanguagesInSourceAnalysis: true
-                compiled:
-                    enabled: false
-                    justificationForDisabling:
-                        "CodeQL breaks ESRP CodeSign on macOS (ICM #520035761,
-                        githubcustomers/microsoft-codeql-support#198)"
-            credscan:
-                suppressionsFile: $(Build.SourcesDirectory)/build/azure-pipelines/config/CredScanSuppressions.json
-            eslint:
-                enabled: true
-                enableExclusions: true
-                exclusionsFilePath: $(Build.SourcesDirectory)/.eslint-ignore
-            sourceAnalysisPool: 1es-windows-2022-x64
-            createAdoIssuesForJustificationsForDisablement: false
-        containers:
-            snapcraft:
-                image: vscodehub.azurecr.io/vscode-linux-build-agent:snapcraft-x64
-            ubuntu-2004-arm64:
-                image: onebranch.azurecr.io/linux/ubuntu-2004-arm64:latest
-        authenticatedContainerRegistries:
-            - registry: onebranch.azurecr.io
-              tenant: AME
-              identity: 1ESPipelineIdentity
-        stages:
-            - stage: Compile
-              jobs:
-                  - job: Compile
-                    timeoutInMinutes: 90
-                    pool:
-                        name: 1es-ubuntu-22.04-x64
-                        os: linux
-                    variables:
-                        VSCODE_ARCH: x64
-                    steps:
-                        - template: build/azure-pipelines/product-compile.yml@self
-                          parameters:
-                              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    sdl:
+      tsa:
+        enabled: true
+        configFile: $(Build.SourcesDirectory)/build/azure-pipelines/config/tsaoptions.json
+      codeql:
+        runSourceLanguagesInSourceAnalysis: true
+        compiled:
+          enabled: false
+          justificationForDisabling: "CodeQL breaks ESRP CodeSign on macOS (ICM #520035761, githubcustomers/microsoft-codeql-support#198)"
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/build/azure-pipelines/config/CredScanSuppressions.json
+      eslint:
+        enabled: true
+        enableExclusions: true
+        exclusionsFilePath: $(Build.SourcesDirectory)/.eslint-ignore
+      sourceAnalysisPool: 1es-windows-2022-x64
+      createAdoIssuesForJustificationsForDisablement: false
+    containers:
+      snapcraft:
+        image: vscodehub.azurecr.io/vscode-linux-build-agent:snapcraft-x64
+      ubuntu-2004-arm64:
+        image: onebranch.azurecr.io/linux/ubuntu-2004-arm64:latest
+    stages:
+      - stage: Compile
+        jobs:
+          - job: Compile
+            timeoutInMinutes: 90
+            pool:
+              name: AcesShared
+              os: macOS
+            variables:
+              VSCODE_ARCH: arm64
+            steps:
+              - template: build/azure-pipelines/product-compile.yml@self
+                parameters:
+                  VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
 
             - ? ${{ if or(eq(parameters.VSCODE_BUILD_LINUX,
                 true),eq(parameters.VSCODE_BUILD_LINUX_ARMHF,
@@ -302,23 +297,23 @@ extends:
                                       VSCODE_BUILD_ALPINE:
                                           ${{ parameters.VSCODE_BUILD_ALPINE }}
 
-                      - ? ${{ if and(eq(variables['VSCODE_CIBUILD'], false),
-                          eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true)) }}
-                        : - job: CLIAlpineARM64
-                            pool:
-                                name: 1es-mariner-2.0-arm64
-                                os: linux
-                                hostArchitecture: arm64
-                            container: ubuntu-2004-arm64
-                            steps:
-                                - template: build/azure-pipelines/alpine/cli-build-alpine.yml@self
-                                  parameters:
-                                      VSCODE_QUALITY:
-                                          ${{ variables.VSCODE_QUALITY }}
-                                      VSCODE_BUILD_ALPINE_ARM64:
-                                          ${{
-                                          parameters.VSCODE_BUILD_ALPINE_ARM64
-                                          }}
+            - ${{ if and(eq(variables['VSCODE_CIBUILD'], false), eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true)) }}:
+              - job: CLIAlpineARM64
+                pool:
+                  name: 1es-mariner-2.0-arm64
+                  os: linux
+                  hostArchitecture: arm64
+                container: ubuntu-2004-arm64
+                templateContext:
+                  authenticatedContainerRegistries:
+                    - registry: onebranch.azurecr.io
+                      tenant: AME
+                      identity: 1ESPipelineIdentity
+                steps:
+                  - template: build/azure-pipelines/alpine/cli-build-alpine.yml@self
+                    parameters:
+                      VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+                      VSCODE_BUILD_ALPINE_ARM64: ${{ parameters.VSCODE_BUILD_ALPINE_ARM64 }}
 
                       - ${{ if eq(parameters.VSCODE_BUILD_MACOS, true) }}:
                             - job: CLIMacOSX64
@@ -622,16 +617,20 @@ extends:
                                           ${{ eq(parameters.VSCODE_STEP_ON_IT,
                                           false) }}
 
-                      - ? ${{ if and(eq(variables['VSCODE_CIBUILD'], false),
-                          eq(parameters.VSCODE_BUILD_LINUX, true)) }}
-                        : - job: LinuxSnap
-                            dependsOn:
-                                - Linuxx64
-                            container: snapcraft
-                            variables:
-                                VSCODE_ARCH: x64
-                            steps:
-                                - template: build/azure-pipelines/linux/snap-build-linux.yml@self
+            - ${{ if and(eq(variables['VSCODE_CIBUILD'], false), eq(parameters.VSCODE_BUILD_LINUX, true)) }}:
+              - job: LinuxSnap
+                dependsOn:
+                  - Linuxx64
+                container: snapcraft
+                variables:
+                  VSCODE_ARCH: x64
+                templateContext:
+                  authenticatedContainerRegistries:
+                    - registry: onebranch.azurecr.io
+                      tenant: AME
+                      identity: 1ESPipelineIdentity
+                steps:
+                  - template: build/azure-pipelines/linux/snap-build-linux.yml@self
 
                       - ? ${{ if and(eq(variables['VSCODE_CIBUILD'], false),
                           eq(parameters.VSCODE_BUILD_LINUX_ARMHF, true)) }}

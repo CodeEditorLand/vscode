@@ -5,10 +5,10 @@
 
 import "mocha";
 
-import rmdirSpec from "../../../completions/upstream/rmdir";
-import { testPaths, type ISuiteSpec } from "../../helpers";
-
-const allOptions = ["-p"];
+const allOptions = [
+	'-p',
+];
+const expectedCompletions = [{ label: 'rmdir', description: (rmdirSpec as any).description }];
 
 export const rmdirTestSuiteSpec: ISuiteSpec = {
 	name: "rmdir",
@@ -16,23 +16,11 @@ export const rmdirTestSuiteSpec: ISuiteSpec = {
 	availableCommands: "rmdir",
 	testSpecs: [
 		// Empty input
-		{
-			input: "|",
-			expectedCompletions: ["rmdir"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: '|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
 		// Typing the command
-		{
-			input: "r|",
-			expectedCompletions: ["rmdir"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
-		{
-			input: "rmdir|",
-			expectedCompletions: ["rmdir"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: 'r|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{ input: 'rmdir|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
 		// Basic options
 		{

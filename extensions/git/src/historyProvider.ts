@@ -597,6 +597,10 @@ export class GitHistoryProvider
 		const references: SourceControlHistoryItemRef[] = [];
 
 		for (const ref of commit.refNames) {
+			if (ref === 'refs/remotes/origin/HEAD') {
+				continue;
+			}
+
 			switch (true) {
 				case ref.startsWith("HEAD -> refs/heads/"):
 					references.push({

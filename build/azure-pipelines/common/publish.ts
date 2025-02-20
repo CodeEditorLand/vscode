@@ -4,28 +4,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import cp from "child_process";
-import crypto from "crypto";
-import fs from "fs";
-import { pipeline } from "node:stream/promises";
-import { clearInterval, setInterval } from "node:timers";
-import { isMainThread, Worker, workerData } from "node:worker_threads";
-import os from "os";
-import path from "path";
-import { Readable } from "stream";
-import type { ReadableStream } from "stream/web";
-import { CosmosClient } from "@azure/cosmos";
-import { ConfidentialClientApplication } from "@azure/msal-node";
-import {
-	BlobClient,
-	BlobServiceClient,
-	BlockBlobClient,
-	ContainerClient,
-} from "@azure/storage-blob";
-import jws from "jws";
-import yauzl from "yauzl";
-
-import { retry } from "./retry";
+import fs from 'fs';
+import path from 'path';
+import { Readable } from 'stream';
+import type { ReadableStream } from 'stream/web';
+import { pipeline } from 'node:stream/promises';
+import yauzl from 'yauzl';
+import crypto from 'crypto';
+import { retry } from './retry';
+import { CosmosClient } from '@azure/cosmos';
+import cp from 'child_process';
+import os from 'os';
+import { Worker, isMainThread, workerData } from 'node:worker_threads';
+import { ConfidentialClientApplication } from '@azure/msal-node';
+import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient, ContainerSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob';
+import jws from 'jws';
+import { clearInterval, setInterval } from 'node:timers';
 
 function e(name: string): string {
 	const result = process.env[name];
@@ -340,6 +334,7 @@ class ESRPReleaseService {
 		authCertificatePfx: string,
 		requestSigningCertificatePfx: string,
 		containerClient: ContainerClient,
+		stagingSasToken: string
 	) {
 		const authKey = getKeyFromPFX(authCertificatePfx);
 		const authCertificate = getCertificatesFromPFX(authCertificatePfx)[0];
@@ -367,14 +362,7 @@ class ESRPReleaseService {
 			scopes: ["https://api.esrp.microsoft.com/.default"],
 		});
 
-		return new ESRPReleaseService(
-			log,
-			clientId,
-			response!.accessToken,
-			requestSigningCertificates,
-			requestSigningKey,
-			containerClient,
-		);
+		return new ESRPReleaseService(log, clientId, response!.accessToken, requestSigningCertificates, requestSigningKey, containerClient, stagingSasToken);
 	}
 
 	private static API_URL =
@@ -387,7 +375,8 @@ class ESRPReleaseService {
 		private readonly requestSigningCertificates: string[],
 		private readonly requestSigningKey: string,
 		private readonly containerClient: ContainerClient,
-	) {}
+		private readonly stagingSasToken: string
+	) { }
 
 	async createRelease(
 		version: string,
@@ -464,7 +453,8 @@ class ESRPReleaseService {
 		blobClient: BlobClient,
 	): Promise<ReleaseSubmitResponse> {
 		const size = fs.statSync(filePath).size;
-		const hash = await hashStream("sha256", fs.createReadStream(filePath));
+		const hash = await hashStream('sha256', fs.createReadStream(filePath));
+		const blobUrl = `${blobClient.url}?${this.stagingSasToken}`;
 
 		const message: ReleaseRequestMessage = {
 			customerCorrelationId: correlationId,
@@ -500,19 +490,14 @@ class ESRPReleaseService {
 			routingInfo: {
 				intent: "filedownloadlinkgeneration",
 			},
-			files: [
-				{
-					name: path.basename(filePath),
-					friendlyFileName,
-					tenantFileLocation: blobClient.url,
-					tenantFileLocationType: "AzureBlob",
-					sourceLocation: {
-						type: "azureBlob",
-						blobUrl: blobClient.url,
-					},
-					hashType: "sha256",
-					hash: Array.from(hash),
-					sizeInBytes: size,
+			files: [{
+				name: path.basename(filePath),
+				friendlyFileName,
+				tenantFileLocation: blobUrl,
+				tenantFileLocationType: 'AzureBlob',
+				sourceLocation: {
+					type: 'azureBlob',
+					blobUrl
 				},
 			],
 		};
@@ -1028,13 +1013,22 @@ async function processArtifact(artifact: Artifact, filePath: string) {
 				blobServiceClient.getContainerClient("staging");
 			await stagingContainerClient.createIfNotExists();
 
+			const now = new Date().valueOf();
+			const oneHour = 60 * 60 * 1000;
+			const oneHourAgo = new Date(now - oneHour);
+			const oneHourFromNow = new Date(now + oneHour);
+			const userDelegationKey = await blobServiceClient.getUserDelegationKey(oneHourAgo, oneHourFromNow);
+			const sasOptions = { containerName: 'staging', permissions: ContainerSASPermissions.from({ read: true }), startsOn: oneHourAgo, expiresOn: oneHourFromNow };
+			const stagingSasToken = generateBlobSASQueryParameters(sasOptions, userDelegationKey, e('VSCODE_STAGING_BLOB_STORAGE_ACCOUNT_NAME')).toString();
+
 			const releaseService = await ESRPReleaseService.create(
 				log,
-				e("RELEASE_TENANT_ID"),
-				e("RELEASE_CLIENT_ID"),
-				e("RELEASE_AUTH_CERT"),
-				e("RELEASE_REQUEST_SIGNING_CERT"),
+				e('RELEASE_TENANT_ID'),
+				e('RELEASE_CLIENT_ID'),
+				e('RELEASE_AUTH_CERT'),
+				e('RELEASE_REQUEST_SIGNING_CERT'),
 				stagingContainerClient,
+				stagingSasToken
 			);
 
 			await releaseService.createRelease(
@@ -1122,25 +1116,23 @@ async function main() {
 		console.log(`\u2705 ${name}`);
 	}
 
-	const stages = new Set<string>(["Compile", "CompileCLI"]);
-	if (e("VSCODE_BUILD_STAGE_WINDOWS") === "True") {
-		stages.add("Windows");
+	const stages = new Set<string>(['Compile']);
+
+	if (
+		e('VSCODE_BUILD_STAGE_LINUX') === 'True' ||
+		e('VSCODE_BUILD_STAGE_ALPINE') === 'True' ||
+		e('VSCODE_BUILD_STAGE_MACOS') === 'True' ||
+		e('VSCODE_BUILD_STAGE_WINDOWS') === 'True'
+	) {
+		stages.add('CompileCLI');
 	}
-	if (e("VSCODE_BUILD_STAGE_LINUX") === "True") {
-		stages.add("Linux");
-	}
-	if (e("VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER") === "True") {
-		stages.add("LinuxLegacyServer");
-	}
-	if (e("VSCODE_BUILD_STAGE_ALPINE") === "True") {
-		stages.add("Alpine");
-	}
-	if (e("VSCODE_BUILD_STAGE_MACOS") === "True") {
-		stages.add("macOS");
-	}
-	if (e("VSCODE_BUILD_STAGE_WEB") === "True") {
-		stages.add("Web");
-	}
+
+	if (e('VSCODE_BUILD_STAGE_WINDOWS') === 'True') { stages.add('Windows'); }
+	if (e('VSCODE_BUILD_STAGE_LINUX') === 'True') { stages.add('Linux'); }
+	if (e('VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER') === 'True') { stages.add('LinuxLegacyServer'); }
+	if (e('VSCODE_BUILD_STAGE_ALPINE') === 'True') { stages.add('Alpine'); }
+	if (e('VSCODE_BUILD_STAGE_MACOS') === 'True') { stages.add('macOS'); }
+	if (e('VSCODE_BUILD_STAGE_WEB') === 'True') { stages.add('Web'); }
 
 	let resultPromise = Promise.resolve<PromiseSettledResult<void>[]>([]);
 	const operations: { name: string; operation: Promise<void> }[] = [];

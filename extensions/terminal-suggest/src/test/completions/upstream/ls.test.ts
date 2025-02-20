@@ -52,55 +52,28 @@ const allOptions = [
 	"-w",
 	"-x",
 ];
-
+const expectedCompletions = [{ label: 'ls', description: (lsSpec as any).description }];
 export const lsTestSuiteSpec: ISuiteSpec = {
 	name: "ls",
 	completionSpecs: lsSpec,
 	availableCommands: "ls",
 	testSpecs: [
 		// Empty input
-		{
-			input: "|",
-			expectedCompletions: ["ls"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: '|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
 		// Typing the command
-		{
-			input: "l|",
-			expectedCompletions: ["ls"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
-		{
-			input: "ls|",
-			expectedCompletions: ["ls"],
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: 'l|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{ input: 'ls|', expectedCompletions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
 		// Basic options
 		// TODO: The spec wants file paths and folders (which seems like it should only be folders),
-		//       but neither are requested https://github.com/microsoft/vscode/issues/239606
-		{
-			input: "ls |",
-			expectedCompletions: allOptions,
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
-		{
-			input: "ls -|",
-			expectedCompletions: allOptions,
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: 'ls |', expectedCompletions: allOptions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{ input: 'ls -|', expectedCompletions: allOptions, expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
-		// Filtering options should request all options so client side can filter
-		{
-			input: "ls -a|",
-			expectedCompletions: allOptions,
-			expectedResourceRequests: { type: "both", cwd: testPaths.cwd },
-		},
+		{ input: 'ls -a|', expectedCompletions: allOptions },
 
 		// Duplicate option
-		// TODO: Duplicate options should not be presented https://github.com/microsoft/vscode/issues/239607
-		// { input: 'ls -a -|', expectedCompletions: removeArrayEntry(allOptions, '-a'), expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
+		{ input: 'ls -a -|', expectedCompletions: allOptions.filter(o => o !== '-a'), expectedResourceRequests: { type: 'both', cwd: testPaths.cwd } },
 
 		// Relative paths
 		{
@@ -158,3 +131,4 @@ export const lsTestSuiteSpec: ISuiteSpec = {
 		},
 	],
 };
+

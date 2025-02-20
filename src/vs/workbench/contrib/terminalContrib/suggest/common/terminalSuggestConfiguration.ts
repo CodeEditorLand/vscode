@@ -13,11 +13,11 @@ export const enum TerminalSuggestSettingId {
 	QuickSuggestions = 'terminal.integrated.suggest.quickSuggestions',
 	SuggestOnTriggerCharacters = 'terminal.integrated.suggest.suggestOnTriggerCharacters',
 	RunOnEnter = 'terminal.integrated.suggest.runOnEnter',
-	BuiltinCompletions = 'terminal.integrated.suggest.builtinCompletions',
 	WindowsExecutableExtensions = 'terminal.integrated.suggest.windowsExecutableExtensions',
 	Providers = 'terminal.integrated.suggest.providers',
 	ShowStatusBar = 'terminal.integrated.suggest.showStatusBar',
 	CdPath = 'terminal.integrated.suggest.cdPath',
+	InlineSuggestion = 'terminal.integrated.suggest.inlineSuggestion',
 }
 
 export const windowsDefaultExecutableExtensions: string[] = [
@@ -43,17 +43,21 @@ export const terminalSuggestConfigSection = 'terminal.integrated.suggest';
 
 export interface ITerminalSuggestConfiguration {
 	enabled: boolean;
-	quickSuggestions: boolean;
+	quickSuggestions: /*Legacy - was this when experimental*/boolean | {
+		commands: 'off' | 'on';
+		arguments: 'off' | 'on';
+		unknown: 'off' | 'on';
+	};
 	suggestOnTriggerCharacters: boolean;
 	runOnEnter: 'never' | 'exactMatch' | 'exactMatchIgnoreExtension' | 'always';
-	builtinCompletions: {
-		'pwshCode': boolean;
-		'pwshGit': boolean;
-	};
+	windowsExecutableExtensions: { [key: string]: boolean };
 	providers: {
 		'terminal-suggest': boolean;
 		'pwsh-shell-integration': boolean;
 	};
+	showStatusBar: boolean;
+	cdPath: 'off' | 'relative' | 'absolute';
+	inlineSuggestion: 'off' | 'alwaysOnTopExceptExactMatch' | 'alwaysOnTop';
 }
 
 export const terminalSuggestConfiguration: IStringDictionary<IConfigurationPropertySchema> = {
@@ -71,15 +75,36 @@ export const terminalSuggestConfiguration: IStringDictionary<IConfigurationPrope
 		properties: {},
 		default: {
 			'terminal-suggest': true,
-			'pwsh-shell-integration': false,
+			'pwsh-shell-integration': true,
 		},
 		tags: ['preview'],
 	},
 	[TerminalSuggestSettingId.QuickSuggestions]: {
 		restricted: true,
 		markdownDescription: localize('suggest.quickSuggestions', "Controls whether suggestions should automatically show up while typing. Also be aware of the {0}-setting which controls if suggestions are triggered by special characters.", `\`#${TerminalSuggestSettingId.SuggestOnTriggerCharacters}#\``),
-		type: 'boolean',
-		default: true,
+		type: 'object',
+		properties: {
+			commands: {
+				description: localize('suggest.quickSuggestions.commands', 'Enable quick suggestions for commands, the first word in a command line input.'),
+				type: 'string',
+				enum: ['off', 'on'],
+			},
+			arguments: {
+				description: localize('suggest.quickSuggestions.arguments', 'Enable quick suggestions for arguments, anything after the first word in a command line input.'),
+				type: 'string',
+				enum: ['off', 'on'],
+			},
+			unknown: {
+				description: localize('suggest.quickSuggestions.unknown', 'Enable quick suggestions when it\'s unclear what the best suggestion is, if this is on files and folders will be suggested as a fallback.'),
+				type: 'string',
+				enum: ['off', 'on'],
+			},
+		},
+		default: {
+			commands: 'on',
+			arguments: 'on',
+			unknown: 'off',
+		},
 		tags: ['preview']
 	},
 	[TerminalSuggestSettingId.SuggestOnTriggerCharacters]: {
@@ -103,26 +128,6 @@ export const terminalSuggestConfiguration: IStringDictionary<IConfigurationPrope
 		default: 'ignore',
 		tags: ['preview']
 	},
-	[TerminalSuggestSettingId.BuiltinCompletions]: {
-		restricted: true,
-		markdownDescription: localize('suggest.builtinCompletions', "Controls which built-in completions are activated. This setting can cause conflicts if custom shell completions are configured in the shell profile."),
-		type: 'object',
-		properties: {
-			'pwshCode': {
-				description: localize('suggest.builtinCompletions.pwshCode', 'Custom PowerShell argument completers will be registered for VS Code\'s `code` and `code-insiders` CLIs. This is currently very basic and always suggests flags and subcommands without checking context.'),
-				type: 'boolean'
-			},
-			'pwshGit': {
-				description: localize('suggest.builtinCompletions.pwshGit', 'Custom PowerShell argument completers will be registered for the `git` CLI.'),
-				type: 'boolean'
-			},
-		},
-		default: {
-			pwshCode: true,
-			pwshGit: true,
-		},
-		tags: ['preview']
-	},
 	[TerminalSuggestSettingId.WindowsExecutableExtensions]: {
 		restricted: true,
 		markdownDescription: localize("terminalWindowsExecutableSuggestionSetting", "A set of windows command executable extensions that will be included as suggestions in the terminal.\n\nMany executables are included by default, listed below:\n\n{0}.\n\nTo exclude an extension, set it to `false`\n\n. To include one not in the list, add it and set it to `true`.",
@@ -142,6 +147,7 @@ export const terminalSuggestConfiguration: IStringDictionary<IConfigurationPrope
 	[TerminalSuggestSettingId.CdPath]: {
 		restricted: true,
 		markdownDescription: localize('suggest.cdPath', "Controls whether to enable $CDPATH support which exposes children of the folders in the $CDPATH variable regardless of the current working directory. $CDPATH is expected to be semi colon-separated on Windows and colon-separated on other platforms."),
+		type: 'string',
 		enum: ['off', 'relative', 'absolute'],
 		markdownEnumDescriptions: [
 			localize('suggest.cdPath.off', "Disable the feature."),
@@ -151,6 +157,19 @@ export const terminalSuggestConfiguration: IStringDictionary<IConfigurationPrope
 		default: 'absolute',
 		tags: ['preview']
 	},
+	[TerminalSuggestSettingId.InlineSuggestion]: {
+		restricted: true,
+		markdownDescription: localize('suggest.inlineSuggestion', "Controls whether the shell's inline suggestion should be detected and how it is scored."),
+		type: 'string',
+		enum: ['off', 'alwaysOnTopExceptExactMatch', 'alwaysOnTop'],
+		markdownEnumDescriptions: [
+			localize('suggest.inlineSuggestion.off', "Disable the feature."),
+			localize('suggest.inlineSuggestion.alwaysOnTopExceptExactMatch', "Enable the feature and sort the inline suggestion without forcing it to be on top. This means that exact matches will be will be above the inline suggestion."),
+			localize('suggest.inlineSuggestion.alwaysOnTop', "Enable the feature and always put the inline suggestion on top."),
+		],
+		default: 'alwaysOnTop',
+		tags: ['preview']
+	}
 };
 
 

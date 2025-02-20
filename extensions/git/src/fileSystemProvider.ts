@@ -39,12 +39,8 @@ interface CacheRow {
 const THREE_MINUTES = 1000 * 60 * 3;
 const FIVE_MINUTES = 1000 * 60 * 5;
 
-function sanitizeRef(
-	ref: string,
-	path: string,
-	repository: Repository,
-): string {
-	if (ref === "~") {
+function sanitizeRef(ref: string, path: string, submoduleOf: string | undefined, repository: Repository): string {
+	if (ref === '~') {
 		const fileUri = Uri.file(path);
 		const uriString = fileUri.toString();
 		const [indexStatus] = repository.indexGroup.resourceStates.filter(
@@ -55,6 +51,11 @@ function sanitizeRef(
 
 	if (/^~\d$/.test(ref)) {
 		return `:${ref[1]}`;
+	}
+
+	// Submodule HEAD
+	if (submoduleOf && (ref === 'index' || ref === 'wt')) {
+		return 'HEAD';
 	}
 
 	return ref;
@@ -188,16 +189,8 @@ export class GitFileSystemProvider implements FileSystemProvider {
 		}
 
 		try {
-			const details = await repository.getObjectDetails(
-				sanitizeRef(ref, path, repository),
-				path,
-			);
-			return {
-				type: FileType.File,
-				size: details.size,
-				mtime: this.mtime,
-				ctime: 0,
-			};
+			const details = await repository.getObjectDetails(sanitizeRef(ref, path, submoduleOf, repository), path);
+			return { type: FileType.File, size: details.size, mtime: this.mtime, ctime: 0 };
 		} catch {
 			// Empty tree
 			if (ref === (await repository.getEmptyTree())) {
@@ -264,10 +257,7 @@ export class GitFileSystemProvider implements FileSystemProvider {
 		this.cache.set(uri.toString(), cacheValue);
 
 		try {
-			return await repository.buffer(
-				sanitizeRef(ref, path, repository),
-				path,
-			);
+			return await repository.buffer(sanitizeRef(ref, path, submoduleOf, repository), path);
 		} catch {
 			// Empty tree
 			if (ref === (await repository.getEmptyTree())) {

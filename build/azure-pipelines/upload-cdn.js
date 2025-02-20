@@ -80,55 +80,44 @@ function wait(stream) {
 	});
 }
 async function main() {
-	const files = [];
-	const options = (compressed) => ({
-		account: process.env.AZURE_STORAGE_ACCOUNT,
-		credential,
-		container: process.env.VSCODE_QUALITY,
-		prefix: commit + "/",
-		contentSettings: {
-			contentEncoding: compressed ? "gzip" : undefined,
-			cacheControl: "max-age=31536000, public",
-		},
-	});
-	const all = vinyl_fs_1.default
-		.src("**", { cwd: "../vscode-web", base: "../vscode-web", dot: true })
-		.pipe((0, gulp_filter_1.default)((f) => !f.isDirectory()));
-	const compressed = all
-		.pipe(
-			(0, gulp_filter_1.default)((f) =>
-				MimeTypesToCompress.has(mime_1.default.lookup(f.path)),
-			),
-		)
-		.pipe((0, gulp_gzip_1.default)({ append: false }))
-		.pipe(azure.upload(options(true)));
-	const uncompressed = all
-		.pipe(
-			(0, gulp_filter_1.default)(
-				(f) => !MimeTypesToCompress.has(mime_1.default.lookup(f.path)),
-			),
-		)
-		.pipe(azure.upload(options(false)));
-	const out = event_stream_1.default.merge(compressed, uncompressed).pipe(
-		event_stream_1.default.through(function (f) {
-			console.log("Uploaded:", f.relative);
-			files.push(f.relative);
-			this.emit("data", f);
-		}),
-	);
-	console.log(`Uploading files to CDN...`); // debug
-	await wait(out);
-	const listing = new vinyl_1.default({
-		path: "files.txt",
-		contents: Buffer.from(files.join("\n")),
-		stat: { mode: 0o666 },
-	});
-	const filesOut = event_stream_1.default
-		.readArray([listing])
-		.pipe((0, gulp_gzip_1.default)({ append: false }))
-		.pipe(azure.upload(options(true)));
-	console.log(`Uploading: files.txt (${files.length} files)`); // debug
-	await wait(filesOut);
+    const files = [];
+    const options = (compressed) => ({
+        account: process.env.AZURE_STORAGE_ACCOUNT,
+        credential,
+        container: '$web',
+        prefix: `${process.env.VSCODE_QUALITY}/${commit}/`,
+        contentSettings: {
+            contentEncoding: compressed ? 'gzip' : undefined,
+            cacheControl: 'max-age=31536000, public'
+        }
+    });
+    const all = vinyl_fs_1.default.src('**', { cwd: '../vscode-web', base: '../vscode-web', dot: true })
+        .pipe((0, gulp_filter_1.default)(f => !f.isDirectory()));
+    const compressed = all
+        .pipe((0, gulp_filter_1.default)(f => MimeTypesToCompress.has(mime_1.default.lookup(f.path))))
+        .pipe((0, gulp_gzip_1.default)({ append: false }))
+        .pipe(azure.upload(options(true)));
+    const uncompressed = all
+        .pipe((0, gulp_filter_1.default)(f => !MimeTypesToCompress.has(mime_1.default.lookup(f.path))))
+        .pipe(azure.upload(options(false)));
+    const out = event_stream_1.default.merge(compressed, uncompressed)
+        .pipe(event_stream_1.default.through(function (f) {
+        console.log('Uploaded:', f.relative);
+        files.push(f.relative);
+        this.emit('data', f);
+    }));
+    console.log(`Uploading files to CDN...`); // debug
+    await wait(out);
+    const listing = new vinyl_1.default({
+        path: 'files.txt',
+        contents: Buffer.from(files.join('\n')),
+        stat: { mode: 0o666 }
+    });
+    const filesOut = event_stream_1.default.readArray([listing])
+        .pipe((0, gulp_gzip_1.default)({ append: false }))
+        .pipe(azure.upload(options(true)));
+    console.log(`Uploading: files.txt (${files.length} files)`); // debug
+    await wait(filesOut);
 }
 main().catch((err) => {
 	console.error(err);

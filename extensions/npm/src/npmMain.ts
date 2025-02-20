@@ -3,24 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as httpRequest from "request-light";
-import * as vscode from "vscode";
-import which from "which";
-
-import { runSelectedScript, selectAndRunScriptFromFolder } from "./commands";
-import { addJSONProviders } from "./features/jsonContributions";
-import { NpmScriptLensProvider } from "./npmScriptLens";
-import { NpmScriptsTreeDataProvider } from "./npmView";
-import {
-	invalidateHoverScriptsCache,
-	NpmScriptHoverProvider,
-} from "./scriptHover";
-import {
-	getPackageManager,
-	hasPackageJson,
-	invalidateTasksCache,
-	NpmTaskProvider,
-} from "./tasks";
+import * as httpRequest from 'request-light';
+import * as vscode from 'vscode';
+import { addJSONProviders } from './features/jsonContributions';
+import { runSelectedScript, selectAndRunScriptFromFolder } from './commands';
+import { NpmScriptsTreeDataProvider } from './npmView';
+import { getScriptRunner, getPackageManager, invalidateTasksCache, NpmTaskProvider, hasPackageJson } from './tasks';
+import { invalidateHoverScriptsCache, NpmScriptHoverProvider } from './scriptHover';
+import { NpmScriptLensProvider } from './npmScriptLens';
+import which from 'which';
 
 let treeDataProvider: NpmScriptsTreeDataProvider | undefined;
 
@@ -92,25 +83,22 @@ export async function activate(
 		);
 	}
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand(
-			"npm.runScriptFromFolder",
-			selectAndRunScriptFromFolder,
-		),
-	);
-	context.subscriptions.push(
-		vscode.commands.registerCommand("npm.refresh", () => {
-			invalidateScriptCaches();
-		}),
-	);
-	context.subscriptions.push(
-		vscode.commands.registerCommand("npm.packageManager", (args) => {
-			if (args instanceof vscode.Uri) {
-				return getPackageManager(context, args);
-			}
-			return "";
-		}),
-	);
+	context.subscriptions.push(vscode.commands.registerCommand('npm.runScriptFromFolder', selectAndRunScriptFromFolder));
+	context.subscriptions.push(vscode.commands.registerCommand('npm.refresh', () => {
+		invalidateScriptCaches();
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('npm.scriptRunner', (args) => {
+		if (args instanceof vscode.Uri) {
+			return getScriptRunner(args, context, true);
+		}
+		return '';
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('npm.packageManager', (args) => {
+		if (args instanceof vscode.Uri) {
+			return getPackageManager(args, context, true);
+		}
+		return '';
+	}));
 	context.subscriptions.push(new NpmScriptLensProvider());
 
 	context.subscriptions.push(

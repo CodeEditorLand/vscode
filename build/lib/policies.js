@@ -233,44 +233,22 @@ class StringPolicy extends BasePolicy {
 	}
 }
 class ObjectPolicy extends BasePolicy {
-	static from(
-		name,
-		category,
-		minimumVersion,
-		description,
-		moduleName,
-		settingNode,
-	) {
-		const type = getStringProperty(settingNode, "type");
-		if (type !== "object" && type !== "array") {
-			return undefined;
-		}
-		return new ObjectPolicy(
-			name,
-			category,
-			minimumVersion,
-			description,
-			moduleName,
-		);
-	}
-	constructor(name, category, minimumVersion, description, moduleName) {
-		super(
-			PolicyType.StringEnum,
-			name,
-			category,
-			minimumVersion,
-			description,
-			moduleName,
-		);
-	}
-	renderADMXElements() {
-		return [
-			`<text id="${this.name}" valueName="${this.name}" required="true" />`,
-		];
-	}
-	renderADMLPresentationContents() {
-		return `<textBox refId="${this.name}"><label>${this.name}:</label></textBox>`;
-	}
+    static from(name, category, minimumVersion, description, moduleName, settingNode) {
+        const type = getStringProperty(settingNode, 'type');
+        if (type !== 'object' && type !== 'array') {
+            return undefined;
+        }
+        return new ObjectPolicy(name, category, minimumVersion, description, moduleName);
+    }
+    constructor(name, category, minimumVersion, description, moduleName) {
+        super(PolicyType.StringEnum, name, category, minimumVersion, description, moduleName);
+    }
+    renderADMXElements() {
+        return [`<multiText id="${this.name}" valueName="${this.name}" required="true" />`];
+    }
+    renderADMLPresentationContents() {
+        return `<multiTextBox refId="${this.name}" />`;
+    }
 }
 class StringEnumPolicy extends BasePolicy {
 	enum_;

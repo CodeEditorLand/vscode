@@ -221,7 +221,7 @@ class QuickChat extends Disposable {
 				ChatWidget,
 				ChatAgentLocation.Panel,
 				{ isQuickChat: true },
-				{ autoScroll: true, renderInputOnTop: true, renderStyle: 'compact', menus: { inputSideToolbar: MenuId.ChatInputSide }, enableImplicitContext: true },
+				{ autoScroll: true, renderInputOnTop: true, renderStyle: 'compact', menus: { inputSideToolbar: MenuId.ChatInputSide } },
 				{
 					listForeground: quickInputForeground,
 					listBackground: quickInputBackground,
@@ -294,6 +294,14 @@ class QuickChat extends Disposable {
 						for (const group of item.edits) {
 							message.push({
 								kind: 'textEdit',
+								edits: group,
+								uri: item.uri
+							});
+						}
+					} else if (item.kind === 'notebookEditGroup') {
+						for (const group of item.edits) {
+							message.push({
+								kind: 'notebookEdit',
 								edits: group,
 								uri: item.uri
 							});

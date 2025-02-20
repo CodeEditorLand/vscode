@@ -5,20 +5,16 @@
 
 import { dirname } from "path";
 import {
-	CancellationToken,
-	commands,
-	ExtensionContext,
-	Hover,
-	HoverProvider,
-	l10n,
-	MarkdownString,
-	Position,
-	ProviderResult,
-	tasks,
-	TextDocument,
-	Uri,
-	workspace,
-} from "vscode";
+	CancellationToken, commands, ExtensionContext,
+	Hover, HoverProvider, MarkdownString, l10n, Position, ProviderResult,
+	tasks, TextDocument,
+	Uri, workspace
+} from 'vscode';
+import { INpmScriptInfo, readScripts } from './readScripts';
+import {
+	createScriptRunnerTask,
+	startDebugging
+} from './tasks';
 
 import { INpmScriptInfo, readScripts } from "./readScripts";
 import { createTask, getPackageManager, startDebugging } from "./tasks";
@@ -154,13 +150,7 @@ export class NpmScriptHoverProvider implements HoverProvider {
 		const documentUri = args.documentUri;
 		const folder = workspace.getWorkspaceFolder(documentUri);
 		if (folder) {
-			const task = await createTask(
-				await getPackageManager(this.context, folder.uri),
-				script,
-				["run", script],
-				folder,
-				documentUri,
-			);
+			const task = await createScriptRunnerTask(this.context, script, folder, documentUri);
 			await tasks.executeTask(task);
 		}
 	}

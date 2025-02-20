@@ -12,12 +12,8 @@ steps:
     - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - template: ./distro/download-distro.yml@self
 
-          - task: AzureKeyVault@2
-            displayName: "Azure Key Vault: Get Secrets"
-            inputs:
-                azureSubscription: vscode
-                KeyVaultName: vscode-build-secrets
-                SecretsFilter: "github-distro-mixin-password"
+  - script: mkdir -p .build && node build/azure-pipelines/common/computeNodeModulesCacheKey.js compile $VSCODE_ARCH > .build/packagelockhash
+    displayName: Prepare node_modules cache key
 
     - script: node build/setup-npm-registry.js $NPM_REGISTRY
       condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
@@ -40,17 +36,10 @@ steps:
       condition: and(succeeded(), eq(variables.NODE_MODULES_RESTORED, 'true'))
       displayName: Extract node_modules cache
 
-    - script: |
-          set -e
-          # Set the private NPM registry to the global npmrc file
-          # so that authentication works for subfolders like build/, remote/, extensions/ etc
-          # which does not have their own .npmrc file
-          npm config set registry "$NPM_REGISTRY"
-          echo "##vso[task.setvariable variable=NPMRC_PATH]$(npm config get userconfig)"
-      condition:
-          and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'),
-          ne(variables['NPM_REGISTRY'], 'none'))
-      displayName: Setup NPM
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
+    - script: sudo apt update -y && sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
+      displayName: Install build tools
+      condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
     - task: npmAuthenticate@0
       inputs:
@@ -103,8 +92,8 @@ steps:
             workingDirectory: build
             displayName: Compile /build/ folder
 
-          - script: .github/workflows/check-clean-git-state.sh
-            displayName: Check /build/ folder
+    - script: tar -cz --exclude='.build/node_modules_cache' --exclude='.build/node_modules_list.txt' --exclude='.build/distro' -f $(Build.ArtifactStagingDirectory)/compilation.tar.gz $(ls -d .build out-* test/integration/browser/out test/smoke/out test/automation/out 2>/dev/null)
+      displayName: Compress compilation artifact
 
     - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: node build/azure-pipelines/distro/mixin-quality

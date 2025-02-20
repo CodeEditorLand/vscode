@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import "mocha";
-
-import * as vscode from "vscode";
-import type { Uri } from "vscode";
+import 'mocha';
+import * as vscode from 'vscode';
+import type { ICompletionResource } from '../types';
+import type { Uri } from 'vscode';
 
 export interface ISuiteSpec {
 	name: string;
@@ -23,7 +23,7 @@ export interface ITestSpec {
 		type: "files" | "folders" | "both";
 		cwd: Uri;
 	};
-	expectedCompletions?: string[];
+	expectedCompletions?: (string | ICompletionResource)[];
 }
 
 const fixtureDir = vscode.Uri.joinPath(

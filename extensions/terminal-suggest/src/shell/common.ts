@@ -3,20 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-	exec,
-	spawn,
-	type ExecOptionsWithStringEncoding,
-} from "node:child_process";
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
+import { exec, spawn, type ExecOptionsWithStringEncoding, type SpawnOptionsWithoutStdio } from 'node:child_process';
+import type { ICompletionResource } from '../types';
 
-import type { ICompletionResource } from "../types";
-
-export async function spawnHelper(
-	command: string,
-	args: string[],
-	options: ExecOptionsWithStringEncoding,
-): Promise<string> {
+export async function spawnHelper(command: string, args: string[], options: SpawnOptionsWithoutStdio): Promise<string> {
 	// This must be run with interactive, otherwise there's a good chance aliases won't
 	// be set up. Note that this could differ from the actual aliases as it's a new bash
 	// session, for the same reason this would not include aliases that are created
@@ -37,10 +28,34 @@ export async function spawnHelper(
 	});
 }
 
-export async function execHelper(
-	commandLine: string,
-	options: ExecOptionsWithStringEncoding,
-): Promise<string> {
+export interface ISpawnHelperResult {
+	stdout: string;
+	stderr: string;
+	exitCode: number;
+}
+export async function spawnHelper2(command: string, args: string[], options: SpawnOptionsWithoutStdio): Promise<ISpawnHelperResult> {
+	// This must be run with interactive, otherwise there's a good chance aliases won't
+	// be set up. Note that this could differ from the actual aliases as it's a new bash
+	// session, for the same reason this would not include aliases that are created
+	// by simply running `alias ...` in the terminal.
+	return new Promise<ISpawnHelperResult>((resolve, reject) => {
+		const stdout: string[] = [];
+		const stderr: string[] = [];
+		const child = spawn(command, args, options);
+		child.stdout.on('data', (data) => stdout.push(data));
+		child.stderr.on('data', (data) => stderr.push(data));
+		child.on('error', (error) => reject(error));
+		child.on('close', (code) => {
+			resolve({
+				stdout: stdout.join(''),
+				stderr: stderr.join(''),
+				exitCode: code ?? -1
+			});
+		});
+	});
+}
+
+export async function execHelper(commandLine: string, options: ExecOptionsWithStringEncoding): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		exec(commandLine, options, (error, stdout) => {
 			if (error) {
@@ -76,7 +91,7 @@ export async function getAliasesHelper(
 		}
 		definitionCommand = match.groups.resolved.substring(0, definitionIndex);
 		result.push({
-			label: match.groups.alias,
+			label: { label: match.groups.alias, description: match.groups.resolved },
 			detail: match.groups.resolved,
 			kind: vscode.TerminalCompletionItemKind.Alias,
 			definitionCommand,
@@ -84,3 +99,4 @@ export async function getAliasesHelper(
 	}
 	return result;
 }
+

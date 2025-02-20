@@ -24,8 +24,7 @@ const completionSpec: Fig.Spec = {
 		},
 		{
 			name: "-a",
-			description:
-				"Include directory entries whose names begin with a dot (.)",
+			description: "Include directory entries whose names begin with a dot (.)",
 		},
 		{
 			name: "-B",
@@ -63,8 +62,7 @@ const completionSpec: Fig.Spec = {
 		},
 		{
 			name: "-f",
-			description:
-				"Output is not sorted.  This option turns on the -a option",
+			description: "Output is not sorted.  This option turns on the -a option",
 		},
 		{
 			name: "-G",
@@ -120,10 +118,7 @@ const completionSpec: Fig.Spec = {
 			name: "-O",
 			description: "Include the file flags in a long (-l) output",
 		},
-		{
-			name: "-o",
-			description: "List in long format, but omit the group id",
-		},
+		{ name: "-o", description: "List in long format, but omit the group id" },
 		{
 			name: "-P",
 			description:
@@ -139,10 +134,7 @@ const completionSpec: Fig.Spec = {
 			description:
 				"Force printing of non-graphic characters in file names as the character `?'; this is the default when output is to a terminal",
 		},
-		{
-			name: "-R",
-			description: "Recursively list subdirectories encountered",
-		},
+		{ name: "-R", description: "Recursively list subdirectories encountered" },
 		{
 			name: "-r",
 			description:
@@ -181,8 +173,7 @@ const completionSpec: Fig.Spec = {
 		},
 		{
 			name: "-W",
-			description:
-				"Display whiteouts when scanning directories.  (-S) flag)",
+			description: "Display whiteouts when scanning directories.  (-S) flag)",
 		},
 		{
 			name: "-w",

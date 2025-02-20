@@ -472,192 +472,226 @@ class VinylScriptSnapshot extends ScriptSnapshot {
     }
 }
 class LanguageServiceHost implements ts.LanguageServiceHost {
-    private readonly _snapshots: {
-        [path: string]: ScriptSnapshot;
-    };
-    private readonly _filesInProject: Set<string>;
-    private readonly _filesAdded: Set<string>;
-    private readonly _dependencies: utils.graph.Graph<string>;
-    private readonly _dependenciesRecomputeList: string[];
-    private readonly _fileNameToDeclaredModule: {
-        [path: string]: string[];
-    };
-    private _projectVersion: number;
-    constructor(private readonly _cmdLine: ts.ParsedCommandLine, private readonly _projectPath: string, private readonly _log: (topic: string, message: string) => void) {
-        this._snapshots = Object.create(null);
-        this._filesInProject = new Set(_cmdLine.fileNames);
-        this._filesAdded = new Set();
-        this._dependencies = new utils.graph.Graph<string>();
-        this._dependenciesRecomputeList = [];
-        this._fileNameToDeclaredModule = Object.create(null);
-        this._projectVersion = 1;
-    }
-    log(_s: string): void {
-        // console.log(s);
-    }
-    trace(_s: string): void {
-        // console.log(s);
-    }
-    error(s: string): void {
-        console.error(s);
-    }
-    getCompilationSettings(): ts.CompilerOptions {
-        return this._cmdLine.options;
-    }
-    getProjectVersion(): string {
-        return String(this._projectVersion);
-    }
-    getScriptFileNames(): string[] {
-        return Object.keys(this._snapshots).filter((path) => this._filesInProject.has(path) || this._filesAdded.has(path));
-    }
-    getScriptVersion(filename: string): string {
-        filename = normalize(filename);
-        const result = this._snapshots[filename];
-        if (result) {
-            return result.getVersion();
-        }
-        return "UNKNWON_FILE_" + Math.random().toString(16).slice(2);
-    }
-    getScriptSnapshot(filename: string, resolve: boolean = true): ScriptSnapshot {
-        filename = normalize(filename);
-        let result = this._snapshots[filename];
-        if (!result && resolve) {
-            try {
-                result = new VinylScriptSnapshot(new Vinyl(<any>{
-                    path: filename,
-                    contents: fs.readFileSync(filename),
-                    base: this.getCompilationSettings().outDir,
-                    stat: fs.statSync(filename),
-                }));
-                this.addScriptSnapshot(filename, result);
-            }
-            catch (e) {
-                // ignore
-            }
-        }
-        return result;
-    }
-    private static _declareModule = /declare\s+module\s+('|")(.+)\1/g;
-    addScriptSnapshot(filename: string, snapshot: ScriptSnapshot): ScriptSnapshot {
-        this._projectVersion++;
-        filename = normalize(filename);
-        const old = this._snapshots[filename];
-        if (!old &&
-            !this._filesInProject.has(filename) &&
-            !filename.endsWith(".d.ts")) {
-            //                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
-            //                                              not very proper!
-            this._filesAdded.add(filename);
-        }
-        if (!old || old.getVersion() !== snapshot.getVersion()) {
-            this._dependenciesRecomputeList.push(filename);
-            // (cheap) check for declare module
-            LanguageServiceHost._declareModule.lastIndex = 0;
-            let match: RegExpExecArray | null | undefined;
-            while ((match = LanguageServiceHost._declareModule.exec(snapshot.getText(0, snapshot.getLength())))) {
-                let declaredModules = this._fileNameToDeclaredModule[filename];
-                if (!declaredModules) {
-                    this._fileNameToDeclaredModule[filename] = declaredModules =
-                        [];
-                }
-                declaredModules.push(match[2]);
-            }
-        }
-        this._snapshots[filename] = snapshot;
-        return old;
-    }
-    removeScriptSnapshot(filename: string): boolean {
-        this._filesInProject.delete(filename);
-        this._filesAdded.delete(filename);
-        this._projectVersion++;
-        filename = normalize(filename);
-        delete this._fileNameToDeclaredModule[filename];
-        return delete this._snapshots[filename];
-    }
-    getCurrentDirectory(): string {
-        return path.dirname(this._projectPath);
-    }
-    getDefaultLibFileName(options: ts.CompilerOptions): string {
-        return ts.getDefaultLibFilePath(options);
-    }
-    readonly directoryExists = ts.sys.directoryExists;
-    readonly getDirectories = ts.sys.getDirectories;
-    readonly fileExists = ts.sys.fileExists;
-    readonly readFile = ts.sys.readFile;
-    readonly readDirectory = ts.sys.readDirectory;
-    // ---- dependency management
-    collectDependents(filename: string, target: string[]): void {
-        while (this._dependenciesRecomputeList.length) {
-            this._processFile(this._dependenciesRecomputeList.pop()!);
-        }
-        filename = normalize(filename);
-        const node = this._dependencies.lookup(filename);
-        if (node) {
-            node.incoming.forEach((entry) => target.push(entry.data));
-        }
-    }
-    hasCyclicDependency(): string | undefined {
-        // Ensure dependencies are up to date
-        while (this._dependenciesRecomputeList.length) {
-            this._processFile(this._dependenciesRecomputeList.pop()!);
-        }
-        const cycle = this._dependencies.findCycle();
-        return cycle ? cycle.join(" -> ") : undefined;
-    }
-    _processFile(filename: string): void {
-        if (filename.match(/.*\.d\.ts$/)) {
-            return;
-        }
-        filename = normalize(filename);
-        const snapshot = this.getScriptSnapshot(filename);
-        if (!snapshot) {
-            this._log("processFile", `Missing snapshot for: ${filename}`);
-            return;
-        }
-        const info = ts.preProcessFile(snapshot.getText(0, snapshot.getLength()), true);
-        // (0) clear out old dependencies
-        this._dependencies.resetNode(filename);
-        // (1) ///-references
-        info.referencedFiles.forEach((ref) => {
-            this._dependencies.inertEdge(filename, normalize(path.resolve(path.dirname(filename), ref.fileName)));
-        });
-        // (2) import-require statements
-        info.importedFiles.forEach((ref) => {
-            if (!ref.fileName.startsWith(".") ||
-                path.extname(ref.fileName) === "") {
-                // node module?
-                return;
-            }
-            let dirname = filename;
-            let found = false;
-            while (!found && dirname.indexOf(normalize(this.getCurrentDirectory())) === 0) {
-                dirname = path.dirname(dirname);
-                let resolvedPath = path.resolve(dirname, ref.fileName);
-                if (resolvedPath.endsWith(".js")) {
-                    resolvedPath = resolvedPath.slice(0, -3);
-                }
-                const normalizedPath = normalize(resolvedPath);
-                if (this.getScriptSnapshot(normalizedPath + ".ts")) {
-                    this._dependencies.inertEdge(filename, normalizedPath + ".ts");
-                    found = true;
-                }
-                else if (this.getScriptSnapshot(normalizedPath + ".d.ts")) {
-                    this._dependencies.inertEdge(filename, normalizedPath + ".d.ts");
-                    found = true;
-                }
-                else if (this.getScriptSnapshot(normalizedPath + ".js")) {
-                    this._dependencies.inertEdge(filename, normalizedPath + ".js");
-                    found = true;
-                }
-            }
-            if (!found) {
-                for (const key in this._fileNameToDeclaredModule) {
-                    if (this._fileNameToDeclaredModule[key] &&
-                        ~this._fileNameToDeclaredModule[key].indexOf(ref.fileName)) {
-                        this._dependencies.inertEdge(filename, key);
-                    }
-                }
-            }
-        });
-    }
+
+	private readonly _snapshots: { [path: string]: ScriptSnapshot };
+	private readonly _filesInProject: Set<string>;
+	private readonly _filesAdded: Set<string>;
+	private readonly _dependencies: utils.graph.Graph<string>;
+	private readonly _dependenciesRecomputeList: string[];
+	private readonly _fileNameToDeclaredModule: { [path: string]: string[] };
+
+	private _projectVersion: number;
+
+	constructor(
+		private readonly _cmdLine: ts.ParsedCommandLine,
+		private readonly _projectPath: string,
+		private readonly _log: (topic: string, message: string) => void
+	) {
+		this._snapshots = Object.create(null);
+		this._filesInProject = new Set(_cmdLine.fileNames);
+		this._filesAdded = new Set();
+		this._dependencies = new utils.graph.Graph<string>();
+		this._dependenciesRecomputeList = [];
+		this._fileNameToDeclaredModule = Object.create(null);
+
+		this._projectVersion = 1;
+	}
+
+	log(_s: string): void {
+		// console.log(s);
+	}
+
+	trace(_s: string): void {
+		// console.log(s);
+	}
+
+	error(s: string): void {
+		console.error(s);
+	}
+
+	getCompilationSettings(): ts.CompilerOptions {
+		return this._cmdLine.options;
+	}
+
+	getProjectVersion(): string {
+		return String(this._projectVersion);
+	}
+
+	getScriptFileNames(): string[] {
+		const res = Object.keys(this._snapshots).filter(path => this._filesInProject.has(path) || this._filesAdded.has(path));
+		return res;
+	}
+
+	getScriptVersion(filename: string): string {
+		filename = normalize(filename);
+		const result = this._snapshots[filename];
+		if (result) {
+			return result.getVersion();
+		}
+		return 'UNKNWON_FILE_' + Math.random().toString(16).slice(2);
+	}
+
+	getScriptSnapshot(filename: string, resolve: boolean = true): ScriptSnapshot {
+		filename = normalize(filename);
+		let result = this._snapshots[filename];
+		if (!result && resolve) {
+			try {
+				result = new VinylScriptSnapshot(new Vinyl(<any>{
+					path: filename,
+					contents: fs.readFileSync(filename),
+					base: this.getCompilationSettings().outDir,
+					stat: fs.statSync(filename)
+				}));
+				this.addScriptSnapshot(filename, result);
+			} catch (e) {
+				// ignore
+			}
+		}
+		return result;
+	}
+
+	private static _declareModule = /declare\s+module\s+('|")(.+)\1/g;
+
+	addScriptSnapshot(filename: string, snapshot: ScriptSnapshot): ScriptSnapshot {
+		this._projectVersion++;
+		filename = normalize(filename);
+		const old = this._snapshots[filename];
+		if (!old && !this._filesInProject.has(filename) && !filename.endsWith('.d.ts')) {
+			//                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+			//                                              not very proper!
+			this._filesAdded.add(filename);
+		}
+		if (!old || old.getVersion() !== snapshot.getVersion()) {
+			this._dependenciesRecomputeList.push(filename);
+
+			// (cheap) check for declare module
+			LanguageServiceHost._declareModule.lastIndex = 0;
+			let match: RegExpExecArray | null | undefined;
+			while ((match = LanguageServiceHost._declareModule.exec(snapshot.getText(0, snapshot.getLength())))) {
+				let declaredModules = this._fileNameToDeclaredModule[filename];
+				if (!declaredModules) {
+					this._fileNameToDeclaredModule[filename] = declaredModules = [];
+				}
+				declaredModules.push(match[2]);
+			}
+		}
+		this._snapshots[filename] = snapshot;
+		return old;
+	}
+
+	removeScriptSnapshot(filename: string): boolean {
+		this._filesInProject.delete(filename);
+		this._filesAdded.delete(filename);
+		this._projectVersion++;
+		filename = normalize(filename);
+		delete this._fileNameToDeclaredModule[filename];
+		return delete this._snapshots[filename];
+	}
+
+	getCurrentDirectory(): string {
+		return path.dirname(this._projectPath);
+	}
+
+	getDefaultLibFileName(options: ts.CompilerOptions): string {
+		return ts.getDefaultLibFilePath(options);
+	}
+
+	readonly directoryExists = ts.sys.directoryExists;
+	readonly getDirectories = ts.sys.getDirectories;
+	readonly fileExists = ts.sys.fileExists;
+	readonly readFile = ts.sys.readFile;
+	readonly readDirectory = ts.sys.readDirectory;
+
+	// ---- dependency management
+
+	collectDependents(filename: string, target: string[]): void {
+		while (this._dependenciesRecomputeList.length) {
+			this._processFile(this._dependenciesRecomputeList.pop()!);
+		}
+		filename = normalize(filename);
+		const node = this._dependencies.lookup(filename);
+		if (node) {
+			node.incoming.forEach(entry => target.push(entry.data));
+		}
+	}
+
+	hasCyclicDependency(): string | undefined {
+		// Ensure dependencies are up to date
+		while (this._dependenciesRecomputeList.length) {
+			this._processFile(this._dependenciesRecomputeList.pop()!);
+		}
+		const cycle = this._dependencies.findCycle();
+		return cycle
+			? cycle.join(' -> ')
+			: undefined;
+	}
+
+	_processFile(filename: string): void {
+		if (filename.match(/.*\.d\.ts$/)) {
+			return;
+		}
+		filename = normalize(filename);
+		const snapshot = this.getScriptSnapshot(filename);
+		if (!snapshot) {
+			this._log('processFile', `Missing snapshot for: ${filename}`);
+			return;
+		}
+		const info = ts.preProcessFile(snapshot.getText(0, snapshot.getLength()), true);
+
+		// (0) clear out old dependencies
+		this._dependencies.resetNode(filename);
+
+		// (1) ///-references
+		info.referencedFiles.forEach(ref => {
+			const resolvedPath = path.resolve(path.dirname(filename), ref.fileName);
+			const normalizedPath = normalize(resolvedPath);
+
+			this._dependencies.inertEdge(filename, normalizedPath);
+		});
+
+		// (2) import-require statements
+		info.importedFiles.forEach(ref => {
+
+			if (!ref.fileName.startsWith('.')) {
+				// node module?
+				return;
+			}
+
+
+			const stopDirname = normalize(this.getCurrentDirectory());
+			let dirname = filename;
+			let found = false;
+
+
+			while (!found && dirname.indexOf(stopDirname) === 0) {
+				dirname = path.dirname(dirname);
+				let resolvedPath = path.resolve(dirname, ref.fileName);
+				if (resolvedPath.endsWith('.js')) {
+					resolvedPath = resolvedPath.slice(0, -3);
+				}
+				const normalizedPath = normalize(resolvedPath);
+
+				if (this.getScriptSnapshot(normalizedPath + '.ts')) {
+					this._dependencies.inertEdge(filename, normalizedPath + '.ts');
+					found = true;
+
+				} else if (this.getScriptSnapshot(normalizedPath + '.d.ts')) {
+					this._dependencies.inertEdge(filename, normalizedPath + '.d.ts');
+					found = true;
+
+				} else if (this.getScriptSnapshot(normalizedPath + '.js')) {
+					this._dependencies.inertEdge(filename, normalizedPath + '.js');
+					found = true;
+				}
+			}
+
+			if (!found) {
+				for (const key in this._fileNameToDeclaredModule) {
+					if (this._fileNameToDeclaredModule[key] && ~this._fileNameToDeclaredModule[key].indexOf(ref.fileName)) {
+						this._dependencies.inertEdge(filename, key);
+					}
+				}
+			}
+		});
+	}
 }

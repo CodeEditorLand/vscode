@@ -19,11 +19,7 @@ vscode.workspace.registerFileSystemProvider(testFs.scheme, testFs, {
 	isCaseSensitive: testFs.isCaseSensitive,
 });
 
-export async function createRandomFile(
-	contents = "",
-	dir: vscode.Uri | undefined = undefined,
-	ext = "",
-): Promise<vscode.Uri> {
+export async function createRandomFile(contents: string | Uint8Array = '', dir: vscode.Uri | undefined = undefined, ext = ''): Promise<vscode.Uri> {
 	let fakeFile: vscode.Uri;
 	if (dir) {
 		assert.strictEqual(dir.scheme, testFs.scheme);

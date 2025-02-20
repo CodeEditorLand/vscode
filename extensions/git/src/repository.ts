@@ -3,46 +3,28 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fs from "fs";
-import * as path from "path";
-import TelemetryReporter from "@vscode/extension-telemetry";
-import * as iconv from "@vscode/iconv-lite-umd";
-import picomatch from "picomatch";
-import {
-	CancellationError,
-	CancellationToken,
-	CancellationTokenSource,
-	Command,
-	commands,
-	Disposable,
-	Event,
-	EventEmitter,
-	FileDecoration,
-	l10n,
-	LogLevel,
-	LogOutputChannel,
-	Memento,
-	ProgressLocation,
-	ProgressOptions,
-	QuickDiffProvider,
-	RelativePattern,
-	scm,
-	SourceControl,
-	SourceControlInputBox,
-	SourceControlInputBoxValidation,
-	SourceControlInputBoxValidationType,
-	SourceControlResourceDecorations,
-	SourceControlResourceGroup,
-	SourceControlResourceState,
-	TabInputNotebookDiff,
-	TabInputTextDiff,
-	TabInputTextMultiDiff,
-	ThemeColor,
-	Uri,
-	window,
-	workspace,
-	WorkspaceEdit,
-} from "vscode";
+import TelemetryReporter from '@vscode/extension-telemetry';
+import * as fs from 'fs';
+import * as path from 'path';
+import picomatch from 'picomatch';
+import { CancellationError, CancellationToken, CancellationTokenSource, Command, commands, Disposable, Event, EventEmitter, FileDecoration, l10n, LogLevel, LogOutputChannel, Memento, ProgressLocation, ProgressOptions, QuickDiffProvider, RelativePattern, scm, SourceControl, SourceControlInputBox, SourceControlInputBoxValidation, SourceControlInputBoxValidationType, SourceControlResourceDecorations, SourceControlResourceGroup, SourceControlResourceState, TabInputNotebookDiff, TabInputTextDiff, TabInputTextMultiDiff, ThemeColor, Uri, window, workspace, WorkspaceEdit } from 'vscode';
+import { ActionButton } from './actionButton';
+import { ApiRepository } from './api/api1';
+import { Branch, BranchQuery, Change, CommitOptions, FetchOptions, ForcePushMode, GitErrorCodes, LogOptions, Ref, RefQuery, RefType, Remote, Status } from './api/git';
+import { AutoFetcher } from './autofetch';
+import { GitBranchProtectionProvider, IBranchProtectionProviderRegistry } from './branchProtection';
+import { debounce, memoize, throttle } from './decorators';
+import { Repository as BaseRepository, BlameInformation, Commit, GitError, LogFileOptions, LsTreeElement, PullOptions, Stash, Submodule } from './git';
+import { GitHistoryProvider } from './historyProvider';
+import { Operation, OperationKind, OperationManager, OperationResult } from './operation';
+import { CommitCommandsCenter, IPostCommitCommandsProviderRegistry } from './postCommitCommands';
+import { IPushErrorHandlerRegistry } from './pushError';
+import { IRemoteSourcePublisherRegistry } from './remotePublisher';
+import { StatusBarCommands } from './statusbar';
+import { toGitUri } from './uri';
+import { anyEvent, combinedDisposable, debounceEvent, dispose, EmptyDisposable, eventToPromise, filterEvent, find, getCommitShortHash, IDisposable, isDescendant, isRemote, Limiter, onceEvent, pathEquals, relativePath } from './util';
+import { IFileWatcher, watch } from './watch';
+import { ISourceControlHistoryItemDetailsProviderRegistry } from './historyItemDetailsProvider';
 
 import { ActionButton } from "./actionButton";
 import { ApiRepository } from "./api/api1";
@@ -1785,31 +1767,9 @@ export class Repository implements Disposable {
 		);
 	}
 
-	async stage(resource: Uri, contents: string): Promise<void> {
-		const path = relativePath(
-			this.repository.root,
-			resource.fsPath,
-		).replace(/\\/g, "/");
+	async stage(resource: Uri, contents: string, encoding: string): Promise<void> {
 		await this.run(Operation.Stage, async () => {
-			const configFiles = workspace.getConfiguration(
-				"files",
-				Uri.file(resource.fsPath),
-			);
-			let encoding = configFiles.get<string>("encoding") ?? "utf8";
-			const autoGuessEncoding =
-				configFiles.get<boolean>("autoGuessEncoding") === true;
-			const candidateGuessEncodings =
-				configFiles.get<string[]>("candidateGuessEncodings") ?? [];
-
-			if (autoGuessEncoding) {
-				encoding =
-					detectEncoding(
-						Buffer.from(contents),
-						candidateGuessEncodings,
-					) ?? encoding;
-			}
-
-			encoding = iconv.encodingExists(encoding) ? encoding : "utf8";
+			const path = relativePath(this.repository.root, resource.fsPath).replace(/\\/g, '/');
 			await this.repository.stage(path, contents, encoding);
 
 			this._onDidChangeOriginalResource.fire(resource);
@@ -1923,26 +1883,7 @@ export class Repository implements Disposable {
 					]
 				: [];
 
-		if (this.mergeInProgress) {
-			await this.run(
-				Operation.MergeContinue,
-				async () => {
-					if (opts.all) {
-						const addOpts =
-							opts.all === "tracked" ? { update: true } : {};
-						await this.repository.add([], addOpts);
-					}
-
-					await this.repository.mergeContinue();
-					await this.commitOperationCleanup(
-						message,
-						indexResources,
-						workingGroupResources,
-					);
-				},
-				() => this.commitOperationGetOptimisticResourceGroups(opts),
-			);
-		} else if (this.rebaseCommit) {
+		if (this.rebaseCommit) {
 			await this.run(
 				Operation.RebaseContinue,
 				async () => {
@@ -2042,6 +1983,9 @@ export class Repository implements Disposable {
 	}
 
 	async clean(resources: Uri[]): Promise<void> {
+		const config = workspace.getConfiguration('git');
+		const untrackedChangesSoftDelete = config.get<boolean>('untrackedChangesSoftDelete', true) && !isRemote;
+
 		await this.run(
 			Operation.Clean(!this.optimisticUpdateEnabled()),
 			async () => {
@@ -2085,7 +2029,14 @@ export class Repository implements Disposable {
 					}
 				});
 
-				await this.repository.clean(toClean);
+				if (untrackedChangesSoftDelete) {
+					const limiter = new Limiter<void>(5);
+					await Promise.all(toClean.map(fsPath => limiter.queue(
+						async () => await workspace.fs.delete(Uri.file(fsPath), { useTrash: true }))));
+				} else {
+					await this.repository.clean(toClean);
+				}
+
 				try {
 					await this.repository.checkout("", toCheckout);
 				} catch (err) {
@@ -2739,19 +2690,18 @@ export class Repository implements Disposable {
 		);
 	}
 
-	async blame(path: string): Promise<string> {
-		return await this.run(Operation.Blame(true), () =>
-			this.repository.blame(path),
-		);
+	async blame(filePath: string): Promise<string> {
+		return await this.run(Operation.Blame(true), () => {
+			const path = relativePath(this.repository.root, filePath).replace(/\\/g, '/');
+			return this.repository.blame(path);
+		});
 	}
 
-	async blame2(
-		path: string,
-		ref?: string,
-	): Promise<BlameInformation[] | undefined> {
-		return await this.run(Operation.Blame(false), () =>
-			this.repository.blame2(path, ref),
-		);
+	async blame2(filePath: string, ref?: string): Promise<BlameInformation[] | undefined> {
+		return await this.run(Operation.Blame(false), () => {
+			const path = relativePath(this.repository.root, filePath).replace(/\\/g, '/');
+			return this.repository.blame2(path, ref);
+		});
 	}
 
 	@throttle
@@ -2897,38 +2847,16 @@ export class Repository implements Disposable {
 
 	async show(ref: string, filePath: string): Promise<string> {
 		return await this.run(Operation.Show, async () => {
-			const path = relativePath(this.repository.root, filePath).replace(
-				/\\/g,
-				"/",
-			);
-			const configFiles = workspace.getConfiguration(
-				"files",
-				Uri.file(filePath),
-			);
-			const defaultEncoding = configFiles.get<string>("encoding");
-			const autoGuessEncoding =
-				configFiles.get<boolean>("autoGuessEncoding");
-			const candidateGuessEncodings = configFiles.get<string[]>(
-				"candidateGuessEncodings",
-			);
+			const path = relativePath(this.repository.root, filePath).replace(/\\/g, '/');
 
 			try {
-				return await this.repository.bufferString(
-					`${ref}:${path}`,
-					defaultEncoding,
-					autoGuessEncoding,
-					candidateGuessEncodings,
-				);
+				const content = await this.repository.buffer(`${ref}:${path}`);
+				return await workspace.decode(content, Uri.file(filePath));
 			} catch (err) {
 				if (err.gitErrorCode === GitErrorCodes.WrongCase) {
-					const gitRelativePath =
-						await this.repository.getGitRelativePath(ref, path);
-					return await this.repository.bufferString(
-						`${ref}:${gitRelativePath}`,
-						defaultEncoding,
-						autoGuessEncoding,
-						candidateGuessEncodings,
-					);
+					const gitRelativePath = await this.repository.getGitRelativePath(ref, path);
+					const content = await this.repository.buffer(`${ref}:${gitRelativePath}`);
+					return await workspace.decode(content, Uri.file(filePath));
 				}
 
 				throw err;
@@ -2952,13 +2880,11 @@ export class Repository implements Disposable {
 		);
 	}
 
-	getObjectDetails(
-		ref: string,
-		filePath: string,
-	): Promise<{ mode: string; object: string; size: number }> {
-		return this.run(Operation.GetObjectDetails, () =>
-			this.repository.getObjectDetails(ref, filePath),
-		);
+	getObjectDetails(ref: string, filePath: string): Promise<{ mode: string; object: string; size: number }> {
+		return this.run(Operation.GetObjectDetails, () => {
+			const path = relativePath(this.repository.root, filePath).replace(/\\/g, '/');
+			return this.repository.getObjectDetails(ref, path);
+		});
 	}
 
 	detectObjectType(

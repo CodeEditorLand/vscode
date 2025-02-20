@@ -2,28 +2,31 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import cp from "child_process";
-import fs from "fs";
-import path from "path";
-import { Stream } from "stream";
-import ansiColors from "ansi-colors";
-import es from "event-stream";
-import fancyLog from "fancy-log";
-import glob from "glob";
-import gulp from "gulp";
-import buffer from "gulp-buffer";
-import filter from "gulp-filter";
-import rename from "gulp-rename";
-import * as jsoncParser from "jsonc-parser";
-import File from "vinyl";
-import webpack from "webpack";
-import { getExtensionStream, IExtensionDefinition } from "./builtInExtensions";
-import { getProductionDependencies } from "./dependencies";
-import { fetchGithub, fetchUrls } from "./fetch";
-import { getVersion } from "./getVersion";
-import { createStatsStream } from "./stats";
-import * as util2 from "./util";
-const vzip = require("gulp-vinyl-zip");
+
+import es from 'event-stream';
+import fs from 'fs';
+import cp from 'child_process';
+import glob from 'glob';
+import gulp from 'gulp';
+import path from 'path';
+import crypto from 'crypto';
+import { Stream } from 'stream';
+import File from 'vinyl';
+import { createStatsStream } from './stats';
+import * as util2 from './util';
+const vzip = require('gulp-vinyl-zip');
+import filter from 'gulp-filter';
+import rename from 'gulp-rename';
+import fancyLog from 'fancy-log';
+import ansiColors from 'ansi-colors';
+import buffer from 'gulp-buffer';
+import * as jsoncParser from 'jsonc-parser';
+import webpack from 'webpack';
+import { getProductionDependencies } from './dependencies';
+import { IExtensionDefinition, getExtensionStream } from './builtInExtensions';
+import { getVersion } from './getVersion';
+import { fetchUrls, fetchGithub } from './fetch';
+
 const root = path.dirname(path.dirname(__dirname));
 function minifyExtensionResources(input: Stream): Stream {
     const jsonFilter = filter(["**/*.json", "**/*.code-snippets"], {
@@ -78,22 +81,55 @@ export function fromMarketplace(serviceUrl: string, { name: extensionName, versi
         .pipe((require("gulp-json-editor") as typeof import("gulp-json-editor"))({ __metadata: metadata }))
         .pipe(packageJsonFilter.restore);
 }
-export function fromGithub({ name, version, repo, sha256, metadata, }: IExtensionDefinition): Stream {
-    fancyLog("Downloading extension from GH:", ansiColors.yellow(`${name}@${version}`), "...");
-    const packageJsonFilter = filter("package.json", { restore: true });
-    return fetchGithub(new URL(repo).pathname, {
-        version,
-        name: (name) => name.endsWith(".vsix"),
-        checksumSha256: sha256,
-    })
-        .pipe(buffer())
-        .pipe(vzip.src())
-        .pipe(filter("extension/**"))
-        .pipe(rename((p) => (p.dirname = p.dirname!.replace(/^extension\/?/, ""))))
-        .pipe(packageJsonFilter)
-        .pipe(buffer())
-        .pipe((require("gulp-json-editor") as typeof import("gulp-json-editor"))({ __metadata: metadata }))
-        .pipe(packageJsonFilter.restore);
+
+export function fromVsix(vsixPath: string, { name: extensionName, version, sha256, metadata }: IExtensionDefinition): Stream {
+	const json = require('gulp-json-editor') as typeof import('gulp-json-editor');
+
+	fancyLog('Using local VSIX for extension:', ansiColors.yellow(`${extensionName}@${version}`), '...');
+
+	const packageJsonFilter = filter('package.json', { restore: true });
+
+	return gulp.src(vsixPath)
+		.pipe(buffer())
+		.pipe(es.mapSync((f: File) => {
+			const hash = crypto.createHash('sha256');
+			hash.update(f.contents as Buffer);
+			const checksum = hash.digest('hex');
+			if (checksum !== sha256) {
+				throw new Error(`Checksum mismatch for ${vsixPath} (expected ${sha256}, actual ${checksum}))`);
+			}
+			return f;
+		}))
+		.pipe(vzip.src())
+		.pipe(filter('extension/**'))
+		.pipe(rename(p => p.dirname = p.dirname!.replace(/^extension\/?/, '')))
+		.pipe(packageJsonFilter)
+		.pipe(buffer())
+		.pipe(json({ __metadata: metadata }))
+		.pipe(packageJsonFilter.restore);
+}
+
+
+export function fromGithub({ name, version, repo, sha256, metadata }: IExtensionDefinition): Stream {
+	const json = require('gulp-json-editor') as typeof import('gulp-json-editor');
+
+	fancyLog('Downloading extension from GH:', ansiColors.yellow(`${name}@${version}`), '...');
+
+	const packageJsonFilter = filter('package.json', { restore: true });
+
+	return fetchGithub(new URL(repo).pathname, {
+		version,
+		name: name => name.endsWith('.vsix'),
+		checksumSha256: sha256
+	})
+		.pipe(buffer())
+		.pipe(vzip.src())
+		.pipe(filter('extension/**'))
+		.pipe(rename(p => p.dirname = p.dirname!.replace(/^extension\/?/, '')))
+		.pipe(packageJsonFilter)
+		.pipe(buffer())
+		.pipe(json({ __metadata: metadata }))
+		.pipe(packageJsonFilter.restore);
 }
 const productJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../../product.json"), "utf8"));
 const builtInExtensions: IExtensionDefinition[] = productJson.builtInExtensions || [];

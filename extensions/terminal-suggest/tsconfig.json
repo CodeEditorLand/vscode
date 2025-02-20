@@ -2,13 +2,11 @@
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
 		"outDir": "./out",
-		"types": ["node"],
-		"target": "es2020",
-		"module": "CommonJS",
-		"moduleResolution": "node",
-		"strict": true,
 		"esModuleInterop": true,
-		"skipLibCheck": true,
+		"experimentalDecorators": true,
+		"types": [
+			"node"
+		],
 
 		// Needed to suppress warnings in upstream completions
 		"noImplicitReturns": false,
