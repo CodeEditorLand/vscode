@@ -1,17 +1,7 @@
 {
 	"name": "bat",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin mmims/language-batchfile grammars/batchfile.cson ./syntaxes/batchfile.tmLanguage.json"
 	},
@@ -19,22 +9,22 @@
 		"grammars": [
 			{
 				"language": "bat",
-				"scopeName": "source.batchfile",
-				"path": "./syntaxes/batchfile.tmLanguage.json"
+				"path": "./syntaxes/batchfile.tmLanguage.json",
+				"scopeName": "source.batchfile"
 			}
 		],
 		"languages": [
 			{
-				"id": "bat",
-				"extensions": [
-					".bat",
-					".cmd"
-				],
 				"aliases": [
 					"Batch",
 					"bat"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".bat",
+					".cmd"
+				],
+				"id": "bat"
 			}
 		],
 		"snippets": [
@@ -44,7 +34,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "1.52.0"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

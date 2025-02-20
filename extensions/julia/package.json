@@ -1,13 +1,7 @@
 {
 	"name": "julia",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin JuliaEditorSupport/atom-language-julia grammars/julia_vscode.json ./syntaxes/julia.tmLanguage.json"
 	},
@@ -19,44 +13,43 @@
 		},
 		"grammars": [
 			{
-				"language": "julia",
-				"scopeName": "source.julia",
-				"path": "./syntaxes/julia.tmLanguage.json",
 				"embeddedLanguages": {
 					"meta.embedded.inline.cpp": "cpp",
 					"meta.embedded.inline.javascript": "javascript",
 					"meta.embedded.inline.python": "python",
 					"meta.embedded.inline.r": "r",
 					"meta.embedded.inline.sql": "sql"
-				}
+				},
+				"language": "julia",
+				"path": "./syntaxes/julia.tmLanguage.json",
+				"scopeName": "source.julia"
 			}
 		],
 		"languages": [
 			{
-				"id": "julia",
 				"aliases": [
 					"Julia",
 					"julia"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".jl"
 				],
 				"firstLine": "^#!\\s*/.*\\bjulia[0-9.-]*\\b",
-				"configuration": "./language-configuration.json"
+				"id": "julia"
 			},
 			{
-				"id": "juliamarkdown",
 				"aliases": [
 					"Julia Markdown",
 					"juliamarkdown"
 				],
 				"extensions": [
 					".jmd"
-				]
+				],
+				"id": "juliamarkdown"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

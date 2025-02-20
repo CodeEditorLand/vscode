@@ -1,17 +1,7 @@
 {
 	"name": "groovy",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/groovy.tmbundle Syntaxes/Groovy.tmLanguage ./syntaxes/groovy.tmLanguage.json"
 	},
@@ -19,17 +9,17 @@
 		"grammars": [
 			{
 				"language": "groovy",
-				"scopeName": "source.groovy",
-				"path": "./syntaxes/groovy.tmLanguage.json"
+				"path": "./syntaxes/groovy.tmLanguage.json",
+				"scopeName": "source.groovy"
 			}
 		],
 		"languages": [
 			{
-				"id": "groovy",
 				"aliases": [
 					"Groovy",
 					"groovy"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".groovy",
 					".gvy",
@@ -37,14 +27,14 @@
 					".jenkinsfile",
 					".nf"
 				],
-				"filenames": [
-					"Jenkinsfile"
-				],
 				"filenamePatterns": [
 					"Jenkinsfile*"
 				],
+				"filenames": [
+					"Jenkinsfile"
+				],
 				"firstLine": "^#!.*\\bgroovy\\b",
-				"configuration": "./language-configuration.json"
+				"id": "groovy"
 			}
 		],
 		"snippets": [
@@ -54,7 +44,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

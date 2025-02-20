@@ -1,48 +1,32 @@
 {
 	"name": "debug-auto-launch",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/extension",
 	"scripts": {
-		"compile": "gulp compile-extension:debug-auto-launch",
-		"watch": "gulp watch-extension:debug-auto-launch"
+		"compile": "gulp compile-extension:debug-auto-launch"
 	},
 	"contributes": {
 		"commands": [
 			{
+				"category": "Debug",
 				"command": "extension.node-debug.toggleAutoAttach",
-				"title": "%toggle.auto.attach%",
-				"category": "Debug"
+				"title": "%toggle.auto.attach%"
 			}
 		]
 	},
 	"activationEvents": [
 		"onStartupFinished"
 	],
-	"prettier": {
-		"arrowParens": "avoid",
-		"printWidth": 100,
-		"singleQuote": true,
-		"trailingComma": "all"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "1.5.0"
-	},
 	"icon": "media/icon.png",
 	"capabilities": {
-		"virtualWorkspaces": false,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": false
 	}
 }

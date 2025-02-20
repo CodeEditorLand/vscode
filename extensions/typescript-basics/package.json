@@ -1,18 +1,7 @@
 {
 	"name": "typescript",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"author": "vscode",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammars.mjs"
 	},
@@ -20,8 +9,17 @@
 		"grammars": [
 			{
 				"language": "typescript",
-				"scopeName": "source.ts",
 				"path": "./syntaxes/TypeScript.tmLanguage.json",
+				"scopeName": "source.ts",
+				"tokenTypes": {
+					"entity.name.function.tagged-template": "other",
+					"entity.name.type.instance.jsdoc": "other",
+					"meta.import string.quoted": "other",
+					"meta.template.expression": "other",
+					"meta.template.expression comment": "comment",
+					"meta.template.expression string": "string",
+					"variable.other.jsdoc": "other"
+				},
 				"unbalancedBracketScopes": [
 					"keyword.operator.relational",
 					"storage.type.function.arrow",
@@ -29,112 +27,112 @@
 					"meta.brace.angle",
 					"punctuation.definition.tag",
 					"keyword.operator.assignment.compound.bitwise.ts"
-				],
-				"tokenTypes": {
-					"meta.template.expression": "other",
-					"meta.template.expression string": "string",
-					"meta.template.expression comment": "comment",
-					"entity.name.type.instance.jsdoc": "other",
-					"entity.name.function.tagged-template": "other",
-					"meta.import string.quoted": "other",
-					"variable.other.jsdoc": "other"
-				}
+				]
 			},
 			{
+				"embeddedLanguages": {
+					"meta.embedded.expression.tsx": "typescriptreact",
+					"meta.tag.attributes.tsx": "typescriptreact",
+					"meta.tag.tsx": "jsx-tags",
+					"meta.tag.without-attributes.tsx": "jsx-tags"
+				},
 				"language": "typescriptreact",
-				"scopeName": "source.tsx",
 				"path": "./syntaxes/TypeScriptReact.tmLanguage.json",
+				"scopeName": "source.tsx",
+				"tokenTypes": {
+					"entity.name.function.tagged-template": "other",
+					"entity.name.type.instance.jsdoc": "other",
+					"meta.import string.quoted": "other",
+					"meta.template.expression": "other",
+					"meta.template.expression comment": "comment",
+					"meta.template.expression string": "string",
+					"variable.other.jsdoc": "other"
+				},
 				"unbalancedBracketScopes": [
 					"keyword.operator.relational",
 					"storage.type.function.arrow",
 					"keyword.operator.bitwise.shift",
 					"punctuation.definition.tag",
 					"keyword.operator.assignment.compound.bitwise.ts"
-				],
-				"embeddedLanguages": {
-					"meta.tag.tsx": "jsx-tags",
-					"meta.tag.without-attributes.tsx": "jsx-tags",
-					"meta.tag.attributes.tsx": "typescriptreact",
-					"meta.embedded.expression.tsx": "typescriptreact"
-				},
-				"tokenTypes": {
-					"meta.template.expression": "other",
-					"meta.template.expression string": "string",
-					"meta.template.expression comment": "comment",
-					"entity.name.type.instance.jsdoc": "other",
-					"entity.name.function.tagged-template": "other",
-					"meta.import string.quoted": "other",
-					"variable.other.jsdoc": "other"
-				}
+				]
 			},
 			{
-				"scopeName": "documentation.injection.ts",
-				"path": "./syntaxes/jsdoc.ts.injection.tmLanguage.json",
 				"injectTo": [
 					"source.ts",
 					"source.tsx"
-				]
+				],
+				"path": "./syntaxes/jsdoc.ts.injection.tmLanguage.json",
+				"scopeName": "documentation.injection.ts"
 			},
 			{
-				"scopeName": "documentation.injection.js.jsx",
-				"path": "./syntaxes/jsdoc.js.injection.tmLanguage.json",
 				"injectTo": [
 					"source.js",
 					"source.js.jsx"
-				]
+				],
+				"path": "./syntaxes/jsdoc.js.injection.tmLanguage.json",
+				"scopeName": "documentation.injection.js.jsx"
 			}
 		],
 		"languages": [
 			{
-				"id": "typescript",
 				"aliases": [
 					"TypeScript",
 					"ts",
 					"typescript"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".ts",
 					".cts",
 					".mts"
 				],
-				"configuration": "./language-configuration.json"
+				"id": "typescript"
 			},
 			{
-				"id": "typescriptreact",
 				"aliases": [
 					"TypeScript JSX",
 					"TypeScript React",
 					"tsx"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".tsx"
 				],
-				"configuration": "./language-configuration.json"
+				"id": "typescriptreact"
 			},
 			{
-				"id": "jsonc",
-				"filenames": [
-					"tsconfig.json",
-					"jsconfig.json"
-				],
 				"filenamePatterns": [
 					"tsconfig.*.json",
 					"jsconfig.*.json",
 					"tsconfig-*.json",
 					"jsconfig-*.json"
-				]
+				],
+				"filenames": [
+					"tsconfig.json",
+					"jsconfig.json"
+				],
+				"id": "jsonc"
 			},
 			{
-				"id": "json",
 				"extensions": [
 					".tsbuildinfo"
-				]
+				],
+				"id": "json"
 			}
 		],
 		"semanticTokenScopes": [
 			{
 				"language": "typescript",
 				"scopes": {
+					"function": [
+						"entity.name.function.ts"
+					],
+					"function.defaultLibrary": [
+						"support.function.ts"
+					],
+					"namespace": [
+						"entity.name.type.module.ts"
+					],
 					"property": [
 						"variable.other.property.ts"
 					],
@@ -144,26 +142,26 @@
 					"variable": [
 						"variable.other.readwrite.ts"
 					],
-					"variable.readonly": [
-						"variable.other.constant.object.ts"
-					],
-					"function": [
-						"entity.name.function.ts"
-					],
-					"namespace": [
-						"entity.name.type.module.ts"
-					],
 					"variable.defaultLibrary": [
 						"support.variable.ts"
 					],
-					"function.defaultLibrary": [
-						"support.function.ts"
+					"variable.readonly": [
+						"variable.other.constant.object.ts"
 					]
 				}
 			},
 			{
 				"language": "typescriptreact",
 				"scopes": {
+					"function": [
+						"entity.name.function.tsx"
+					],
+					"function.defaultLibrary": [
+						"support.function.tsx"
+					],
+					"namespace": [
+						"entity.name.type.module.tsx"
+					],
 					"property": [
 						"variable.other.property.tsx"
 					],
@@ -173,20 +171,11 @@
 					"variable": [
 						"variable.other.readwrite.tsx"
 					],
-					"variable.readonly": [
-						"variable.other.constant.object.tsx"
-					],
-					"function": [
-						"entity.name.function.tsx"
-					],
-					"namespace": [
-						"entity.name.type.module.tsx"
-					],
 					"variable.defaultLibrary": [
 						"support.variable.tsx"
 					],
-					"function.defaultLibrary": [
-						"support.function.tsx"
+					"variable.readonly": [
+						"variable.other.constant.object.tsx"
 					]
 				}
 			}
@@ -202,7 +191,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

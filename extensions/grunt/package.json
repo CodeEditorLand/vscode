@@ -1,61 +1,49 @@
 {
 	"name": "grunt",
 	"displayName": "Grunt support for VS Code",
-	"version": "1.0.0",
-	"private": true,
 	"description": "Extension to add Grunt capabilities to VS Code.",
-	"categories": [
-		"Other"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/main",
 	"scripts": {
-		"compile": "gulp compile-extension:grunt",
-		"watch": "gulp watch-extension:grunt"
+		"compile": "gulp compile-extension:grunt"
 	},
 	"contributes": {
 		"configuration": {
 			"id": "grunt",
-			"type": "object",
-			"title": "Grunt",
 			"properties": {
 				"grunt.autoDetect": {
-					"scope": "application",
-					"type": "string",
+					"default": "off",
+					"description": "%config.grunt.autoDetect%",
 					"enum": [
 						"off",
 						"on"
 					],
-					"default": "off",
-					"description": "%config.grunt.autoDetect%"
+					"scope": "application",
+					"type": "string"
 				}
-			}
+			},
+			"title": "Grunt",
+			"type": "object"
 		},
 		"taskDefinitions": [
 			{
-				"type": "grunt",
+				"properties": {
+					"args": {
+						"description": "%grunt.taskDefinition.args.description%",
+						"type": "array"
+					},
+					"file": {
+						"description": "%grunt.taskDefinition.file.description%",
+						"type": "string"
+					},
+					"task": {
+						"description": "%grunt.taskDefinition.type.description%",
+						"type": "string"
+					}
+				},
 				"required": [
 					"task"
 				],
-				"properties": {
-					"task": {
-						"type": "string",
-						"description": "%grunt.taskDefinition.type.description%"
-					},
-					"args": {
-						"type": "array",
-						"description": "%grunt.taskDefinition.args.description%"
-					},
-					"file": {
-						"type": "string",
-						"description": "%grunt.taskDefinition.file.description%"
-					}
-				},
+				"type": "grunt",
 				"when": "shellExecutionSupported"
 			}
 		]
@@ -67,14 +55,11 @@
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "*"
-	},
 	"icon": "images/grunt.png",
 	"capabilities": {
-		"virtualWorkspaces": false,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": false
 	}
 }

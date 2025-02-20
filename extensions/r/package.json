@@ -1,17 +1,7 @@
 {
 	"name": "r",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin REditorSupport/vscode-R syntax/r.json ./syntaxes/r.tmLanguage.json"
 	},
@@ -19,28 +9,27 @@
 		"grammars": [
 			{
 				"language": "r",
-				"scopeName": "source.r",
-				"path": "./syntaxes/r.tmLanguage.json"
+				"path": "./syntaxes/r.tmLanguage.json",
+				"scopeName": "source.r"
 			}
 		],
 		"languages": [
 			{
-				"id": "r",
+				"aliases": [
+					"R",
+					"r"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".r",
 					".rhistory",
 					".rprofile",
 					".rt"
 				],
-				"aliases": [
-					"R",
-					"r"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "r"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

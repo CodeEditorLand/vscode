@@ -1,17 +1,7 @@
 {
 	"name": "sql",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammar.mjs"
 	},
@@ -19,26 +9,25 @@
 		"grammars": [
 			{
 				"language": "sql",
-				"scopeName": "source.sql",
-				"path": "./syntaxes/sql.tmLanguage.json"
+				"path": "./syntaxes/sql.tmLanguage.json",
+				"scopeName": "source.sql"
 			}
 		],
 		"languages": [
 			{
-				"id": "sql",
-				"extensions": [
-					".sql",
-					".dsql"
-				],
 				"aliases": [
 					"MS SQL",
 					"T-SQL"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".sql",
+					".dsql"
+				],
+				"id": "sql"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

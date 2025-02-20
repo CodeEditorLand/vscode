@@ -1,17 +1,7 @@
 {
 	"name": "csharp",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin dotnet/csharp-tmLanguage grammars/csharp.tmLanguage ./syntaxes/csharp.tmLanguage.json"
 	},
@@ -24,8 +14,8 @@
 		"grammars": [
 			{
 				"language": "csharp",
-				"scopeName": "source.cs",
 				"path": "./syntaxes/csharp.tmLanguage.json",
+				"scopeName": "source.cs",
 				"tokenTypes": {
 					"meta.interpolation": "other"
 				}
@@ -33,17 +23,17 @@
 		],
 		"languages": [
 			{
-				"id": "csharp",
+				"aliases": [
+					"C#",
+					"csharp"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".cs",
 					".csx",
 					".cake"
 				],
-				"aliases": [
-					"C#",
-					"csharp"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "csharp"
 			}
 		],
 		"snippets": [
@@ -53,7 +43,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

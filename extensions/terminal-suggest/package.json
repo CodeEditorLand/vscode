@@ -1,34 +1,21 @@
 {
-  "name": "terminal-suggest",
-  "publisher": "vscode",
-  "displayName": "%displayName%",
-  "description": "%description%",
-  "version": "1.0.1",
-  "private": true,
-  "license": "MIT",
-  "icon": "./src/media/icon.png",
-  "engines": {
-    "vscode": "^1.95.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "enabledApiProposals": [
-    "terminalCompletionProvider",
-    "terminalShellEnv",
-    "terminalShellType"
-  ],
-  "scripts": {
-    "compile": "npx gulp compile-extension:terminal-suggest",
-    "watch": "npx gulp watch-extension:terminal-suggest",
-    "pull-zshbuiltins": "ts-node ./scripts/pullZshBuiltins.ts"
-  },
-  "main": "./out/terminalSuggestMain",
-  "activationEvents": [
-    "onTerminalCompletionsRequested"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/microsoft/vscode.git"
-  }
+	"name": "terminal-suggest",
+	"displayName": "%displayName%",
+	"description": "%description%",
+	"main": "./out/terminalSuggestMain",
+	"scripts": {
+		"compile": "npx gulp compile-extension:terminal-suggest",
+		"pull-zshbuiltins": "ts-node ./scripts/pullZshBuiltins.ts"
+	},
+	"activationEvents": [
+		"onTerminalCompletionsRequested"
+	],
+	"dependencies": {},
+	"devDependencies": {},
+	"icon": "./src/media/icon.png",
+	"enabledApiProposals": [
+		"terminalCompletionProvider",
+		"terminalShellEnv",
+		"terminalShellType"
+	]
 }

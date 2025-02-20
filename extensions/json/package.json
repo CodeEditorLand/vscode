@@ -1,17 +1,7 @@
 {
 	"name": "json",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammars.js"
 	},
@@ -19,32 +9,32 @@
 		"grammars": [
 			{
 				"language": "json",
-				"scopeName": "source.json",
-				"path": "./syntaxes/JSON.tmLanguage.json"
+				"path": "./syntaxes/JSON.tmLanguage.json",
+				"scopeName": "source.json"
 			},
 			{
 				"language": "jsonc",
-				"scopeName": "source.json.comments",
-				"path": "./syntaxes/JSONC.tmLanguage.json"
+				"path": "./syntaxes/JSONC.tmLanguage.json",
+				"scopeName": "source.json.comments"
 			},
 			{
 				"language": "jsonl",
-				"scopeName": "source.json.lines",
-				"path": "./syntaxes/JSONL.tmLanguage.json"
+				"path": "./syntaxes/JSONL.tmLanguage.json",
+				"scopeName": "source.json.lines"
 			},
 			{
 				"language": "snippets",
-				"scopeName": "source.json.comments.snippets",
-				"path": "./syntaxes/snippets.tmLanguage.json"
+				"path": "./syntaxes/snippets.tmLanguage.json",
+				"scopeName": "source.json.comments.snippets"
 			}
 		],
 		"languages": [
 			{
-				"id": "json",
 				"aliases": [
 					"JSON",
 					"json"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".json",
 					".bowerrc",
@@ -64,17 +54,17 @@
 					"composer.lock",
 					".watchmanconfig"
 				],
+				"id": "json",
 				"mimetypes": [
 					"application/json",
 					"application/manifest+json"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			},
 			{
-				"id": "jsonc",
 				"aliases": [
 					"JSON with Comments"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".jsonc",
 					".eslintrc",
@@ -92,25 +82,25 @@
 					".ember-cli",
 					"typedoc.json"
 				],
-				"configuration": "./language-configuration.json"
+				"id": "jsonc"
 			},
 			{
-				"id": "jsonl",
 				"aliases": [
 					"JSON Lines"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".jsonl",
 					".ndjson"
 				],
 				"filenames": [],
-				"configuration": "./language-configuration.json"
+				"id": "jsonl"
 			},
 			{
-				"id": "snippets",
 				"aliases": [
 					"Code Snippets"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".code-snippets"
 				],
@@ -118,11 +108,10 @@
 					"**/User/snippets/*.json",
 					"**/User/profiles/*/snippets/*.json"
 				],
-				"configuration": "./language-configuration.json"
+				"id": "snippets"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

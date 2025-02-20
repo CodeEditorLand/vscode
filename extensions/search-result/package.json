@@ -1,19 +1,11 @@
 {
 	"name": "search-result",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/extension.js",
 	"browser": "./dist/extension.js",
 	"scripts": {
-		"generate-grammar": "node ./syntaxes/generateTMLanguage.js",
-		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:search-result ./tsconfig.json"
+		"generate-grammar": "node ./syntaxes/generateTMLanguage.js"
 	},
 	"contributes": {
 		"configurationDefaults": {
@@ -24,34 +16,33 @@
 		"grammars": [
 			{
 				"language": "search-result",
-				"scopeName": "text.searchResult",
-				"path": "./syntaxes/searchResult.tmLanguage.json"
+				"path": "./syntaxes/searchResult.tmLanguage.json",
+				"scopeName": "text.searchResult"
 			}
 		],
 		"languages": [
 			{
-				"id": "search-result",
+				"aliases": [
+					"Search Result"
+				],
 				"extensions": [
 					".code-search"
 				],
-				"aliases": [
-					"Search Result"
-				]
+				"id": "search-result"
 			}
 		]
 	},
 	"activationEvents": [
 		"onLanguage:search-result"
 	],
-	"engines": {
-		"vscode": "1.39.0"
-	},
+	"dependencies": {},
+	"devDependencies": {},
 	"icon": "images/icon.png",
 	"capabilities": {
-		"virtualWorkspaces": true,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": true
 	},
 	"enabledApiProposals": [
 		"documentFiltersExclusive"

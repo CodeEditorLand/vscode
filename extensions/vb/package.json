@@ -1,17 +1,7 @@
 {
 	"name": "vb",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/asp.vb.net.tmbundle Syntaxes/ASP%20VB.net.plist ./syntaxes/asp-vb-net.tmLanguage.json"
 	},
@@ -19,13 +9,17 @@
 		"grammars": [
 			{
 				"language": "vb",
-				"scopeName": "source.asp.vb.net",
-				"path": "./syntaxes/asp-vb-net.tmLanguage.json"
+				"path": "./syntaxes/asp-vb-net.tmLanguage.json",
+				"scopeName": "source.asp.vb.net"
 			}
 		],
 		"languages": [
 			{
-				"id": "vb",
+				"aliases": [
+					"Visual Basic",
+					"vb"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".vb",
 					".brs",
@@ -33,11 +27,7 @@
 					".bas",
 					".vba"
 				],
-				"aliases": [
-					"Visual Basic",
-					"vb"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "vb"
 			}
 		],
 		"snippets": [
@@ -47,7 +37,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

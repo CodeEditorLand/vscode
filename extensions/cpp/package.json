@@ -1,17 +1,7 @@
 {
 	"name": "cpp",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammars.js"
 	},
@@ -19,44 +9,49 @@
 		"grammars": [
 			{
 				"language": "c",
-				"scopeName": "source.c",
-				"path": "./syntaxes/c.tmLanguage.json"
+				"path": "./syntaxes/c.tmLanguage.json",
+				"scopeName": "source.c"
 			},
 			{
 				"language": "cpp",
-				"scopeName": "source.cpp.embedded.macro",
-				"path": "./syntaxes/cpp.embedded.macro.tmLanguage.json"
+				"path": "./syntaxes/cpp.embedded.macro.tmLanguage.json",
+				"scopeName": "source.cpp.embedded.macro"
 			},
 			{
 				"language": "cpp",
-				"scopeName": "source.cpp",
-				"path": "./syntaxes/cpp.tmLanguage.json"
+				"path": "./syntaxes/cpp.tmLanguage.json",
+				"scopeName": "source.cpp"
 			},
 			{
-				"scopeName": "source.c.platform",
-				"path": "./syntaxes/platform.tmLanguage.json"
+				"path": "./syntaxes/platform.tmLanguage.json",
+				"scopeName": "source.c.platform"
 			},
 			{
 				"language": "cuda-cpp",
-				"scopeName": "source.cuda-cpp",
-				"path": "./syntaxes/cuda-cpp.tmLanguage.json"
+				"path": "./syntaxes/cuda-cpp.tmLanguage.json",
+				"scopeName": "source.cuda-cpp"
 			}
 		],
 		"languages": [
 			{
-				"id": "c",
-				"extensions": [
-					".c",
-					".i"
-				],
 				"aliases": [
 					"C",
 					"c"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".c",
+					".i"
+				],
+				"id": "c"
 			},
 			{
-				"id": "cpp",
+				"aliases": [
+					"C++",
+					"Cpp",
+					"cpp"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".cpp",
 					".cppm",
@@ -81,45 +76,40 @@
 					".hpp.in",
 					".h.in"
 				],
-				"aliases": [
-					"C++",
-					"Cpp",
-					"cpp"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "cpp"
 			},
 			{
-				"id": "cuda-cpp",
+				"aliases": [
+					"CUDA C++"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".cu",
 					".cuh"
 				],
-				"aliases": [
-					"CUDA C++"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "cuda-cpp"
 			}
 		],
 		"problemMatchers": [
 			{
-				"name": "nvcc",
-				"owner": "cuda-cpp",
 				"fileLocation": [
 					"relative",
 					"${workspaceFolder}"
 				],
+				"name": "nvcc",
+				"owner": "cuda-cpp",
 				"pattern": "$nvcc-location"
 			}
 		],
 		"problemPatterns": [
 			{
+				"file": 1,
+				"kind": "location",
+				"location": 2,
+				"message": 4,
 				"name": "nvcc-location",
 				"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)",
-				"kind": "location",
-				"file": 1,
-				"location": 2,
-				"severity": 3,
-				"message": 4
+				"severity": 3
 			}
 		],
 		"snippets": [
@@ -133,7 +123,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

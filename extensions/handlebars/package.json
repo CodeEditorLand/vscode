@@ -1,17 +1,7 @@
 {
 	"name": "handlebars",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin daaain/Handlebars grammars/Handlebars.json ./syntaxes/Handlebars.tmLanguage.json"
 	},
@@ -19,38 +9,37 @@
 		"grammars": [
 			{
 				"language": "handlebars",
-				"scopeName": "text.html.handlebars",
-				"path": "./syntaxes/Handlebars.tmLanguage.json"
+				"path": "./syntaxes/Handlebars.tmLanguage.json",
+				"scopeName": "text.html.handlebars"
 			}
 		],
 		"htmlLanguageParticipants": [
 			{
-				"languageId": "handlebars",
-				"autoInsert": true
+				"autoInsert": true,
+				"languageId": "handlebars"
 			}
 		],
 		"languages": [
 			{
-				"id": "handlebars",
+				"aliases": [
+					"Handlebars",
+					"handlebars"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".handlebars",
 					".hbs",
 					".hjs"
 				],
-				"aliases": [
-					"Handlebars",
-					"handlebars"
-				],
+				"id": "handlebars",
 				"mimetypes": [
 					"text/x-handlebars-template"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	},
+	"dependencies": {},
+	"devDependencies": {},
 	"extensionKind": [
 		"ui",
 		"workspace"

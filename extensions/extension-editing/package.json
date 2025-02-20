@@ -1,19 +1,11 @@
 {
 	"name": "extension-editing",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/extensionEditingMain",
 	"browser": "./dist/browser/extensionEditingBrowserMain",
 	"scripts": {
-		"compile": "gulp compile-extension:extension-editing",
-		"watch": "gulp watch-extension:extension-editing"
+		"compile": "gulp compile-extension:extension-editing"
 	},
 	"contributes": {
 		"jsonValidation": [
@@ -43,10 +35,10 @@
 		],
 		"languages": [
 			{
-				"id": "ignore",
 				"filenames": [
 					".vscodeignore"
-				]
+				],
+				"id": "ignore"
 			}
 		]
 	},
@@ -63,14 +55,11 @@
 		"@types/markdown-it": "14.1.2",
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "1.4.0"
-	},
 	"icon": "images/icon.png",
 	"capabilities": {
-		"virtualWorkspaces": true,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": true
 	}
 }

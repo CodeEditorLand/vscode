@@ -1,52 +1,41 @@
 {
 	"name": "razor",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammar.mjs"
 	},
 	"contributes": {
 		"grammars": [
 			{
-				"language": "razor",
-				"scopeName": "text.html.cshtml",
-				"path": "./syntaxes/cshtml.tmLanguage.json",
 				"embeddedLanguages": {
 					"section.embedded.source.cshtml": "csharp",
 					"source.css": "css",
 					"source.js": "javascript"
-				}
+				},
+				"language": "razor",
+				"path": "./syntaxes/cshtml.tmLanguage.json",
+				"scopeName": "text.html.cshtml"
 			}
 		],
 		"languages": [
 			{
-				"id": "razor",
-				"extensions": [
-					".cshtml",
-					".razor"
-				],
 				"aliases": [
 					"Razor",
 					"razor"
 				],
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".cshtml",
+					".razor"
+				],
+				"id": "razor",
 				"mimetypes": [
 					"text/x-cshtml"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

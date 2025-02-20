@@ -1,9 +1,6 @@
 {
-	"name": "vscode-css-languageserver",
-	"version": "1.0.0",
+	"name": "@codeeditorland/css-languageserver",
 	"description": "CSS/LESS/SCSS language server",
-	"license": "MIT",
-	"author": "Microsoft Corporation",
 	"main": "./out/node/cssServerMain",
 	"browser": "./dist/browser/cssServerMain",
 	"scripts": {
@@ -11,21 +8,10 @@
 		"install-server-local": "npm install vscode-languageserver",
 		"install-server-next": "npm install vscode-languageserver@next",
 		"install-service-local": "npm link vscode-css-languageservice",
-		"install-service-next": "npm install vscode-css-languageservice@next",
-		"test": "node ./test/index.js",
-		"watch": "gulp watch-extension:css-language-features-server"
+		"install-service-next": "npm install vscode-css-languageservice@next"
 	},
-	"dependencies": {
-		"@vscode/l10n": "0.0.18",
-		"vscode-css-languageservice": "6.3.2",
-		"vscode-languageserver": "10.0.0-next.11",
-		"vscode-uri": "3.1.0"
-	},
+	"dependencies": {},
 	"devDependencies": {
-		"@types/mocha": "10.0.10",
 		"@types/node": "22.x"
-	},
-	"engines": {
-		"node": "*"
 	}
 }

@@ -1,62 +1,51 @@
 {
 	"name": "references-view",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"bugs": {
-		"url": "https://github.com/Microsoft/vscode-references-view/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-references-view"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/extension",
 	"browser": "./dist/extension.js",
 	"scripts": {
-		"compile": "npx gulp compile-extension:references-view",
-		"watch": "npx gulp watch-extension:references-view"
+		"compile": "npx gulp compile-extension:references-view"
 	},
 	"contributes": {
 		"commands": [
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.findReferences",
-				"title": "%cmd.references-view.findReferences%",
-				"category": "%cmd.category.references%"
+				"title": "%cmd.references-view.findReferences%"
 			},
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.findImplementations",
-				"title": "%cmd.references-view.findImplementations%",
-				"category": "%cmd.category.references%"
+				"title": "%cmd.references-view.findImplementations%"
 			},
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.clearHistory",
-				"title": "%cmd.references-view.clearHistory%",
-				"category": "%cmd.category.references%",
-				"icon": "$(clear-all)"
+				"icon": "$(clear-all)",
+				"title": "%cmd.references-view.clearHistory%"
 			},
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.clear",
-				"title": "%cmd.references-view.clear%",
-				"category": "%cmd.category.references%",
-				"icon": "$(clear-all)"
+				"icon": "$(clear-all)",
+				"title": "%cmd.references-view.clear%"
 			},
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.refresh",
-				"title": "%cmd.references-view.refresh%",
-				"category": "%cmd.category.references%",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"title": "%cmd.references-view.refresh%"
 			},
 			{
+				"category": "%cmd.category.references%",
 				"command": "references-view.pickFromHistory",
-				"title": "%cmd.references-view.pickFromHistory%",
-				"category": "%cmd.category.references%"
+				"title": "%cmd.references-view.pickFromHistory%"
 			},
 			{
 				"command": "references-view.removeReferenceItem",
-				"title": "%cmd.references-view.removeReferenceItem%",
-				"icon": "$(close)"
+				"icon": "$(close)",
+				"title": "%cmd.references-view.removeReferenceItem%"
 			},
 			{
 				"command": "references-view.copy",
@@ -72,70 +61,69 @@
 			},
 			{
 				"command": "references-view.refind",
-				"title": "%cmd.references-view.refind%",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"title": "%cmd.references-view.refind%"
 			},
 			{
+				"category": "Calls",
 				"command": "references-view.showCallHierarchy",
-				"title": "%cmd.references-view.showCallHierarchy%",
-				"category": "Calls"
+				"title": "%cmd.references-view.showCallHierarchy%"
 			},
 			{
+				"category": "Calls",
 				"command": "references-view.showOutgoingCalls",
-				"title": "%cmd.references-view.showOutgoingCalls%",
-				"category": "Calls",
-				"icon": "$(call-outgoing)"
+				"icon": "$(call-outgoing)",
+				"title": "%cmd.references-view.showOutgoingCalls%"
 			},
 			{
-				"command": "references-view.showIncomingCalls",
-				"title": "%cmd.references-view.showIncomingCalls%",
 				"category": "Calls",
-				"icon": "$(call-incoming)"
+				"command": "references-view.showIncomingCalls",
+				"icon": "$(call-incoming)",
+				"title": "%cmd.references-view.showIncomingCalls%"
 			},
 			{
 				"command": "references-view.removeCallItem",
-				"title": "%cmd.references-view.removeCallItem%",
-				"icon": "$(close)"
+				"icon": "$(close)",
+				"title": "%cmd.references-view.removeCallItem%"
 			},
 			{
 				"command": "references-view.next",
-				"title": "%cmd.references-view.next%",
-				"enablement": "references-view.canNavigate"
+				"enablement": "references-view.canNavigate",
+				"title": "%cmd.references-view.next%"
 			},
 			{
 				"command": "references-view.prev",
-				"title": "%cmd.references-view.prev%",
-				"enablement": "references-view.canNavigate"
+				"enablement": "references-view.canNavigate",
+				"title": "%cmd.references-view.prev%"
 			},
 			{
+				"category": "Types",
 				"command": "references-view.showTypeHierarchy",
-				"title": "%cmd.references-view.showTypeHierarchy%",
-				"category": "Types"
+				"title": "%cmd.references-view.showTypeHierarchy%"
 			},
 			{
+				"category": "Types",
 				"command": "references-view.showSupertypes",
-				"title": "%cmd.references-view.showSupertypes%",
-				"category": "Types",
-				"icon": "$(type-hierarchy-super)"
+				"icon": "$(type-hierarchy-super)",
+				"title": "%cmd.references-view.showSupertypes%"
 			},
 			{
-				"command": "references-view.showSubtypes",
-				"title": "%cmd.references-view.showSubtypes%",
 				"category": "Types",
-				"icon": "$(type-hierarchy-sub)"
+				"command": "references-view.showSubtypes",
+				"icon": "$(type-hierarchy-sub)",
+				"title": "%cmd.references-view.showSubtypes%"
 			},
 			{
 				"command": "references-view.removeTypeItem",
-				"title": "%cmd.references-view.removeTypeItem%",
-				"icon": "$(close)"
+				"icon": "$(close)",
+				"title": "%cmd.references-view.removeTypeItem%"
 			}
 		],
 		"configuration": {
 			"properties": {
 				"references.preferredLocation": {
-					"description": "%config.references.preferredLocation%",
-					"type": "string",
 					"default": "peek",
+					"description": "%config.references.preferredLocation%",
 					"enum": [
 						"peek",
 						"view"
@@ -143,90 +131,112 @@
 					"enumDescriptions": [
 						"%config.references.preferredLocation.peek%",
 						"%config.references.preferredLocation.view%"
-					]
+					],
+					"type": "string"
 				}
 			}
 		},
 		"keybindings": [
 			{
 				"command": "references-view.findReferences",
-				"when": "editorHasReferenceProvider",
-				"key": "shift+alt+f12"
+				"key": "shift+alt+f12",
+				"when": "editorHasReferenceProvider"
 			},
 			{
 				"command": "references-view.next",
-				"when": "reference-list.hasResult",
-				"key": "f4"
+				"key": "f4",
+				"when": "reference-list.hasResult"
 			},
 			{
 				"command": "references-view.prev",
-				"when": "reference-list.hasResult",
-				"key": "shift+f4"
+				"key": "shift+f4",
+				"when": "reference-list.hasResult"
 			},
 			{
 				"command": "references-view.showCallHierarchy",
-				"when": "editorHasCallHierarchyProvider",
-				"key": "shift+alt+h"
+				"key": "shift+alt+h",
+				"when": "editorHasCallHierarchyProvider"
 			}
 		],
 		"menus": {
-			"editor/context": [
+			"commandPalette": [
+				{
+					"command": "references-view.removeReferenceItem",
+					"when": "never"
+				},
+				{
+					"command": "references-view.removeCallItem",
+					"when": "never"
+				},
+				{
+					"command": "references-view.removeTypeItem",
+					"when": "never"
+				},
+				{
+					"command": "references-view.copy",
+					"when": "never"
+				},
+				{
+					"command": "references-view.copyAll",
+					"when": "never"
+				},
+				{
+					"command": "references-view.copyPath",
+					"when": "never"
+				},
+				{
+					"command": "references-view.refind",
+					"when": "never"
+				},
 				{
 					"command": "references-view.findReferences",
-					"when": "editorHasReferenceProvider",
-					"group": "0_navigation@1"
+					"when": "editorHasReferenceProvider"
 				},
-				{
-					"command": "references-view.findImplementations",
-					"when": "editorHasImplementationProvider",
-					"group": "0_navigation@2"
-				},
-				{
-					"command": "references-view.showCallHierarchy",
-					"when": "editorHasCallHierarchyProvider",
-					"group": "0_navigation@3"
-				},
-				{
-					"command": "references-view.showTypeHierarchy",
-					"when": "editorHasTypeHierarchyProvider",
-					"group": "0_navigation@4"
-				}
-			],
-			"view/title": [
 				{
 					"command": "references-view.clear",
-					"group": "navigation@3",
-					"when": "view == references-view.tree && reference-list.hasResult"
+					"when": "reference-list.hasResult"
 				},
 				{
 					"command": "references-view.clearHistory",
-					"group": "navigation@3",
-					"when": "view == references-view.tree && reference-list.hasHistory && !reference-list.hasResult"
+					"when": "reference-list.isActive && !reference-list.hasResult"
 				},
 				{
 					"command": "references-view.refresh",
-					"group": "navigation@2",
-					"when": "view == references-view.tree && reference-list.hasResult"
+					"when": "reference-list.hasResult"
 				},
 				{
-					"command": "references-view.showOutgoingCalls",
-					"group": "navigation@1",
-					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showIncoming"
+					"command": "references-view.pickFromHistory",
+					"when": "reference-list.isActive"
 				},
 				{
-					"command": "references-view.showIncomingCalls",
-					"group": "navigation@1",
-					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showOutgoing"
+					"command": "references-view.next",
+					"when": "never"
 				},
 				{
-					"command": "references-view.showSupertypes",
-					"group": "navigation@1",
-					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != supertypes"
+					"command": "references-view.prev",
+					"when": "never"
+				}
+			],
+			"editor/context": [
+				{
+					"command": "references-view.findReferences",
+					"group": "0_navigation@1",
+					"when": "editorHasReferenceProvider"
 				},
 				{
-					"command": "references-view.showSubtypes",
-					"group": "navigation@1",
-					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != subtypes"
+					"command": "references-view.findImplementations",
+					"group": "0_navigation@2",
+					"when": "editorHasImplementationProvider"
+				},
+				{
+					"command": "references-view.showCallHierarchy",
+					"group": "0_navigation@3",
+					"when": "editorHasCallHierarchyProvider"
+				},
+				{
+					"command": "references-view.showTypeHierarchy",
+					"group": "0_navigation@4",
+					"when": "editorHasTypeHierarchyProvider"
 				}
 			],
 			"view/item/context": [
@@ -306,62 +316,41 @@
 					"when": "view == references-view.tree && viewItem == type-item"
 				}
 			],
-			"commandPalette": [
-				{
-					"command": "references-view.removeReferenceItem",
-					"when": "never"
-				},
-				{
-					"command": "references-view.removeCallItem",
-					"when": "never"
-				},
-				{
-					"command": "references-view.removeTypeItem",
-					"when": "never"
-				},
-				{
-					"command": "references-view.copy",
-					"when": "never"
-				},
-				{
-					"command": "references-view.copyAll",
-					"when": "never"
-				},
-				{
-					"command": "references-view.copyPath",
-					"when": "never"
-				},
-				{
-					"command": "references-view.refind",
-					"when": "never"
-				},
-				{
-					"command": "references-view.findReferences",
-					"when": "editorHasReferenceProvider"
-				},
+			"view/title": [
 				{
 					"command": "references-view.clear",
-					"when": "reference-list.hasResult"
+					"group": "navigation@3",
+					"when": "view == references-view.tree && reference-list.hasResult"
 				},
 				{
 					"command": "references-view.clearHistory",
-					"when": "reference-list.isActive && !reference-list.hasResult"
+					"group": "navigation@3",
+					"when": "view == references-view.tree && reference-list.hasHistory && !reference-list.hasResult"
 				},
 				{
 					"command": "references-view.refresh",
-					"when": "reference-list.hasResult"
+					"group": "navigation@2",
+					"when": "view == references-view.tree && reference-list.hasResult"
 				},
 				{
-					"command": "references-view.pickFromHistory",
-					"when": "reference-list.isActive"
+					"command": "references-view.showOutgoingCalls",
+					"group": "navigation@1",
+					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showIncoming"
 				},
 				{
-					"command": "references-view.next",
-					"when": "never"
+					"command": "references-view.showIncomingCalls",
+					"group": "navigation@1",
+					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showOutgoing"
 				},
 				{
-					"command": "references-view.prev",
-					"when": "never"
+					"command": "references-view.showSupertypes",
+					"group": "navigation@1",
+					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != supertypes"
+				},
+				{
+					"command": "references-view.showSubtypes",
+					"group": "navigation@1",
+					"when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != subtypes"
 				}
 			]
 		},
@@ -377,8 +366,8 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "references-view",
 					"icon": "$(references)",
+					"id": "references-view",
 					"title": "%container.title%"
 				}
 			]
@@ -388,17 +377,15 @@
 		"onCommand:references-view.find",
 		"onCommand:editor.action.showReferences"
 	],
+	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "1.67.0"
-	},
 	"icon": "media/icon.png",
 	"capabilities": {
-		"virtualWorkspaces": true,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": true
 	}
 }

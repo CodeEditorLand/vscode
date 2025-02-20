@@ -1,34 +1,32 @@
 {
 	"name": "html-language-features",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./client/out/node/htmlClientMain",
 	"browser": "./client/dist/browser/htmlClientMain",
 	"scripts": {
 		"compile": "npx gulp compile-extension:html-language-features-client compile-extension:html-language-features-server",
-		"install-client-next": "npm install vscode-languageclient@next",
-		"watch": "npx gulp watch-extension:html-language-features-client watch-extension:html-language-features-server"
+		"install-client-next": "npm install vscode-languageclient@next"
 	},
 	"contributes": {
 		"configuration": {
 			"id": "html",
 			"order": 20,
-			"type": "object",
-			"title": "HTML",
 			"properties": {
-				"html.completion.attributeDefaultValue": {
-					"type": "string",
+				"html.autoClosingTags": {
+					"default": true,
+					"description": "%html.autoClosingTags%",
 					"scope": "resource",
+					"type": "boolean"
+				},
+				"html.autoCreateQuotes": {
+					"default": true,
+					"description": "%html.autoCreateQuotes%",
+					"scope": "resource",
+					"type": "boolean"
+				},
+				"html.completion.attributeDefaultValue": {
+					"default": "doublequotes",
 					"enum": [
 						"doublequotes",
 						"singlequotes",
@@ -39,88 +37,94 @@
 						"%html.completion.attributeDefaultValue.singlequotes%",
 						"%html.completion.attributeDefaultValue.empty%"
 					],
-					"default": "doublequotes",
-					"markdownDescription": "%html.completion.attributeDefaultValue%"
+					"markdownDescription": "%html.completion.attributeDefaultValue%",
+					"scope": "resource",
+					"type": "string"
 				},
 				"html.customData": {
-					"type": "array",
-					"markdownDescription": "%html.customData.desc%",
 					"default": [],
 					"items": {
 						"type": "string"
 					},
-					"scope": "resource"
-				},
-				"html.format.enable": {
-					"type": "boolean",
-					"scope": "window",
-					"default": true,
-					"description": "%html.format.enable.desc%"
-				},
-				"html.format.wrapLineLength": {
-					"type": "integer",
+					"markdownDescription": "%html.customData.desc%",
 					"scope": "resource",
-					"default": 120,
-					"description": "%html.format.wrapLineLength.desc%"
-				},
-				"html.format.unformatted": {
-					"type": [
-						"string",
-						"null"
-					],
-					"scope": "resource",
-					"default": "wbr",
-					"markdownDescription": "%html.format.unformatted.desc%"
+					"type": "array"
 				},
 				"html.format.contentUnformatted": {
+					"default": "pre,code,textarea",
+					"markdownDescription": "%html.format.contentUnformatted.desc%",
+					"scope": "resource",
 					"type": [
 						"string",
 						"null"
-					],
+					]
+				},
+				"html.format.enable": {
+					"default": true,
+					"description": "%html.format.enable.desc%",
+					"scope": "window",
+					"type": "boolean"
+				},
+				"html.format.extraLiners": {
+					"default": "head, body, /html",
+					"markdownDescription": "%html.format.extraLiners.desc%",
 					"scope": "resource",
-					"default": "pre,code,textarea",
-					"markdownDescription": "%html.format.contentUnformatted.desc%"
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"html.format.indentHandlebars": {
+					"default": false,
+					"markdownDescription": "%html.format.indentHandlebars.desc%",
+					"scope": "resource",
+					"type": "boolean"
 				},
 				"html.format.indentInnerHtml": {
-					"type": "boolean",
-					"scope": "resource",
 					"default": false,
-					"markdownDescription": "%html.format.indentInnerHtml.desc%"
-				},
-				"html.format.preserveNewLines": {
-					"type": "boolean",
+					"markdownDescription": "%html.format.indentInnerHtml.desc%",
 					"scope": "resource",
-					"default": true,
-					"description": "%html.format.preserveNewLines.desc%"
+					"type": "boolean"
 				},
 				"html.format.maxPreserveNewLines": {
+					"default": null,
+					"markdownDescription": "%html.format.maxPreserveNewLines.desc%",
+					"scope": "resource",
 					"type": [
 						"number",
 						"null"
-					],
-					"scope": "resource",
-					"default": null,
-					"markdownDescription": "%html.format.maxPreserveNewLines.desc%"
+					]
 				},
-				"html.format.indentHandlebars": {
-					"type": "boolean",
+				"html.format.preserveNewLines": {
+					"default": true,
+					"description": "%html.format.preserveNewLines.desc%",
 					"scope": "resource",
+					"type": "boolean"
+				},
+				"html.format.templating": {
 					"default": false,
-					"markdownDescription": "%html.format.indentHandlebars.desc%"
+					"description": "%html.format.templating.desc%",
+					"scope": "resource",
+					"type": "boolean"
 				},
-				"html.format.extraLiners": {
+				"html.format.unformatted": {
+					"default": "wbr",
+					"markdownDescription": "%html.format.unformatted.desc%",
+					"scope": "resource",
 					"type": [
 						"string",
 						"null"
-					],
+					]
+				},
+				"html.format.unformattedContentDelimiter": {
+					"default": "",
+					"markdownDescription": "%html.format.unformattedContentDelimiter.desc%",
 					"scope": "resource",
-					"default": "head, body, /html",
-					"markdownDescription": "%html.format.extraLiners.desc%"
+					"type": "string"
 				},
 				"html.format.wrapAttributes": {
-					"type": "string",
-					"scope": "resource",
 					"default": "auto",
+					"description": "%html.format.wrapAttributes.desc%",
 					"enum": [
 						"auto",
 						"force",
@@ -139,96 +143,81 @@
 						"%html.format.wrapAttributes.preserve%",
 						"%html.format.wrapAttributes.preservealigned%"
 					],
-					"description": "%html.format.wrapAttributes.desc%"
+					"scope": "resource",
+					"type": "string"
 				},
 				"html.format.wrapAttributesIndentSize": {
+					"default": null,
+					"markdownDescription": "%html.format.wrapAttributesIndentSize.desc%",
+					"scope": "resource",
 					"type": [
 						"number",
 						"null"
-					],
-					"scope": "resource",
-					"default": null,
-					"markdownDescription": "%html.format.wrapAttributesIndentSize.desc%"
+					]
 				},
-				"html.format.templating": {
-					"type": "boolean",
+				"html.format.wrapLineLength": {
+					"default": 120,
+					"description": "%html.format.wrapLineLength.desc%",
 					"scope": "resource",
-					"default": false,
-					"description": "%html.format.templating.desc%"
-				},
-				"html.format.unformattedContentDelimiter": {
-					"type": "string",
-					"scope": "resource",
-					"default": "",
-					"markdownDescription": "%html.format.unformattedContentDelimiter.desc%"
-				},
-				"html.suggest.html5": {
-					"type": "boolean",
-					"scope": "resource",
-					"default": true,
-					"description": "%html.suggest.html5.desc%"
-				},
-				"html.validate.scripts": {
-					"type": "boolean",
-					"scope": "resource",
-					"default": true,
-					"description": "%html.validate.scripts%"
-				},
-				"html.validate.styles": {
-					"type": "boolean",
-					"scope": "resource",
-					"default": true,
-					"description": "%html.validate.styles%"
-				},
-				"html.autoCreateQuotes": {
-					"type": "boolean",
-					"scope": "resource",
-					"default": true,
-					"description": "%html.autoCreateQuotes%"
-				},
-				"html.autoClosingTags": {
-					"type": "boolean",
-					"scope": "resource",
-					"default": true,
-					"description": "%html.autoClosingTags%"
+					"type": "integer"
 				},
 				"html.hover.documentation": {
-					"type": "boolean",
-					"scope": "resource",
 					"default": true,
-					"description": "%html.hover.documentation%"
+					"description": "%html.hover.documentation%",
+					"scope": "resource",
+					"type": "boolean"
 				},
 				"html.hover.references": {
-					"type": "boolean",
-					"scope": "resource",
 					"default": true,
-					"description": "%html.hover.references%"
+					"description": "%html.hover.references%",
+					"scope": "resource",
+					"type": "boolean"
 				},
 				"html.mirrorCursorOnMatchingTag": {
-					"type": "boolean",
-					"scope": "resource",
 					"default": false,
+					"deprecationMessage": "%html.mirrorCursorOnMatchingTagDeprecationMessage%",
 					"description": "%html.mirrorCursorOnMatchingTag%",
-					"deprecationMessage": "%html.mirrorCursorOnMatchingTagDeprecationMessage%"
+					"scope": "resource",
+					"type": "boolean"
+				},
+				"html.suggest.html5": {
+					"default": true,
+					"description": "%html.suggest.html5.desc%",
+					"scope": "resource",
+					"type": "boolean"
 				},
 				"html.trace.server": {
-					"type": "string",
-					"scope": "window",
+					"default": "off",
+					"description": "%html.trace.server.desc%",
 					"enum": [
 						"off",
 						"messages",
 						"verbose"
 					],
-					"default": "off",
-					"description": "%html.trace.server.desc%"
+					"scope": "window",
+					"type": "string"
+				},
+				"html.validate.scripts": {
+					"default": true,
+					"description": "%html.validate.scripts%",
+					"scope": "resource",
+					"type": "boolean"
+				},
+				"html.validate.styles": {
+					"default": true,
+					"description": "%html.validate.styles%",
+					"scope": "resource",
+					"type": "boolean"
 				}
-			}
+			},
+			"title": "HTML",
+			"type": "object"
 		},
 		"configurationDefaults": {
-			"[html]": {
+			"[handlebars]": {
 				"editor.suggest.insertMode": "replace"
 			},
-			"[handlebars]": {
+			"[html]": {
 				"editor.suggest.insertMode": "replace"
 			}
 		},
@@ -247,24 +236,17 @@
 		"onLanguage:html",
 		"onLanguage:handlebars"
 	],
-	"dependencies": {
-		"@vscode/extension-telemetry": "0.9.8",
-		"vscode-languageclient": "10.0.0-next.13",
-		"vscode-uri": "3.1.0"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "22.x"
-	},
-	"engines": {
-		"vscode": "1.77.0"
 	},
 	"icon": "icons/html.png",
 	"aiKey": "0c6ae279ed8443289764825290e4f9e2-1a736e7c-1324-4338-be46-fc2a58ae4d14-7255",
 	"capabilities": {
-		"virtualWorkspaces": true,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": true
 	},
 	"enabledApiProposals": [
 		"extensionsAny"

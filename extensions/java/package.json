@@ -1,17 +1,7 @@
 {
 	"name": "java",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin redhat-developer/vscode-java language-support/java/java.tmLanguage.json ./syntaxes/java.tmLanguage.json"
 	},
@@ -19,22 +9,22 @@
 		"grammars": [
 			{
 				"language": "java",
-				"scopeName": "source.java",
-				"path": "./syntaxes/java.tmLanguage.json"
+				"path": "./syntaxes/java.tmLanguage.json",
+				"scopeName": "source.java"
 			}
 		],
 		"languages": [
 			{
-				"id": "java",
-				"extensions": [
-					".java",
-					".jav"
-				],
 				"aliases": [
 					"Java",
 					"java"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".java",
+					".jav"
+				],
+				"id": "java"
 			}
 		],
 		"snippets": [
@@ -44,7 +34,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

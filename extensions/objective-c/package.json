@@ -1,17 +1,7 @@
 {
 	"name": "objective-c",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammars.js"
 	},
@@ -19,39 +9,38 @@
 		"grammars": [
 			{
 				"language": "objective-c",
-				"scopeName": "source.objc",
-				"path": "./syntaxes/objective-c.tmLanguage.json"
+				"path": "./syntaxes/objective-c.tmLanguage.json",
+				"scopeName": "source.objc"
 			},
 			{
 				"language": "objective-cpp",
-				"scopeName": "source.objcpp",
-				"path": "./syntaxes/objective-c++.tmLanguage.json"
+				"path": "./syntaxes/objective-c++.tmLanguage.json",
+				"scopeName": "source.objcpp"
 			}
 		],
 		"languages": [
 			{
-				"id": "objective-c",
-				"extensions": [
-					".m"
-				],
 				"aliases": [
 					"Objective-C"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".m"
+				],
+				"id": "objective-c"
 			},
 			{
-				"id": "objective-cpp",
-				"extensions": [
-					".mm"
-				],
 				"aliases": [
 					"Objective-C++"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".mm"
+				],
+				"id": "objective-cpp"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

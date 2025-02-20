@@ -1,19 +1,9 @@
 {
-	"name": "vscode-colorize-perf-tests",
-	"version": "0.0.1",
-	"private": true,
+	"name": "@codeeditorland/colorize-perf-tests",
 	"description": "Colorize performance tests for VS Code",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/colorizerTestMain",
 	"scripts": {
-		"compile": "gulp compile-extension:vscode-colorize-perf-tests",
-		"vscode:prepublish": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:vscode-colorize-perf-tests ./tsconfig.json",
-		"watch": "gulp watch-extension:vscode-colorize-perf-tests"
+		"compile": "gulp compile-extension:vscode-colorize-perf-tests"
 	},
 	"activationEvents": [
 		"onLanguage:json"
@@ -23,9 +13,6 @@
 	},
 	"devDependencies": {
 		"@types/node": "22.x"
-	},
-	"engines": {
-		"vscode": "*"
 	},
 	"icon": "media/icon.png"
 }

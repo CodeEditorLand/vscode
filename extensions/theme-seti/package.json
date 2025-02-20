@@ -1,18 +1,7 @@
 {
-	"name": "vscode-theme-seti",
+	"name": "@codeeditorland/theme-seti",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
-	"private": true,
 	"description": "%description%",
-	"categories": [
-		"Themes"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update": "node ./build/update-icon-theme.js"
 	},
@@ -25,8 +14,7 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	},
+	"dependencies": {},
+	"devDependencies": {},
 	"icon": "icons/seti-circular-128x128.png"
 }

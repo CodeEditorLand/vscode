@@ -1,56 +1,45 @@
 {
 	"name": "jake",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Other"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/main",
 	"scripts": {
-		"compile": "gulp compile-extension:jake",
-		"watch": "gulp watch-extension:jake"
+		"compile": "gulp compile-extension:jake"
 	},
 	"contributes": {
 		"configuration": {
 			"id": "jake",
-			"type": "object",
-			"title": "Jake",
 			"properties": {
 				"jake.autoDetect": {
-					"scope": "application",
-					"type": "string",
+					"default": "off",
+					"description": "%config.jake.autoDetect%",
 					"enum": [
 						"off",
 						"on"
 					],
-					"default": "off",
-					"description": "%config.jake.autoDetect%"
+					"scope": "application",
+					"type": "string"
 				}
-			}
+			},
+			"title": "Jake",
+			"type": "object"
 		},
 		"taskDefinitions": [
 			{
-				"type": "jake",
+				"properties": {
+					"file": {
+						"description": "%jake.taskDefinition.file.description%",
+						"type": "string"
+					},
+					"task": {
+						"description": "%jake.taskDefinition.type.description%",
+						"type": "string"
+					}
+				},
 				"required": [
 					"task"
 				],
-				"properties": {
-					"task": {
-						"type": "string",
-						"description": "%jake.taskDefinition.type.description%"
-					},
-					"file": {
-						"type": "string",
-						"description": "%jake.taskDefinition.file.description%"
-					}
-				},
+				"type": "jake",
 				"when": "shellExecutionSupported"
 			}
 		]
@@ -62,14 +51,11 @@
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "*"
-	},
 	"icon": "images/cowboy_hat.png",
 	"capabilities": {
-		"virtualWorkspaces": false,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": false
 	}
 }

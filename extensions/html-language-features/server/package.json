@@ -1,32 +1,16 @@
 {
-	"name": "vscode-html-languageserver",
-	"version": "1.0.0",
+	"name": "@codeeditorland/html-languageserver",
 	"description": "HTML language server",
-	"license": "MIT",
-	"author": "Microsoft Corporation",
 	"main": "./out/node/htmlServerMain",
 	"scripts": {
 		"compile": "npx gulp compile-extension:html-language-features-server",
 		"install-server-local": "npm install vscode-languageserver",
 		"install-server-next": "npm install vscode-languageserver@next",
 		"install-service-local": "npm install vscode-css-languageservice && npm install vscode-html-languageservice",
-		"install-service-next": "npm install vscode-css-languageservice@next && npm install vscode-html-languageservice@next",
-		"test": "npm run compile && node ./test/index.js",
-		"watch": "npx gulp watch-extension:html-language-features-server"
+		"install-service-next": "npm install vscode-css-languageservice@next && npm install vscode-html-languageservice@next"
 	},
-	"dependencies": {
-		"@vscode/l10n": "0.0.18",
-		"vscode-css-languageservice": "6.3.2",
-		"vscode-html-languageservice": "5.3.2",
-		"vscode-languageserver": "10.0.0-next.11",
-		"vscode-languageserver-textdocument": "1.0.12",
-		"vscode-uri": "3.1.0"
-	},
+	"dependencies": {},
 	"devDependencies": {
-		"@types/mocha": "10.0.10",
 		"@types/node": "22.x"
-	},
-	"engines": {
-		"node": "*"
 	}
 }

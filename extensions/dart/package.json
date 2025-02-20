@@ -1,13 +1,7 @@
 {
 	"name": "dart",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin dart-lang/dart-syntax-highlight grammars/dart.json ./syntaxes/dart.tmLanguage.json"
 	},
@@ -15,24 +9,23 @@
 		"grammars": [
 			{
 				"language": "dart",
-				"scopeName": "source.dart",
-				"path": "./syntaxes/dart.tmLanguage.json"
+				"path": "./syntaxes/dart.tmLanguage.json",
+				"scopeName": "source.dart"
 			}
 		],
 		"languages": [
 			{
-				"id": "dart",
-				"extensions": [
-					".dart"
-				],
 				"aliases": [
 					"Dart"
 				],
-				"configuration": "./language-configuration.json"
+				"configuration": "./language-configuration.json",
+				"extensions": [
+					".dart"
+				],
+				"id": "dart"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

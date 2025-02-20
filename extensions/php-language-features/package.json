@@ -1,57 +1,46 @@
 {
 	"name": "php-language-features",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/phpMain",
 	"scripts": {
-		"compile": "npx gulp compile-extension:php-language-features",
-		"watch": "npx gulp watch-extension:php-language-features"
+		"compile": "npx gulp compile-extension:php-language-features"
 	},
 	"contributes": {
 		"configuration": {
-			"title": "%configuration.title%",
-			"type": "object",
 			"order": 20,
 			"properties": {
 				"php.suggest.basic": {
-					"type": "boolean",
 					"default": true,
-					"description": "%configuration.suggest.basic%"
+					"description": "%configuration.suggest.basic%",
+					"type": "boolean"
 				},
 				"php.validate.enable": {
-					"type": "boolean",
 					"default": true,
-					"description": "%configuration.validate.enable%"
+					"description": "%configuration.validate.enable%",
+					"type": "boolean"
 				},
 				"php.validate.executablePath": {
+					"default": null,
+					"description": "%configuration.validate.executablePath%",
+					"scope": "machine-overridable",
 					"type": [
 						"string",
 						"null"
-					],
-					"default": null,
-					"description": "%configuration.validate.executablePath%",
-					"scope": "machine-overridable"
+					]
 				},
 				"php.validate.run": {
-					"type": "string",
+					"default": "onSave",
+					"description": "%configuration.validate.run%",
 					"enum": [
 						"onSave",
 						"onType"
 					],
-					"default": "onSave",
-					"description": "%configuration.validate.run%"
+					"type": "string"
 				}
-			}
+			},
+			"title": "%configuration.title%",
+			"type": "object"
 		},
 		"jsonValidation": [
 			{
@@ -70,18 +59,15 @@
 		"@types/node": "22.x",
 		"@types/which": "3.0.4"
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	},
 	"icon": "icons/logo.png",
 	"capabilities": {
-		"virtualWorkspaces": false,
 		"untrustedWorkspaces": {
-			"supported": "limited",
 			"description": "%workspaceTrust%",
 			"restrictedConfigurations": [
 				"php.validate.executablePath"
-			]
-		}
+			],
+			"supported": "limited"
+		},
+		"virtualWorkspaces": false
 	}
 }

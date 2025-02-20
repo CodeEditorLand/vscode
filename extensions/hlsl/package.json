@@ -1,17 +1,7 @@
 {
 	"name": "hlsl",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin tgjones/shaders-tmLanguage grammars/hlsl.json ./syntaxes/hlsl.tmLanguage.json"
 	},
@@ -25,7 +15,11 @@
 		],
 		"languages": [
 			{
-				"id": "hlsl",
+				"aliases": [
+					"HLSL",
+					"hlsl"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".hlsl",
 					".hlsli",
@@ -36,15 +30,10 @@
 					".cginc",
 					".compute"
 				],
-				"aliases": [
-					"HLSL",
-					"hlsl"
-				],
-				"configuration": "./language-configuration.json"
+				"id": "hlsl"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

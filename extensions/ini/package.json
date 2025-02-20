@@ -1,18 +1,7 @@
 {
 	"name": "ini",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
-	"private": true,
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin textmate/ini.tmbundle Syntaxes/Ini.plist ./syntaxes/ini.tmLanguage.json"
 	},
@@ -20,29 +9,33 @@
 		"grammars": [
 			{
 				"language": "ini",
-				"scopeName": "source.ini",
-				"path": "./syntaxes/ini.tmLanguage.json"
+				"path": "./syntaxes/ini.tmLanguage.json",
+				"scopeName": "source.ini"
 			},
 			{
 				"language": "properties",
-				"scopeName": "source.ini",
-				"path": "./syntaxes/ini.tmLanguage.json"
+				"path": "./syntaxes/ini.tmLanguage.json",
+				"scopeName": "source.ini"
 			}
 		],
 		"languages": [
 			{
-				"id": "ini",
-				"extensions": [
-					".ini"
-				],
 				"aliases": [
 					"Ini",
 					"ini"
 				],
-				"configuration": "./ini.language-configuration.json"
+				"configuration": "./ini.language-configuration.json",
+				"extensions": [
+					".ini"
+				],
+				"id": "ini"
 			},
 			{
-				"id": "properties",
+				"aliases": [
+					"Properties",
+					"properties"
+				],
+				"configuration": "./properties.language-configuration.json",
 				"extensions": [
 					".conf",
 					".properties",
@@ -54,23 +47,18 @@
 					".editorconfig",
 					".repo"
 				],
-				"filenames": [
-					"gitconfig",
-					".env"
-				],
 				"filenamePatterns": [
 					"**/.config/git/config",
 					"**/.git/config"
 				],
-				"aliases": [
-					"Properties",
-					"properties"
+				"filenames": [
+					"gitconfig",
+					".env"
 				],
-				"configuration": "./properties.language-configuration.json"
+				"id": "properties"
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

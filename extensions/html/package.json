@@ -1,47 +1,37 @@
 {
 	"name": "html",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ./build/update-grammar.mjs"
 	},
 	"contributes": {
 		"grammars": [
 			{
-				"scopeName": "text.html.basic",
-				"path": "./syntaxes/html.tmLanguage.json",
 				"embeddedLanguages": {
-					"text.html": "html",
 					"source.css": "css",
 					"source.js": "javascript",
 					"source.python": "python",
-					"source.smarty": "smarty"
+					"source.smarty": "smarty",
+					"text.html": "html"
 				},
+				"path": "./syntaxes/html.tmLanguage.json",
+				"scopeName": "text.html.basic",
 				"tokenTypes": {
 					"meta.tag string.quoted": "other"
 				}
 			},
 			{
-				"language": "html",
-				"scopeName": "text.html.derivative",
-				"path": "./syntaxes/html-derivative.tmLanguage.json",
 				"embeddedLanguages": {
-					"text.html": "html",
 					"source.css": "css",
 					"source.js": "javascript",
 					"source.python": "python",
-					"source.smarty": "smarty"
+					"source.smarty": "smarty",
+					"text.html": "html"
 				},
+				"language": "html",
+				"path": "./syntaxes/html-derivative.tmLanguage.json",
+				"scopeName": "text.html.derivative",
 				"tokenTypes": {
 					"meta.tag string.quoted": "other"
 				}
@@ -49,7 +39,13 @@
 		],
 		"languages": [
 			{
-				"id": "html",
+				"aliases": [
+					"HTML",
+					"htm",
+					"html",
+					"xhtml"
+				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".html",
 					".htm",
@@ -65,20 +61,14 @@
 					".ejs",
 					".rhtml"
 				],
-				"aliases": [
-					"HTML",
-					"htm",
-					"html",
-					"xhtml"
-				],
+				"id": "html",
 				"mimetypes": [
 					"text/html",
 					"text/x-jshtm",
 					"text/template",
 					"text/ng-template",
 					"application/xhtml+xml"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			}
 		],
 		"snippets": [
@@ -88,7 +78,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

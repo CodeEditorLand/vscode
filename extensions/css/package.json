@@ -1,17 +1,7 @@
 {
 	"name": "css",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin microsoft/vscode-css grammars/css.cson ./syntaxes/css.tmLanguage.json"
 	},
@@ -19,8 +9,8 @@
 		"grammars": [
 			{
 				"language": "css",
-				"scopeName": "source.css",
 				"path": "./syntaxes/css.tmLanguage.json",
+				"scopeName": "source.css",
 				"tokenTypes": {
 					"meta.function.url string.quoted": "other"
 				}
@@ -28,22 +18,21 @@
 		],
 		"languages": [
 			{
-				"id": "css",
 				"aliases": [
 					"CSS",
 					"css"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".css"
 				],
+				"id": "css",
 				"mimetypes": [
 					"text/css"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			}
 		]
 	},
-	"engines": {
-		"vscode": "0.10.x"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

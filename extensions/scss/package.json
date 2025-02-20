@@ -1,17 +1,7 @@
 {
 	"name": "scss",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"categories": [
-		"Programming Languages"
-	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"scripts": {
 		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin atom/language-sass grammars/scss.cson ./syntaxes/scss.tmLanguage.json grammars/sassdoc.cson ./syntaxes/sassdoc.tmLanguage.json"
 	},
@@ -19,37 +9,37 @@
 		"grammars": [
 			{
 				"language": "scss",
-				"scopeName": "source.css.scss",
-				"path": "./syntaxes/scss.tmLanguage.json"
+				"path": "./syntaxes/scss.tmLanguage.json",
+				"scopeName": "source.css.scss"
 			},
 			{
-				"scopeName": "source.sassdoc",
-				"path": "./syntaxes/sassdoc.tmLanguage.json"
+				"path": "./syntaxes/sassdoc.tmLanguage.json",
+				"scopeName": "source.sassdoc"
 			}
 		],
 		"languages": [
 			{
-				"id": "scss",
 				"aliases": [
 					"SCSS",
 					"scss"
 				],
+				"configuration": "./language-configuration.json",
 				"extensions": [
 					".scss"
 				],
+				"id": "scss",
 				"mimetypes": [
 					"text/x-scss",
 					"text/scss"
-				],
-				"configuration": "./language-configuration.json"
+				]
 			}
 		],
 		"problemMatchers": [
 			{
-				"name": "node-sass",
-				"label": "Node Sass Compiler",
-				"owner": "node-sass",
 				"fileLocation": "absolute",
+				"label": "Node Sass Compiler",
+				"name": "node-sass",
+				"owner": "node-sass",
 				"pattern": [
 					{
 						"regexp": "^{$"
@@ -58,20 +48,20 @@
 						"regexp": "\\s*\"status\":\\s\\d+,"
 					},
 					{
-						"regexp": "\\s*\"file\":\\s\"(.*)\",",
-						"file": 1
+						"file": 1,
+						"regexp": "\\s*\"file\":\\s\"(.*)\","
 					},
 					{
-						"regexp": "\\s*\"line\":\\s(\\d+),",
-						"line": 1
+						"line": 1,
+						"regexp": "\\s*\"line\":\\s(\\d+),"
 					},
 					{
-						"regexp": "\\s*\"column\":\\s(\\d+),",
-						"column": 1
+						"column": 1,
+						"regexp": "\\s*\"column\":\\s(\\d+),"
 					},
 					{
-						"regexp": "\\s*\"message\":\\s\"(.*)\",",
-						"message": 1
+						"message": 1,
+						"regexp": "\\s*\"message\":\\s\"(.*)\","
 					},
 					{
 						"regexp": "\\s*\"formatted\":\\s(.*)"
@@ -83,7 +73,6 @@
 			}
 		]
 	},
-	"engines": {
-		"vscode": "*"
-	}
+	"dependencies": {},
+	"devDependencies": {}
 }

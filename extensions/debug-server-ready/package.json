@@ -1,39 +1,29 @@
 {
 	"name": "debug-server-ready",
 	"displayName": "%displayName%",
-	"version": "1.0.0",
 	"description": "%description%",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/microsoft/vscode.git"
-	},
-	"license": "MIT",
-	"publisher": "vscode",
 	"main": "./out/extension",
 	"scripts": {
-		"compile": "gulp compile-extension:debug-server-ready",
-		"watch": "gulp watch-extension:debug-server-ready"
+		"compile": "gulp compile-extension:debug-server-ready"
 	},
 	"contributes": {
 		"debuggers": [
 			{
-				"type": "*",
 				"configurationAttributes": {
 					"launch": {
 						"properties": {
 							"serverReadyAction": {
 								"oneOf": [
 									{
-										"type": "object",
 										"additionalProperties": false,
-										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"default": {
 											"action": "openExternally",
 											"killOnServerStop": false
 										},
+										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"properties": {
 											"action": {
-												"type": "string",
+												"default": "openExternally",
 												"enum": [
 													"openExternally"
 												],
@@ -41,39 +31,39 @@
 													"%debug.server.ready.action.openExternally.description%"
 												],
 												"markdownDescription": "%debug.server.ready.action.description%",
-												"default": "openExternally"
-											},
-											"pattern": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.pattern.description%",
-												"default": "listening on port ([0-9]+)"
-											},
-											"uriFormat": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.uriFormat.description%",
-												"default": "http://localhost:%s"
+												"type": "string"
 											},
 											"killOnServerStop": {
-												"type": "boolean",
+												"default": false,
 												"markdownDescription": "%debug.server.ready.killOnServerStop.description%",
-												"default": false
+												"type": "boolean"
+											},
+											"pattern": {
+												"default": "listening on port ([0-9]+)",
+												"markdownDescription": "%debug.server.ready.pattern.description%",
+												"type": "string"
+											},
+											"uriFormat": {
+												"default": "http://localhost:%s",
+												"markdownDescription": "%debug.server.ready.uriFormat.description%",
+												"type": "string"
 											}
-										}
+										},
+										"type": "object"
 									},
 									{
-										"type": "object",
 										"additionalProperties": false,
-										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"default": {
 											"action": "debugWithEdge",
+											"killOnServerStop": false,
 											"pattern": "listening on port ([0-9]+)",
 											"uriFormat": "http://localhost:%s",
-											"webRoot": "${workspaceFolder}",
-											"killOnServerStop": false
+											"webRoot": "${workspaceFolder}"
 										},
+										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"properties": {
 											"action": {
-												"type": "string",
+												"default": "debugWithEdge",
 												"enum": [
 													"debugWithChrome",
 													"debugWithEdge"
@@ -82,45 +72,86 @@
 													"%debug.server.ready.action.debugWithChrome.description%"
 												],
 												"markdownDescription": "%debug.server.ready.action.description%",
-												"default": "debugWithEdge"
-											},
-											"pattern": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.pattern.description%",
-												"default": "listening on port ([0-9]+)"
-											},
-											"uriFormat": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.uriFormat.description%",
-												"default": "http://localhost:%s"
-											},
-											"webRoot": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.webRoot.description%",
-												"default": "${workspaceFolder}"
+												"type": "string"
 											},
 											"killOnServerStop": {
-												"type": "boolean",
+												"default": false,
 												"markdownDescription": "%debug.server.ready.killOnServerStop.description%",
-												"default": false
+												"type": "boolean"
+											},
+											"pattern": {
+												"default": "listening on port ([0-9]+)",
+												"markdownDescription": "%debug.server.ready.pattern.description%",
+												"type": "string"
+											},
+											"uriFormat": {
+												"default": "http://localhost:%s",
+												"markdownDescription": "%debug.server.ready.uriFormat.description%",
+												"type": "string"
+											},
+											"webRoot": {
+												"default": "${workspaceFolder}",
+												"markdownDescription": "%debug.server.ready.webRoot.description%",
+												"type": "string"
 											}
-										}
+										},
+										"type": "object"
 									},
 									{
-										"type": "object",
 										"additionalProperties": false,
-										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"default": {
 											"action": "startDebugging",
-											"name": "<launch browser config name>",
-											"killOnServerStop": false
+											"killOnServerStop": false,
+											"name": "<launch browser config name>"
+										},
+										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
+										"properties": {
+											"action": {
+												"default": "startDebugging",
+												"enum": [
+													"startDebugging"
+												],
+												"enumDescriptions": [
+													"%debug.server.ready.action.startDebugging.description%"
+												],
+												"markdownDescription": "%debug.server.ready.action.description%",
+												"type": "string"
+											},
+											"killOnServerStop": {
+												"default": false,
+												"markdownDescription": "%debug.server.ready.killOnServerStop.description%",
+												"type": "boolean"
+											},
+											"name": {
+												"default": "Launch Browser",
+												"markdownDescription": "%debug.server.ready.debugConfigName.description%",
+												"type": "string"
+											},
+											"pattern": {
+												"default": "listening on port ([0-9]+)",
+												"markdownDescription": "%debug.server.ready.pattern.description%",
+												"type": "string"
+											}
 										},
 										"required": [
 											"name"
 										],
+										"type": "object"
+									},
+									{
+										"additionalProperties": false,
+										"default": {
+											"action": "startDebugging",
+											"config": {
+												"request": "launch",
+												"type": "node"
+											},
+											"killOnServerStop": false
+										},
+										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
 										"properties": {
 											"action": {
-												"type": "string",
+												"default": "startDebugging",
 												"enum": [
 													"startDebugging"
 												],
@@ -128,92 +159,51 @@
 													"%debug.server.ready.action.startDebugging.description%"
 												],
 												"markdownDescription": "%debug.server.ready.action.description%",
-												"default": "startDebugging"
+												"type": "string"
 											},
-											"pattern": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.pattern.description%",
-												"default": "listening on port ([0-9]+)"
-											},
-											"name": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.debugConfigName.description%",
-												"default": "Launch Browser"
+											"config": {
+												"default": {},
+												"markdownDescription": "%debug.server.ready.debugConfig.description%",
+												"type": "object"
 											},
 											"killOnServerStop": {
-												"type": "boolean",
+												"default": false,
 												"markdownDescription": "%debug.server.ready.killOnServerStop.description%",
-												"default": false
-											}
-										}
-									},
-									{
-										"type": "object",
-										"additionalProperties": false,
-										"markdownDescription": "%debug.server.ready.serverReadyAction.description%",
-										"default": {
-											"action": "startDebugging",
-											"config": {
-												"type": "node",
-												"request": "launch"
+												"type": "boolean"
 											},
-											"killOnServerStop": false
+											"pattern": {
+												"default": "listening on port ([0-9]+)",
+												"markdownDescription": "%debug.server.ready.pattern.description%",
+												"type": "string"
+											}
 										},
 										"required": [
 											"config"
 										],
-										"properties": {
-											"action": {
-												"type": "string",
-												"enum": [
-													"startDebugging"
-												],
-												"enumDescriptions": [
-													"%debug.server.ready.action.startDebugging.description%"
-												],
-												"markdownDescription": "%debug.server.ready.action.description%",
-												"default": "startDebugging"
-											},
-											"pattern": {
-												"type": "string",
-												"markdownDescription": "%debug.server.ready.pattern.description%",
-												"default": "listening on port ([0-9]+)"
-											},
-											"config": {
-												"type": "object",
-												"markdownDescription": "%debug.server.ready.debugConfig.description%",
-												"default": {}
-											},
-											"killOnServerStop": {
-												"type": "boolean",
-												"markdownDescription": "%debug.server.ready.killOnServerStop.description%",
-												"default": false
-											}
-										}
+										"type": "object"
 									}
 								]
 							}
 						}
 					}
-				}
+				},
+				"type": "*"
 			}
 		]
 	},
 	"activationEvents": [
 		"onDebugResolve"
 	],
+	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "22.x"
 	},
-	"engines": {
-		"vscode": "1.32.0"
-	},
 	"icon": "media/icon.png",
 	"capabilities": {
-		"virtualWorkspaces": false,
 		"untrustedWorkspaces": {
 			"supported": true
-		}
+		},
+		"virtualWorkspaces": false
 	},
 	"enabledApiProposals": [
 		"terminalDataWriteEvent"
