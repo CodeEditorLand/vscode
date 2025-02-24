@@ -207,7 +207,9 @@ function createServerHost(
 				if (enabledExperimentalTypeAcquisition) {
 					try {
 						ret = fs.stat(mapUri(uri, "vscode-node-modules")).size;
-					} catch (_error) {}
+					} catch (_Error) {
+console.log(_Error);
+}
 				}
 			}
 			return ret;
@@ -278,7 +280,9 @@ function createServerHost(
 						ret =
 							fs.stat(mapUri(uri, "vscode-node-modules")).type ===
 							FileType.File;
-					} catch (_error) {}
+					} catch (_Error) {
+console.log(_Error);
+}
 				}
 			}
 			return ret;
@@ -304,7 +308,9 @@ function createServerHost(
 				if (enabledExperimentalTypeAcquisition) {
 					try {
 						stat = fs.stat(mapUri(uri, "vscode-node-modules"));
-					} catch (_error) {}
+					} catch (_Error) {
+console.log(_Error);
+}
 				}
 			}
 			if (stat) {
