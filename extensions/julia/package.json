@@ -1,10 +1,4 @@
 {
-	"name": "julia",
-	"displayName": "%displayName%",
-	"description": "%description%",
-	"scripts": {
-		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin JuliaEditorSupport/atom-language-julia grammars/julia_vscode.json ./syntaxes/julia.tmLanguage.json"
-	},
 	"contributes": {
 		"configurationDefaults": {
 			"[julia]": {
@@ -51,5 +45,11 @@
 		]
 	},
 	"dependencies": {},
-	"devDependencies": {}
+	"description": "%description%",
+	"devDependencies": {},
+	"displayName": "%displayName%",
+	"name": "julia",
+	"scripts": {
+		"update-grammar": "node ../node_modules/vscode-grammar-updater/bin JuliaEditorSupport/atom-language-julia grammars/julia_vscode.json ./syntaxes/julia.tmLanguage.json"
+	}
 }
