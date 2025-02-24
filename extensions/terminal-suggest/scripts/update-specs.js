@@ -3,12 +3,20 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const fs = require("fs");
-const path = require("path");
+// @ts-check
 
-const upstreamSpecs = require("../out/constants.js").upstreamSpecs;
+const fs = require('fs');
+const path = require('path');
 
-const extRoot = path.resolve(path.join(__dirname, ".."));
+const upstreamSpecs = require('../out/constants.js').upstreamSpecs;
+const extRoot = path.resolve(path.join(__dirname, '..'));
+const replaceStrings = [
+	[
+		'import { filepaths } from "@fig/autocomplete-generators";',
+		'import { filepaths } from \'../../helpers/filepaths\';'
+	]
+]
+
 for (const spec of upstreamSpecs) {
 	const source = path.join(
 		extRoot,
@@ -19,4 +27,10 @@ for (const spec of upstreamSpecs) {
 		`src/completions/upstream/${spec}.ts`,
 	);
 	fs.copyFileSync(source, destination);
+
+	let content = fs.readFileSync(destination).toString();
+	for (const replaceString of replaceStrings) {
+		content = content.replaceAll(replaceString[0], replaceString[1]);
+	}
+	fs.writeFileSync(destination, content);
 }

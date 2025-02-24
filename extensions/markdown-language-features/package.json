@@ -350,16 +350,6 @@
 					"scope": "resource",
 					"type": "string"
 				},
-				"markdown.trace.extension": {
-					"default": "off",
-					"description": "%markdown.trace.extension.desc%",
-					"enum": [
-						"off",
-						"verbose"
-					],
-					"scope": "window",
-					"type": "string"
-				},
 				"markdown.trace.server": {
 					"default": "off",
 					"description": "%markdown.trace.server.desc%",

@@ -708,10 +708,17 @@ export class ChatEditingSession extends Disposable implements IChatEditingSessio
 		let didComplete = false;
 
 		return {
-			pushText: edits => {
+			pushText: (edits) => {
 				sequencer.queue(async () => {
 					if (!this.isDisposed) {
 						await this._acceptEdits(resource, edits, false, responseModel);
+					}
+				});
+			},
+			pushNotebookCellText: (cell, edits) => {
+				sequencer.queue(async () => {
+					if (!this.isDisposed) {
+						await this._acceptEdits(cell, edits, false, responseModel);
 					}
 				});
 			},
@@ -933,7 +940,7 @@ export class ChatEditingSession extends Disposable implements IChatEditingSessio
 
 	private async _acceptEdits(resource: URI, textEdits: (TextEdit | ICellEditOperation)[], isLastEdits: boolean, responseModel: IChatResponseModel): Promise<void> {
 		const entry = await this._getOrCreateModifiedFileEntry(resource, this._getTelemetryInfoForModel(responseModel));
-		entry.acceptAgentEdits(resource, textEdits, isLastEdits, responseModel);
+		await entry.acceptAgentEdits(resource, textEdits, isLastEdits, responseModel);
 	}
 
 	private _getTelemetryInfoForModel(responseModel: IChatResponseModel): IModifiedEntryTelemetryInfo {
@@ -1027,7 +1034,8 @@ export class ChatEditingSession extends Disposable implements IChatEditingSessio
 		const chatKind = mustExist ? ChatEditKind.Created : ChatEditKind.Modified;
 		try {
 			const notebookUri = CellUri.parse(resource)?.notebook || resource;
-			if (this._notebookService.hasSupportedNotebooks(notebookUri)) {
+			// If a notebook isn't open, then use the old synchronization approach.
+			if (this._notebookService.hasSupportedNotebooks(notebookUri) && (this._notebookService.getNotebookTextModel(notebookUri) || ChatEditingModifiedNotebookEntry.canHandleSnapshot(initialContent))) {
 				return ChatEditingModifiedNotebookEntry.create(notebookUri, multiDiffEntryDelegate, telemetryInfo, chatKind, initialContent, this._instantiationService);
 			} else {
 				const ref = await this._textModelService.createModelReference(resource);

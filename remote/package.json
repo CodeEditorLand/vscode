@@ -1,8 +1,8 @@
 {
 	"name": "@codeeditorland/reh",
 	"dependencies": {
-		"@codeeditorland/deviceid": "0.1.2",
-		"@codeeditorland/tree-sitter-wasm": "^0.1.2",
+		"@codeeditorland/deviceid": "^0.1.1",
+		"@codeeditorland/tree-sitter-wasm": "^0.1.3",
 		"@xterm/addon-clipboard": "^0.2.0-beta.81",
 		"@xterm/addon-image": "^0.9.0-beta.98",
 		"@xterm/addon-ligatures": "^0.10.0-beta.98",
@@ -22,8 +22,8 @@
 		"native-watchdog": "^1.4.1",
 		"node-pty": "1.1.0-beta30",
 		"tas-client-umd": "0.2.0",
-		"yauzl": "3.2.0",
-		"yazl": "3.3.1"
+		"yauzl": "^3.0.0",
+		"yazl": "^2.4.3"
 	},
 	"devDependencies": {},
 	"overrides": {

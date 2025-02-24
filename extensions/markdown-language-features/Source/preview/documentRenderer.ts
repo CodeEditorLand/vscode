@@ -102,11 +102,7 @@ export class MdDocumentRenderer {
 				.toString(),
 		};
 
-		this._logger.verbose(
-			"DocumentRenderer",
-			`provideTextDocumentContent - ${markdownDocument.uri}`,
-			initialData,
-		);
+		this._logger.trace('DocumentRenderer', `provideTextDocumentContent - ${markdownDocument.uri}`, initialData);
 
 		// Content Security Policy
 		const nonce = getNonce();

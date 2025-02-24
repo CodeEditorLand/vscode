@@ -2141,10 +2141,12 @@ export class TerminalProfile implements vscode.TerminalProfile {
 export enum TerminalCompletionItemKind {
 	File = 0,
 	Folder = 1,
-	Flag = 2,
-	Method = 3,
+	Method = 2,
+	Alias = 3,
 	Argument = 4,
-	Alias = 5
+	Option = 5,
+	OptionValue = 6,
+	Flag = 7,
 }
 
 export class TerminalCompletionItem implements vscode.TerminalCompletionItem {
@@ -2202,6 +2204,7 @@ export class TerminalCompletionList<T extends TerminalCompletionItem = TerminalC
 export interface TerminalResourceRequestConfig {
 	filesRequested?: boolean;
 	foldersRequested?: boolean;
+	fileExtensions?: string[];
 	cwd?: vscode.Uri;
 }
 

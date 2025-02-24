@@ -5,4 +5,8 @@
 
 import { webcrypto } from "crypto";
 
-export const crypto = webcrypto as any as Crypto;
+export const nulLogger = new class implements ILogger {
+	trace(): void {
+		// noop
+	}
+};

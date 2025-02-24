@@ -54,7 +54,7 @@ export async function getBuiltins(
 				completions.push({
 					label: { label: cmd, description },
 					detail,
-					documentation,
+					documentation: new vscode.MarkdownString(documentation),
 					kind: vscode.TerminalCompletionItemKind.Method
 				});
 
